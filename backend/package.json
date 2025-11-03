@@ -4,12 +4,17 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"No tests configured yet, skipping...\""
+    "test": "echo \"No tests configured yet, skipping...\"",
+    "format": "prettier --write \"**/*.{js,json}\"",
+    "check:format": "prettier --check \"**/*.{js,json}\""
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "prettier": "^3.6.2"
   }
 }
