@@ -103,3 +103,5 @@ Accountant --> UC_Report_Finance
 (UC_Track_Debt) ..> (UC_Log_Payment) : <<include>>
 
 @enduml
+
+' Kích hoạt CI lần đầu sau khi sửa lỗi
