@@ -1,45 +1,42 @@
-# Tên của Workflow
 name: Generate PlantUML Diagrams
 
-# Kích hoạt workflow khi có push vào branch 'main'
+# Kích hoạt workflow khi có push lên main/master
+# VÀ chỉ khi file trong đường dẫn 'docs/diagrams/src/' thay đổi
 on:
   push:
     branches:
       - main
       - master
-    # Chỉ chạy nếu file trong 'docs/diagrams/' thay đổi
     paths:
-      - 'docs/diagrams/**.plantuml'
+      - 'docs/diagrams/src/**.plantuml'
 
-# *** THÊM MỚI TẠI ĐÂY ***
-# Cấp quyền "write" cho workflow để nó có thể commit file .png
+# Cấp quyền cho Action để "viết" (commit) file ảnh vào repo
 permissions:
   contents: write
-# *** KẾT THÚC THÊM MỚI ***
+  pull-requests: write
 
 jobs:
   generate-diagrams:
     runs-on: ubuntu-latest
+    
     steps:
-      # 1. Checkout code từ repo về
+      # Bước 1: Checkout code từ repo về máy ảo
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      # 2. Sử dụng một Action có sẵn để tạo ảnh từ file .plantuml
-      - name: Generate PlantUML to PNG
-        uses: grassedge/plantuml-action@v1.5
+      # Bước 2: Chạy action, đọc file .plantuml và tạo ra file .png
+      - name: Generate diagram
+        uses: 'cloud-bees/plantuml-github-action@v2'
         with:
-          plantuml_files: 'docs/diagrams'
-          output_format: 'png'
-        env:
-          JAVA_HOME: /usr/lib/jvm/default-jvm
+          # Chỉ định file nguồn
+          source: 'docs/diagrams/src/use_case_diagram.plantuml'
+          # Chỉ định nơi xuất file ảnh
+          output: 'docs/diagrams/generated/use_case_diagram.png'
 
-      # 3. Tự động Commit file ảnh .png vừa tạo vào repo
-      - name: Commit generated images
-        uses: stefanzweifel/git-auto-commit-action@v4
+      # Bước 3: Tự động commit file ảnh .png vừa tạo
+      - name: Commit changes
+        uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "CI: Auto-generate diagrams (PNG)"
-          commit_user_name: "GitHub Actions Bot"
-          commit_user_email: "actions@github.com"
-          commit_author: "GitHub Actions Bot <actions@github.com>"
-          file_pattern: 'docs/diagrams/*.png'
+          commit_message: "ci(docs): Auto-generate diagrams"
+          # Chỉ commit các file .png trong thư mục generated
+          file_pattern: 'docs/diagrams/generated/*.png'

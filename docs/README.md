@@ -2,15 +2,15 @@
 
 Đây là nơi chứa các tài liệu thiết kế và đặc tả cho dự án.
 
-## 1. Biểu đồ Use Case (PlantUML)
+## 1. Biểu đồ Use Case
 
-Biểu đồ dưới đây được render "live" từ file `diagrams/use_case_diagram.plantuml`.
-Mọi thay đổi trên file `.plantuml` sẽ tự động được cập nhật ở đây khi push lên GitHub.
+Biểu đồ dưới đây được **tự động cập nhật** mỗi khi có thay đổi trong thư mục `docs/diagrams/src/`.
 
-```plantuml
-!include ./diagrams/use_case_diagram.plantuml
-```
+**Quy trình làm việc:**
+1.  Chỉnh sửa file code: `docs/diagrams/src/use_case_diagram.plantuml`
+2.  Push lên `main`.
+3.  GitHub Action (CI) sẽ tự động chạy, tạo ra ảnh mới và cập nhật ảnh hiển thị ngay dưới đây.
 
-## 2. Cách lấy ảnh PNG cho Báo cáo
+---
 
-Khi bạn push file `.plantuml` lên, GitHub Action (CI) sẽ tự động chạy và tạo ra file `use_case_diagram.png` trong cùng thư mục `docs/diagrams/`.
+![Use Case Diagram](diagrams/generated/use_case_diagram.png)
