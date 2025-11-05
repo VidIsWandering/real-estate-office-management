@@ -1,0 +1,45 @@
+# Tên của Workflow
+name: Generate PlantUML Diagrams
+
+# Kích hoạt workflow khi có push vào branch 'main'
+on:
+  push:
+    branches:
+      - main
+      - master
+    # Chỉ chạy nếu file trong 'docs/diagrams/' thay đổi
+    paths:
+      - 'docs/diagrams/**.plantuml'
+
+# *** THÊM MỚI TẠI ĐÂY ***
+# Cấp quyền "write" cho workflow để nó có thể commit file .png
+permissions:
+  contents: write
+# *** KẾT THÚC THÊM MỚI ***
+
+jobs:
+  generate-diagrams:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Checkout code từ repo về
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2. Sử dụng một Action có sẵn để tạo ảnh từ file .plantuml
+      - name: Generate PlantUML to PNG
+        uses: grassedge/plantuml-action@v1.5
+        with:
+          plantuml_files: 'docs/diagrams'
+          output_format: 'png'
+        env:
+          JAVA_HOME: /usr/lib/jvm/default-jvm
+
+      # 3. Tự động Commit file ảnh .png vừa tạo vào repo
+      - name: Commit generated images
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "CI: Auto-generate diagrams (PNG)"
+          commit_user_name: "GitHub Actions Bot"
+          commit_user_email: "actions@github.com"
+          commit_author: "GitHub Actions Bot <actions@github.com>"
+          file_pattern: 'docs/diagrams/*.png'

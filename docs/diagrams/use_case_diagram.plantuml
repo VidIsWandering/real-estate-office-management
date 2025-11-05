@@ -1,0 +1,114 @@
+@startuml
+' === Sơ đồ Use Case cho Hệ thống Quản lý BĐS ===
+' Đây là "Single Source of Truth" cho thiết kế hệ thống.
+' Mọi thay đổi nghiệp vụ cần được cập nhật ở đây trước.
+
+' --- Cài đặt chung cho biểu đồ ---
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+
+' === Định nghĩa 4 Actors chính ===
+actor "Quản lý" as QuanLy
+actor "Nhân viên Môi giới" as MoiGioi
+actor "Nhân viên Pháp lý" as PhapLy
+actor "Nhân viên Kế toán" as KeToan
+
+' === Định nghĩa 1 Actor trừu tượng (Generalization) ===
+' Tất cả 4 actor trên đều là "Người dùng Hệ thống"
+actor "Người dùng Hệ thống" as NguoiDung <<abstract>>
+QuanLy --|> NguoiDung
+MoiGioi --|> NguoiDung
+PhapLy --|> NguoiDung
+KeToan --|> NguoiDung
+
+' === Định nghĩa các Gói (Packages) và Use Cases ===
+rectangle "Hệ thống Quản lý Văn phòng BĐS" {
+
+  ' --- Gói 1: Quản lý Chung ---
+  package "Quản lý Chung" {
+    usecase "Đăng nhập Hệ thống" as UC_Login
+    usecase "Quản lý Hồ sơ Nhân viên" as UC_QL_NV
+    usecase "Phân quyền Người dùng" as UC_PhanQuyen
+    usecase "Xem Nhật ký Hoạt động" as UC_NhatKy
+  }
+
+  ' --- Gói 2: Quản lý Nghiệp vụ ---
+  package "Quản lý Nghiệp vụ" {
+    usecase "Quản lý Hồ sơ Đối tác" as UC_QL_DoiTac
+    usecase "Tiếp nhận Bất động sản" as UC_Them_BDS
+    usecase "Thẩm định Pháp lý BĐS" as UC_ThamDinh_BDS
+    usecase "Lập Lịch hẹn Xem nhà" as UC_Lap_LichHen
+    usecase "Cập nhật Trạng thái Lịch hẹn" as UC_CapNhat_LichHen
+    usecase "Xem Lịch hẹn" as UC_Xem_LichHen
+  }
+
+  ' --- Gói 3: Quản lý Giao dịch ---
+  package "Quản lý Giao dịch" {
+    usecase "Khởi tạo Giao dịch" as UC_Tao_GD
+    usecase "Cập nhật/Hủy Giao dịch" as UC_CapNhat_GD
+    usecase "Soạn thảo Hợp đồng" as UC_Soan_HD
+    usecase "Cập nhật Trạng thái Hợp đồng" as UC_CapNhat_HD
+  }
+
+  ' --- Gói 4: Quản lý Tài chính ---
+  package "Quản lý Tài chính" {
+    usecase "Ghi nhận Thanh toán" as UC_GhiNhan_TT
+    usecase "Theo dõi Công nợ" as UC_TheoDoi_CongNo
+  }
+
+  ' --- Gói 5: Báo cáo ---
+  package "Báo cáo" {
+    usecase "Lập Báo cáo Doanh thu" as UC_BC_DoanhThu
+    usecase "Lập Báo cáo Hiệu suất NV" as UC_BC_HieuSuat
+    usecase "Lập Báo cáo Tình trạng BĐS" as UC_BC_TinhTrang
+    usecase "Lập Báo cáo Tài chính" as UC_BC_TaiChinh
+  }
+}
+
+' === Kết nối Actors với Use Cases ===
+
+' --- Người dùng Hệ thống (Actor trừu tượng) ---
+NguoiDung -- UC_Login
+
+' --- Quản lý ---
+QuanLy -- UC_QL_NV
+QuanLy -- UC_PhanQuyen
+QuanLy -- UC_NhatKy
+QuanLy -- UC_Xem_LichHen
+QuanLy -- UC_BC_DoanhThu
+QuanLy -- UC_BC_HieuSuat
+QuanLy -- UC_BC_TinhTrang
+QuanLy -- UC_BC_TaiChinh
+
+' --- Nhân viên Môi giới ---
+MoiGioi -- UC_QL_DoiTac
+MoiGioi -- UC_Them_BDS
+MoiGioi -- UC_Lap_LichHen
+MoiGioi -- UC_CapNhat_LichHen
+MoiGioi -- UC_Xem_LichHen
+MoiGioi -- UC_Tao_GD
+MoiGioi -- UC_CapNhat_GD
+MoiGioi -- UC_BC_TinhTrang
+
+' --- Nhân viên Pháp lý ---
+PhapLy -- UC_ThamDinh_BDS
+PhapLy -- UC_Soan_HD
+PhapLy -- UC_CapNhat_HD
+
+' --- Nhân viên Kế toán ---
+KeToan -- UC_GhiNhan_TT
+KeToan -- UC_TheoDoi_CongNo
+KeToan -- UC_BC_DoanhThu
+KeToan -- UC_BC_TaiChinh
+
+' === Định nghĩa các mối quan hệ (Include/Extend) ===
+' Dựa trên phân tích của team bạn (Task 1.1)
+
+' UC3.1 Extend: UC2.1 (Nếu chủ sở hữu là người mới)
+UC_Them_BDS ..> UC_QL_DoiTac : <<extend>>
+
+' UC7.2 Include: UC7.1 (Khi xem công nợ, có thể bao gồm luôn việc ghi nhận thanh toán)
+UC_TheoDoi_CongNo ..> UC_GhiNhan_TT : <<include>>
+
+@enduml
