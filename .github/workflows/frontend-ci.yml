@@ -4,34 +4,23 @@ on:
   push:
     branches: [ "main" ]
     paths:
-      - 'frontend/**'
-  # SỬA: Xóa bộ lọc 'paths' để nó luôn chạy trên mọi PR
+      - 'frontend/**'  
   pull_request:
     branches: [ "main" ]
+    paths:
+      - 'frontend/**'
 
 jobs:
   build-and-test-frontend:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./frontend
+        working-directory: ./frontend 
 
     steps:
-      - uses: actions/checkout@v4
-        # THÊM: Cần 'fetch-depth: 0'
-        with:
-          fetch-depth: 0
+      - uses: actions/checkout@v3
 
-      # THÊM: Action kiểm tra file thay đổi
-      - name: Check for frontend file changes
-        id: changed-files-frontend
-        uses: tj-actions/changed-files@v44
-        with:
-          files: frontend/**
-      
-      # SỬA: Thêm 'if' vào tất cả các bước bên dưới
       - name: Use Node.js 18.x
-        if: steps.changed-files-frontend.outputs.any_changed == 'true'
         uses: actions/setup-node@v3
         with:
           node-version: 18.x
@@ -39,21 +28,16 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
 
       - name: Install dependencies
-        if: steps.changed-files-frontend.outputs.any_changed == 'true'
         run: npm ci
 
       - name: Check TypeScript (Type-Check)
-        if: steps.changed-files-frontend.outputs.any_changed == 'true'
-        run: npm run typecheck
+        run: npm run typecheck 
 
       - name: Check Formatting
-        if: steps.changed-files-frontend.outputs.any_changed == 'true'
         run: npm run check:format
 
       - name: Build Project
-        if: steps.changed-files-frontend.outputs.any_changed == 'true'
         run: npm run build
 
       - name: Run Tests
-        if: steps.changed-files-frontend.outputs.any_changed == 'true'
         run: npm test --if-present

@@ -22,12 +22,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Bước 2: Chạy action (SỬA LỖI: dùng @v1)
+      # Bước 2: Chạy action mới
+      # Chúng ta đổi sang dùng "plantuml-action/plantuml-action"
       - name: Generate diagram
-        uses: cloudbees/plantuml-github-action@v1
+        uses: plantuml-action/plantuml-action@v2
         with:
-          source: 'docs/diagrams/src/use_case_diagram.plantuml'
-          output: 'docs/diagrams/generated/use_case_diagram.png'
+          # Chỉ định file nguồn
+          source_file: 'docs/diagrams/src/use_case_diagram.plantuml'
+          # Chỉ định nơi xuất file ảnh
+          output_file: 'docs/diagrams/generated/use_case_diagram.png'
 
       # Bước 3: Tự động commit file ảnh .png vừa tạo
       - name: Commit changes
