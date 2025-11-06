@@ -8,7 +8,7 @@ on:
     paths:
       - 'docs/diagrams/src/**.plantuml'
 
-# Cấp quyền cho Action
+# Cấp quyền cho Action để "viết" (commit) file ảnh vào repo
 permissions:
   contents: write
   pull-requests: write
@@ -22,19 +22,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Bước 2: Chạy action mới
-      # Chúng ta đổi sang dùng "plantuml-action/plantuml-action"
+      # Bước 2: Chạy action, đọc file .plantuml và tạo ra file .png
       - name: Generate diagram
-        uses: plantuml-action/plantuml-action@v2
+        # --- ĐÂY LÀ DÒNG ĐÃ SỬA LỖI (bỏ dấu gạch ngang) ---
+        uses: 'cloudbees/plantuml-github-action@v2' 
         with:
           # Chỉ định file nguồn
-          source_file: 'docs/diagrams/src/use_case_diagram.plantuml'
+          source: 'docs/diagrams/src/use_case_diagram.plantuml'
           # Chỉ định nơi xuất file ảnh
-          output_file: 'docs/diagrams/generated/use_case_diagram.png'
+          output: 'docs/diagrams/generated/use_case_diagram.png'
 
       # Bước 3: Tự động commit file ảnh .png vừa tạo
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "ci(docs): Auto-generate diagrams"
+          # Chỉ commit các file .png trong thư mục generated
           file_pattern: 'docs/diagrams/generated/*.png'

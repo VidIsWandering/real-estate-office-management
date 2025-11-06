@@ -105,4 +105,3 @@ Accountant --> UC_Report_Finance
 @enduml
 
 ' Kích hoạt CI lần đầu sau khi sửa lỗi
-' Kích hoạt CI sau khi đổi action
