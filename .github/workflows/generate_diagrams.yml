@@ -1,5 +1,7 @@
 name: Generate PlantUML Diagrams
 
+# Kích hoạt workflow khi có push lên main/master
+# VÀ chỉ khi file trong đường dẫn 'docs/diagrams/src/' thay đổi
 on:
   push:
     branches:
@@ -18,14 +20,13 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      # Bước 1: Checkout code
+      # Bước 1: Checkout code từ repo về máy ảo
       - name: Checkout repository
         uses: actions/checkout@v4
 
       # Bước 2: Chạy action, đọc file .plantuml và tạo ra file .png
       - name: Generate diagram
-        # --- ĐÂY LÀ DÒNG ĐÃ SỬA LỖI (bỏ dấu gạch ngang) ---
-        uses: 'cloudbees/plantuml-github-action@v2' 
+        uses: 'cloud-bees/plantuml-github-action@v2'
         with:
           # Chỉ định file nguồn
           source: 'docs/diagrams/src/use_case_diagram.plantuml'
