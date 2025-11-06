@@ -5,10 +5,9 @@ on:
     branches: ["main"]
     paths:
       - "backend/**"
+  # SỬA: Xóa bộ lọc 'paths' để nó luôn chạy trên mọi PR
   pull_request:
     branches: ["main"]
-    paths:
-      - "backend/**"
 
 jobs:
   build-and-test-backend:
@@ -18,9 +17,23 @@ jobs:
         working-directory: ./backend
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+        # THÊM: Cần 'fetch-depth: 0' để action 'changed-files'
+        # có thể so sánh lịch sử file trên PR
+        with:
+          fetch-depth: 0
 
+      # THÊM: Một action để kiểm tra xem file có thực sự thay đổi không
+      - name: Check for backend file changes
+        id: changed-files-backend
+        uses: tj-actions/changed-files@v44
+        with:
+          files: backend/**
+
+      # SỬA: Thêm 'if' vào tất cả các bước bên dưới
+      # Chúng chỉ chạy NẾU 'changed-files-backend' báo là CÓ thay đổi
       - name: Use Node.js 18.x
+        if: steps.changed-files-backend.outputs.any_changed == 'true'
         uses: actions/setup-node@v3
         with:
           node-version: 18.x
@@ -28,13 +41,17 @@ jobs:
           cache-dependency-path: backend/package-lock.json
 
       - name: Install dependencies
+        if: steps.changed-files-backend.outputs.any_changed == 'true'
         run: npm ci
 
       - name: Check Formatting
+        if: steps.changed-files-backend.outputs.any_changed == 'true'
         run: npm run check:format
 
       - name: Run Lint
+        if: steps.changed-files-backend.outputs.any_changed == 'true'
         run: npm run lint --if-present
 
       - name: Run Tests
+        if: steps.changed-files-backend.outputs.any_changed == 'true'
         run: npm test --if-present
