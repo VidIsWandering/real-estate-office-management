@@ -1,0 +1,71 @@
+services:
+  # 1. Dịch vụ Database (PostgreSQL)
+  db:
+    image: postgres:15-alpine
+    container_name: se100-db
+    ports:
+      # Mở cổng 5432 của container ra cổng 5433 trên máy thật
+      # (Tránh xung đột nếu bạn đã cài Postgres local ở cổng 5432)
+      - "5433:5432"
+    environment:
+      # Đây là các biến môi trường để tạo DB, user, pass cho dev
+      POSTGRES_USER: devuser
+      POSTGRES_PASSWORD: devpassword
+      POSTGRES_DB: se100_dev_db
+    volumes:
+      # Dòng này giúp giữ lại dữ liệu database ngay cả khi bạn tắt/mở container
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - se100-network
+
+  # 2. Dịch vụ Backend (Node.js/Express)
+  backend:
+    container_name: se100-backend
+    # Build từ Dockerfile trong thư mục ./backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      # Mở cổng 8080 của container ra cổng 8081 trên máy thật
+      - "8081:8080"
+    environment:
+      # Cung cấp URL kết nối DB cho backend
+      # (Lưu ý: "db" chính là tên của dịch vụ 'db' ở trên)
+      DATABASE_URL: "postgresql://devuser:devpassword@db:5432/se100_dev_db"
+      # (Các biến môi trường khác sẽ được thêm vào sau, ví dụ Cloudinary)
+    volumes:
+      # Mount code local vào container
+      # Giúp code tự động cập nhật (hot-reload) mà không cần build lại
+      - ./backend:/app
+      # Bỏ qua node_modules, vì chúng ta đã cài trong image
+      - /app/node_modules
+    networks:
+      - se100-network
+    # Phụ thuộc: Chỉ khởi động 'backend' SAU KHI 'db' đã sẵn sàng
+    depends_on:
+      - db
+
+  # 3. Dịch vụ Frontend (React/Nginx)
+  frontend:
+    container_name: se100-frontend
+    # Build từ Dockerfile trong thư mục ./frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      # Mở cổng 80 của container ra cổng 3000 trên máy thật
+      - "3000:80"
+    networks:
+      - se100-network
+    # Phụ thuộc: Chỉ khởi động 'frontend' SAU KHI 'backend' đã sẵn sàng
+    depends_on:
+      - backend
+
+# Định nghĩa mạng (network) để các container "nói chuyện" với nhau
+networks:
+  se100-network:
+    driver: bridge
+
+# Định nghĩa volume (nơi lưu trữ) cho database
+volumes:
+  postgres_data:
