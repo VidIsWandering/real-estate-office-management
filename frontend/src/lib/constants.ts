@@ -1,0 +1,60 @@
+import {
+  Wifi,
+  Waves,
+  Dumbbell,
+  Car,
+  PawPrint,
+  Tv,
+  Thermometer,
+  Cigarette,
+  Cable,
+  Maximize,
+  Bath,
+  Phone,
+  Sprout,
+  Hammer,
+  Bus,
+  Mountain,
+  VolumeX,
+  Home,
+  Warehouse,
+  Building,
+  Castle,
+  Trees,
+  LucideIcon,
+} from "lucide-react";
+
+
+export enum Amenities {
+    WasherDryer = "WasherDryer",
+    AirConditioning = "AirConditioning",
+    Dishwasher = "Dishwasher",
+    HighSpeedInternet = "HighSpeedInternet",
+    HardwoodFloors = "HardwoodFloors",
+    WalkInClosets = "WalkInClosets",
+    Microwave = "Microwave",
+    Refrigerator = "Refrigerator",
+    Pool = "Pool",
+    Gym = "Gym",
+    Parking = "Parking",
+    PetsAllowed = "PetsAllowed",
+    WiFi = "WiFi",
+}
+
+export const AmemityIcons: Record<Amenities, LucideIcon> = {
+WasherDryer: Waves,
+  AirConditioning: Thermometer,
+  Dishwasher: Waves,
+  HighSpeedInternet: Wifi,
+  HardwoodFloors: Home,
+  WalkInClosets: Maximize,
+  Microwave: Tv,
+  Refrigerator: Thermometer,
+  Pool: Waves,
+  Gym: Dumbbell,
+  Parking: Car,
+  PetsAllowed: PawPrint,
+  WiFi: Wifi,
+}
+
+export const NAVBAR_HEIGHT = 52;
