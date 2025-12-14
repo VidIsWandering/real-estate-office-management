@@ -103,7 +103,8 @@ export function PropertyTable({
     const matchesSearch =
       prop.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       prop.agent.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = filterStatus === "all" || prop.status === filterStatus;
+    const matchesStatus =
+      filterStatus === "all" || prop.status === filterStatus;
     const matchesType = filterType === "all" || prop.type === filterType;
     return matchesSearch && matchesStatus && matchesType;
   });
@@ -112,7 +113,7 @@ export function PropertyTable({
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedProperties = filteredProperties.slice(
     startIndex,
-    startIndex + itemsPerPage
+    startIndex + itemsPerPage,
   );
 
   return (
@@ -147,7 +148,10 @@ export function PropertyTable({
             </thead>
             <tbody className="divide-y divide-gray-200">
               {paginatedProperties.map((property) => (
-                <tr key={property.id} className="hover:bg-gray-50 transition-colors">
+                <tr
+                  key={property.id}
+                  className="hover:bg-gray-50 transition-colors"
+                >
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center text-lg">
@@ -166,7 +170,7 @@ export function PropertyTable({
                   <td className="px-6 py-4">
                     <span
                       className={`text-xs font-medium px-2.5 py-1 rounded-full ${getStatusColor(
-                        property.status
+                        property.status,
                       )}`}
                     >
                       {property.status}
@@ -201,7 +205,8 @@ export function PropertyTable({
       {/* Pagination */}
       <div className="mt-6 flex items-center justify-between">
         <p className="text-sm text-gray-600">
-          Showing {startIndex + 1}-{Math.min(startIndex + itemsPerPage, filteredProperties.length)} of{" "}
+          Showing {startIndex + 1}-
+          {Math.min(startIndex + itemsPerPage, filteredProperties.length)} of{" "}
           {filteredProperties.length} properties
         </p>
         <div className="flex items-center gap-2">
@@ -228,7 +233,9 @@ export function PropertyTable({
             ))}
           </div>
           <button
-            onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+            onClick={() =>
+              setCurrentPage(Math.min(totalPages, currentPage + 1))
+            }
             disabled={currentPage === totalPages}
             className="p-2 text-gray-600 hover:bg-gray-100 rounded transition-colors disabled:opacity-50"
           >

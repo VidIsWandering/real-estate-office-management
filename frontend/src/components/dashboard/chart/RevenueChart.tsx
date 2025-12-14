@@ -24,7 +24,6 @@ const data = [
   { month: "Dec", revenue: 95000 },
 ]; // mock data
 
-
 export function RevenueChart() {
   return (
     <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">

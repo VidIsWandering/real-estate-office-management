@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import { ClientHeader } from "@/components/clients/ClientHeader"
-import { ClientTable } from "@/components/clients/ClientTable"
-import { ClientStatsCard } from "@/components/clients/ClientStatsCard"
+import { ClientHeader } from "@/components/clients/ClientHeader";
+import { ClientTable } from "@/components/clients/ClientTable";
+import { ClientStatsCard } from "@/components/clients/ClientStatsCard";
 import {
   AddClientForm,
   ClientFormData,
@@ -78,29 +78,24 @@ const mockClients = [
 ];
 
 export default function ClientsPage() {
-    
-    return (
-        <div className="space-y-6">
+  return (
+    <div className="space-y-6">
+      <ClientHeader />
 
-            <ClientHeader />
+      <div className="flex gap-6">
+        <div className="flex-1">
+          <ClientTable />
+        </div>
 
-            <div className="flex gap-6">
-
-
-                <div className="flex-1">
-                    <ClientTable />
-                </div>
-
-
-                <div className="w-80">
-                    <ClientStatsCard />
-                </div>
-            </div>
-            {/* <AddClientForm
+        <div className="w-80">
+          <ClientStatsCard />
+        </div>
+      </div>
+      {/* <AddClientForm
                 isOpen={isAddClientDialogOpen}
                 onClose={() => setIsAddClientDialogOpen(false)}
                 onSubmit={handleAddClient}
             />     */}
-        </div>
-    )
+    </div>
+  );
 }

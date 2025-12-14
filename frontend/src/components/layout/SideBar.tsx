@@ -28,9 +28,8 @@ const navItems = [
 ];
 
 export function Sidebar() {
-  
   const pathname = usePathname();
-  const {isOpen, closeSidebar} = useSidebar();
+  const { isOpen, closeSidebar } = useSidebar();
   return (
     <>
       {/* Mobile Backdrop */}

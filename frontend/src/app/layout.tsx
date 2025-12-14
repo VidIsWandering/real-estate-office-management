@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/lib/context/AuthProvider";
-import { DashboardLayout } from "./(dashboard)/layout";
+import DashboardLayout from "./(dashboard)/layout";
 
 import { Sidebar } from "@/components/layout/SideBar";
 import { Header } from "@/components/layout/Header";
@@ -29,7 +29,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html >
+    <html>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
@@ -37,13 +37,11 @@ export default function RootLayout({
           <div className="min-h-screen bg-gray-50">
             <SidebarProvider>
               <Sidebar />
-            <Header />
-            <main className="ml-64 mt-16 p-8">{children}</main>
+              <Header />
+              <main className="ml-64 mt-16 p-8">{children}</main>
             </SidebarProvider>
-            
           </div>
         </AuthProvider>
-        
       </body>
     </html>
   );

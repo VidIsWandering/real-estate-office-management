@@ -1,4 +1,3 @@
-
 // filepath: d:\Code\ooad\project\frontend\src\components\agents\AgentTable.tsx
 "use client";
 

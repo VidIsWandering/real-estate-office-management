@@ -5,7 +5,7 @@ interface LeaderboardEntry {
   name: string;
   metric: string;
   value: number;
-  trend: number; 
+  trend: number;
 }
 
 const leaderboard: LeaderboardEntry[] = [
@@ -23,9 +23,17 @@ interface MonthlyKPI {
 }
 
 const monthlyKPIs: MonthlyKPI[] = [
-  { label: "Total Sales", value: 125, icon: <TrendingUp className="w-4 h-4" /> },
+  {
+    label: "Total Sales",
+    value: 125,
+    icon: <TrendingUp className="w-4 h-4" />,
+  },
   { label: "Active Deals", value: 87, icon: <Target className="w-4 h-4" /> },
-  { label: "Avg. Price", value: "$625K", icon: <BarChart3 className="w-4 h-4" /> },
+  {
+    label: "Avg. Price",
+    value: "$625K",
+    icon: <BarChart3 className="w-4 h-4" />,
+  },
 ];
 
 export function AgentLeaderboard() {
@@ -35,7 +43,9 @@ export function AgentLeaderboard() {
       <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
         <div className="p-6 border-b border-gray-200 flex items-center gap-2">
           <Award className="w-5 h-5 text-primary" />
-          <h3 className="text-lg font-semibold text-gray-900">Top Performers</h3>
+          <h3 className="text-lg font-semibold text-gray-900">
+            Top Performers
+          </h3>
         </div>
         <div className="divide-y divide-gray-200">
           {leaderboard.map((entry) => (

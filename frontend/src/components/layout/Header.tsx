@@ -8,7 +8,7 @@ import {
   User,
   Settings,
   Home,
-  Menu
+  Menu,
 } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";

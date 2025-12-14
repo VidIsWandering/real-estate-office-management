@@ -78,8 +78,7 @@ interface AgentProfilePageProps {
 
 export default function AgentProfile({ params }: AgentProfilePageProps) {
   const router = useRouter();
-   const { agentId } = React.use(params);
-
+  const { agentId } = React.use(params);
 
   const agent = useMemo(
     () => mockAgents.find((a) => a.id === agentId) ?? null,
@@ -158,9 +157,7 @@ export default function AgentProfile({ params }: AgentProfilePageProps) {
                     <p className="font-medium text-gray-900">
                       {relatedAgent.name}
                     </p>
-                    <p className="text-xs text-gray-500">
-                      {relatedAgent.role}
-                    </p>
+                    <p className="text-xs text-gray-500">{relatedAgent.role}</p>
                   </button>
                 ))}
             </div>
