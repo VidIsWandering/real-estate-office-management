@@ -3,7 +3,7 @@
  */
 
 const logger = require('../utils/logger.util');
-const { errorResponse } = require('../utils/response.util');
+
 const { HTTP_STATUS } = require('../config/constants');
 const config = require('../config/environment');
 
@@ -19,7 +19,7 @@ const notFoundHandler = (req, res, next) => {
 /**
  * Global Error Handler
  */
-const errorHandler = (err, req, res, next) => {
+const errorHandler = (err, req, res) => {
   // Log error
   logger.error('Error:', {
     message: err.message,

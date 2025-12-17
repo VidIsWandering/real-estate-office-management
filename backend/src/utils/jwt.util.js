@@ -16,7 +16,7 @@ const generateAccessToken = (payload) => {
       expiresIn: config.jwt.expire,
     });
   } catch (error) {
-    throw new Error('Error generating access token');
+    throw new Error('Error generating access token', error);
   }
 };
 
@@ -31,7 +31,7 @@ const generateRefreshToken = (payload) => {
       expiresIn: config.jwt.refresh_expire,
     });
   } catch (error) {
-    throw new Error('Error generating refresh token');
+    throw new Error('Error generating refresh token', error);
   }
 };
 

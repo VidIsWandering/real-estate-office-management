@@ -8,11 +8,7 @@ const { HTTP_STATUS } = require('../config/constants');
 const { asyncHandler } = require('../middlewares/error.middleware');
 
 class AuthController {
-  /**
-   * Register
-   * POST /api/auth/register
-   */
-  register = asyncHandler(async (req, res) => {
+  async register(req, res) {
     const result = await authService.register(req.body);
 
     return successResponse(
@@ -21,34 +17,22 @@ class AuthController {
       'Account registered successfully',
       HTTP_STATUS.CREATED
     );
-  });
+  }
 
-  /**
-   * Login
-   * POST /api/auth/login
-   */
-  login = asyncHandler(async (req, res) => {
+  async login(req, res) {
     const { username, password } = req.body;
     const result = await authService.login(username, password);
 
     return successResponse(res, result, 'Login successful');
-  });
+  }
 
-  /**
-   * Get profile
-   * GET /api/auth/profile
-   */
-  getProfile = asyncHandler(async (req, res) => {
+  async getProfile(req, res) {
     const result = await authService.getProfile(req.user.id);
 
     return successResponse(res, result, 'Profile retrieved successfully');
-  });
+  }
 
-  /**
-   * Change password
-   * PUT /api/auth/change-password
-   */
-  changePassword = asyncHandler(async (req, res) => {
+  async changePassword(req, res) {
     const { old_password, new_password } = req.body;
     const result = await authService.changePassword(
       req.user.id,
@@ -57,18 +41,28 @@ class AuthController {
     );
 
     return successResponse(res, result, 'Password changed successfully');
-  });
+  }
 
-  /**
-   * Refresh token (optional)
-   * POST /api/auth/refresh-token
-   */
-  refreshToken = asyncHandler(async (req, res) => {
+  async refreshToken(req, res) {
     const { refresh_token } = req.body;
     const result = await authService.refreshToken(refresh_token);
 
     return successResponse(res, result, 'Token refreshed successfully');
-  });
+  }
 }
+
+module.exports = {
+  register: asyncHandler((req, res) => new AuthController().register(req, res)),
+  login: asyncHandler((req, res) => new AuthController().login(req, res)),
+  getProfile: asyncHandler((req, res) =>
+    new AuthController().getProfile(req, res)
+  ),
+  changePassword: asyncHandler((req, res) =>
+    new AuthController().changePassword(req, res)
+  ),
+  refreshToken: asyncHandler((req, res) =>
+    new AuthController().refreshToken(req, res)
+  ),
+};
 
 module.exports = new AuthController();

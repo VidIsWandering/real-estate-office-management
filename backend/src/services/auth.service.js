@@ -156,7 +156,7 @@ class AuthService {
   /**
    * Refresh token (optional - có thể implement sau)
    */
-  async refreshToken(refreshToken) {
+  async refreshToken() {
     // TODO: Implement refresh token logic
     // Verify refresh token → Generate new access token
     throw new Error('Not implemented yet');

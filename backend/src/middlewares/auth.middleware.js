@@ -7,7 +7,7 @@ const {
   unauthorizedResponse,
   forbiddenResponse,
 } = require('../utils/response.util');
-const { STAFF_ROLES } = require('../config/constants');
+// const { STAFF_ROLES } = require('../config/constants');
 
 /**
  * Authenticate - Verify JWT token
@@ -69,10 +69,10 @@ const authorize = (allowedRoles = []) => {
  * Optional authentication - Không bắt buộc đăng nhập
  */
 const optionalAuth = (req, res, next) => {
-  try {
-    const authHeader = req.headers.authorization;
+  const authHeader = req.headers.authorization;
 
-    if (authHeader && authHeader.startsWith('Bearer ')) {
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    try {
       const token = authHeader.substring(7);
       const decoded = verifyAccessToken(token);
 
@@ -82,13 +82,12 @@ const optionalAuth = (req, res, next) => {
         staff_id: decoded.staff_id,
         role: decoded.role,
       };
+    } catch (error) {
+      throw new Error('Invalid token', error);
     }
-
-    next();
-  } catch (error) {
-    // Nếu token invalid thì bỏ qua, không throw error
-    next();
   }
+
+  next();
 };
 
 module.exports = {
