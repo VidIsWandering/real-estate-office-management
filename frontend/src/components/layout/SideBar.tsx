@@ -15,12 +15,13 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSidebar } from "@/lib/context/SidebarProvider";
+import Partners from "@/app/partners/page";
 
 const navItems = [
   { name: "Dashboard", path: "/", icon: LayoutDashboard },
   { name: "Properties", path: "/properties", icon: Home },
-  { name: "Clients", path: "/clients", icon: Users },
-  { name: "Agents", path: "/agents", icon: UserCheck },
+  { name: "Staffs", path: "/staff", icon: Users },
+  { name: "Partners", path: "/partners", icon: UserCheck },
   { name: "Transactions", path: "/transactions", icon: ScrollText },
   { name: "Calendar", path: "/calendar", icon: Calendar },
   { name: "Reports", path: "/reports", icon: BarChart3 },
