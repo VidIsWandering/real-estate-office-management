@@ -9,7 +9,10 @@ const compression = require('compression');
 const morgan = require('morgan');
 const config = require('./config/environment');
 const logger = require('./utils/logger.util');
-const { notFoundHandler, errorHandler } = require('./middlewares/error.middleware');
+const {
+  notFoundHandler,
+  errorHandler,
+} = require('./middlewares/error.middleware');
 
 // Import routes
 const routes = require('./routes/index.route');
@@ -24,12 +27,15 @@ const app = express();
 app.use(helmet());
 
 // CORS
-app.use(cors({
-  origin: config.node_env === 'production' 
-    ? ['https://yourdomain.com'] // Thay bằng domain thật
-    : '*',
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin:
+      config.node_env === 'production'
+        ? ['https://yourdomain.com'] // Thay bằng domain thật
+        : '*',
+    credentials: true,
+  })
+);
 
 // Compression
 app.use(compression());
@@ -42,11 +48,13 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 if (config.node_env === 'development') {
   app.use(morgan('dev'));
 } else {
-  app.use(morgan('combined', {
-    stream: {
-      write: (message) => logger.info(message.trim()),
-    },
-  }));
+  app.use(
+    morgan('combined', {
+      stream: {
+        write: (message) => logger.info(message.trim()),
+      },
+    })
+  );
 }
 
 // Static files (uploads)

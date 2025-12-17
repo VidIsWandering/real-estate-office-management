@@ -3,7 +3,10 @@
  */
 
 const { verifyAccessToken } = require('../utils/jwt.util');
-const { unauthorizedResponse, forbiddenResponse } = require('../utils/response.util');
+const {
+  unauthorizedResponse,
+  forbiddenResponse,
+} = require('../utils/response.util');
 const { STAFF_ROLES } = require('../config/constants');
 
 /**
@@ -13,7 +16,7 @@ const authenticate = (req, res, next) => {
   try {
     // Get token from header
     const authHeader = req.headers.authorization;
-    
+
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return unauthorizedResponse(res, 'No token provided');
     }
@@ -52,7 +55,10 @@ const authorize = (allowedRoles = []) => {
     }
 
     if (!allowedRoles.includes(req.user.role)) {
-      return forbiddenResponse(res, 'You do not have permission to access this resource');
+      return forbiddenResponse(
+        res,
+        'You do not have permission to access this resource'
+      );
     }
 
     next();
@@ -65,11 +71,11 @@ const authorize = (allowedRoles = []) => {
 const optionalAuth = (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
-    
+
     if (authHeader && authHeader.startsWith('Bearer ')) {
       const token = authHeader.substring(7);
       const decoded = verifyAccessToken(token);
-      
+
       req.user = {
         id: decoded.id,
         username: decoded.username,
@@ -77,7 +83,7 @@ const optionalAuth = (req, res, next) => {
         role: decoded.role,
       };
     }
-    
+
     next();
   } catch (error) {
     // Nếu token invalid thì bỏ qua, không throw error

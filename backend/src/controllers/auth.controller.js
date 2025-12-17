@@ -14,7 +14,7 @@ class AuthController {
    */
   register = asyncHandler(async (req, res) => {
     const result = await authService.register(req.body);
-    
+
     return successResponse(
       res,
       result,
@@ -30,12 +30,8 @@ class AuthController {
   login = asyncHandler(async (req, res) => {
     const { username, password } = req.body;
     const result = await authService.login(username, password);
-    
-    return successResponse(
-      res,
-      result,
-      'Login successful'
-    );
+
+    return successResponse(res, result, 'Login successful');
   });
 
   /**
@@ -44,12 +40,8 @@ class AuthController {
    */
   getProfile = asyncHandler(async (req, res) => {
     const result = await authService.getProfile(req.user.id);
-    
-    return successResponse(
-      res,
-      result,
-      'Profile retrieved successfully'
-    );
+
+    return successResponse(res, result, 'Profile retrieved successfully');
   });
 
   /**
@@ -63,12 +55,8 @@ class AuthController {
       old_password,
       new_password
     );
-    
-    return successResponse(
-      res,
-      result,
-      'Password changed successfully'
-    );
+
+    return successResponse(res, result, 'Password changed successfully');
   });
 
   /**
@@ -78,12 +66,8 @@ class AuthController {
   refreshToken = asyncHandler(async (req, res) => {
     const { refresh_token } = req.body;
     const result = await authService.refreshToken(refresh_token);
-    
-    return successResponse(
-      res,
-      result,
-      'Token refreshed successfully'
-    );
+
+    return successResponse(res, result, 'Token refreshed successfully');
   });
 }
 

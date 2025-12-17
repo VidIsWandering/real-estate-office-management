@@ -5,7 +5,10 @@
 const accountRepository = require('../repositories/account.repository');
 const staffRepository = require('../repositories/staff.repository');
 const { hashPassword, comparePassword } = require('../utils/bcrypt.util');
-const { generateAccessToken, generateRefreshToken } = require('../utils/jwt.util');
+const {
+  generateAccessToken,
+  generateRefreshToken,
+} = require('../utils/jwt.util');
 const { STAFF_ROLES } = require('../config/constants');
 
 class AuthService {
@@ -13,7 +16,8 @@ class AuthService {
    * Register new account + staff
    */
   async register(registerData) {
-    const { username, password, full_name, email, phone_number, role } = registerData;
+    const { username, password, full_name, email, phone_number, role } =
+      registerData;
 
     // Check username đã tồn tại chưa
     const existingAccount = await accountRepository.findByUsername(username);
@@ -132,7 +136,10 @@ class AuthService {
     }
 
     // Verify old password
-    const isPasswordValid = await comparePassword(oldPassword, account.password);
+    const isPasswordValid = await comparePassword(
+      oldPassword,
+      account.password
+    );
     if (!isPasswordValid) {
       throw new Error('Current password is incorrect');
     }

@@ -41,18 +41,14 @@ const config = {
 };
 
 // Validate required fields
-const requiredEnvVars = [
-  'DB_PASSWORD',
-  'JWT_SECRET',
-  'JWT_REFRESH_SECRET'
-];
+const requiredEnvVars = ['DB_PASSWORD', 'JWT_SECRET', 'JWT_REFRESH_SECRET'];
 
-const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
+const missingVars = requiredEnvVars.filter((varName) => !process.env[varName]);
 
 if (missingVars.length > 0) {
   throw new Error(
     `Missing required environment variables: ${missingVars.join(', ')}\n` +
-    'Please check your .env file'
+      'Please check your .env file'
   );
 }
 

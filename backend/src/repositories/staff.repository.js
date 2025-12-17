@@ -18,7 +18,7 @@ class StaffRepository {
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
       RETURNING *
     `;
-    
+
     const values = [
       staffData.account_id,
       staffData.full_name,
@@ -29,7 +29,7 @@ class StaffRepository {
       staffData.role || 'staff',
       staffData.status || 'working',
     ];
-    
+
     const result = await db.query(sql, values);
     return new Staff(result.rows[0]);
   }
@@ -43,11 +43,11 @@ class StaffRepository {
       WHERE account_id = $1
     `;
     const result = await db.query(sql, [accountId]);
-    
+
     if (result.rows.length === 0) {
       return null;
     }
-    
+
     return new Staff(result.rows[0]);
   }
 
@@ -60,11 +60,11 @@ class StaffRepository {
       WHERE id = $1
     `;
     const result = await db.query(sql, [id]);
-    
+
     if (result.rows.length === 0) {
       return null;
     }
-    
+
     return new Staff(result.rows[0]);
   }
 
@@ -82,11 +82,11 @@ class StaffRepository {
       WHERE s.id = $1
     `;
     const result = await db.query(sql, [id]);
-    
+
     if (result.rows.length === 0) {
       return null;
     }
-    
+
     return result.rows[0];
   }
 
@@ -118,7 +118,7 @@ class StaffRepository {
       WHERE id = $8
       RETURNING *
     `;
-    
+
     const values = [
       staffData.full_name,
       staffData.email,
@@ -129,13 +129,13 @@ class StaffRepository {
       staffData.status,
       id,
     ];
-    
+
     const result = await db.query(sql, values);
-    
+
     if (result.rows.length === 0) {
       return null;
     }
-    
+
     return new Staff(result.rows[0]);
   }
 
@@ -151,7 +151,7 @@ class StaffRepository {
       INNER JOIN account a ON s.account_id = a.id
       WHERE 1=1
     `;
-    
+
     const values = [];
     let paramCount = 0;
 
@@ -184,7 +184,7 @@ class StaffRepository {
     paramCount++;
     sql += ` ORDER BY s.id DESC LIMIT $${paramCount}`;
     values.push(limit);
-    
+
     paramCount++;
     sql += ` OFFSET $${paramCount}`;
     values.push(offset);

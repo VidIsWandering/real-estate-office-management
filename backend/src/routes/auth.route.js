@@ -19,35 +19,21 @@ const {
  * @desc    Register new account
  * @access  Public
  */
-router.post(
-  '/register',
-  registerValidator,
-  validate,
-  authController.register
-);
+router.post('/register', registerValidator, validate, authController.register);
 
 /**
  * @route   POST /api/auth/login
  * @desc    Login
  * @access  Public
  */
-router.post(
-  '/login',
-  loginValidator,
-  validate,
-  authController.login
-);
+router.post('/login', loginValidator, validate, authController.login);
 
 /**
  * @route   GET /api/auth/profile
  * @desc    Get current user profile
  * @access  Private
  */
-router.get(
-  '/profile',
-  authenticate,
-  authController.getProfile
-);
+router.get('/profile', authenticate, authController.getProfile);
 
 /**
  * @route   PUT /api/auth/change-password
@@ -67,9 +53,6 @@ router.put(
  * @desc    Refresh access token
  * @access  Public
  */
-router.post(
-  '/refresh-token',
-  authController.refreshToken
-);
+router.post('/refresh-token', authController.refreshToken);
 
 module.exports = router;

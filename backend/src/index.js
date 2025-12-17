@@ -15,14 +15,12 @@ const PORT = config.port;
 
 const startServer = async () => {
   try {
- 
-
     // Test database connection
     await testConnection();
-    
+
     // Start listening
     const server = app.listen(PORT, () => {
-         console.log("Process PID:", process.pid);
+      console.log('Process PID:', process.pid);
       logger.info(`
         
         ================================================
@@ -39,13 +37,13 @@ const startServer = async () => {
     // ========================================================================
     // GRACEFUL SHUTDOWN
     // ========================================================================
-    
+
     const gracefulShutdown = async (signal) => {
       logger.info(`${signal} received. Starting graceful shutdown...`);
-      
+
       server.close(async () => {
         logger.info('HTTP server closed');
-        
+
         try {
           await closePool();
           logger.info('Database connections closed');
@@ -55,7 +53,7 @@ const startServer = async () => {
           process.exit(1);
         }
       });
-      
+
       // Force shutdown after 10s
       setTimeout(() => {
         logger.error('Forced shutdown after timeout');
@@ -77,7 +75,6 @@ const startServer = async () => {
       logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
       gracefulShutdown('unhandledRejection');
     });
-
   } catch (error) {
     logger.error('Failed to start server:', error);
     process.exit(1);

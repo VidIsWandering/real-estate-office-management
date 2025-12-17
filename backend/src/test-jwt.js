@@ -13,5 +13,5 @@ console.log('JWT_SECRET length:', process.env.JWT_SECRET?.length);
 
 console.log('\n===== ALL KEYS STARTING WITH JWT =====');
 Object.keys(process.env)
-  .filter(key => key.startsWith('JWT'))
-  .forEach(key => console.log(`${key}: ${process.env[key]}`));
+  .filter((key) => key.startsWith('JWT'))
+  .forEach((key) => console.log(`${key}: ${process.env[key]}`));

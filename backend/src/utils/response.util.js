@@ -1,11 +1,14 @@
-
-
 const { HTTP_STATUS } = require('../config/constants');
 
 /**
  * Success response
  */
-const successResponse = (res, data, message = 'Success', statusCode = HTTP_STATUS.OK) => {
+const successResponse = (
+  res,
+  data,
+  message = 'Success',
+  statusCode = HTTP_STATUS.OK
+) => {
   return res.status(statusCode).json({
     success: true,
     message,
@@ -17,10 +20,10 @@ const successResponse = (res, data, message = 'Success', statusCode = HTTP_STATU
  * Success response with pagination
  */
 const successResponseWithPagination = (
-  res, 
-  data, 
-  pagination, 
-  message = 'Success', 
+  res,
+  data,
+  pagination,
+  message = 'Success',
   statusCode = HTTP_STATUS.OK
 ) => {
   return res.status(statusCode).json({
@@ -40,8 +43,8 @@ const successResponseWithPagination = (
  * Error response
  */
 const errorResponse = (
-  res, 
-  message = 'Internal Server Error', 
+  res,
+  message = 'Internal Server Error',
   statusCode = HTTP_STATUS.INTERNAL_SERVER_ERROR,
   errors = null
 ) => {
@@ -64,7 +67,7 @@ const validationErrorResponse = (res, errors) => {
   return res.status(HTTP_STATUS.BAD_REQUEST).json({
     success: false,
     message: 'Validation failed',
-    errors: errors.map(err => ({
+    errors: errors.map((err) => ({
       field: err.path || err.param,
       message: err.msg,
     })),
