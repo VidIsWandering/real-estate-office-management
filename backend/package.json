@@ -6,8 +6,8 @@
   "scripts": {
     "test": "echo \"No tests configured yet, skipping...\"",
     "format": "prettier --write \"**/*.{js,json}\"",
-    "start": "node src/server.js",
-    "dev": "nodemon src/server.js",
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
     "check:format": "prettier --check \"**/*.{js,json}\"",
     "lint": "eslint ."
   },
