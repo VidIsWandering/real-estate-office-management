@@ -2,13 +2,10 @@ name: Backend CI (Node + JS)
 
 on:
   push:
-    branches: ["main"]
-    paths:
-      - "backend/**"
+    branches: ["main", "develop"]
+
   pull_request:
-    branches: ["main"]
-    paths:
-      - "backend/**"
+    branches: ["main", "develop"]
 
 jobs:
   build-and-test-backend:
