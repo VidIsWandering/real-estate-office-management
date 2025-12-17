@@ -11,7 +11,7 @@ import {
   Briefcase,
   Badge as BadgeIcon,
 } from "lucide-react";
-import { Staff } from "@/pages/Staff";
+import { Staff } from "@/app/staff/page";
 import { Badge } from "@/components/ui/badge";
 
 interface StaffInfoModalProps {

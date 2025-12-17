@@ -184,7 +184,9 @@ export default function Staff() {
         <div className="flex-1 min-w-0">
           {/* Page Title */}
           <div className="mb-6 md:mb-8">
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Staff Management</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+              Staff Management
+            </h1>
             <p className="text-gray-600 mt-1 text-sm md:text-base">
               Manage your staff members and their assigned areas.
             </p>
@@ -248,11 +250,13 @@ export default function Staff() {
             className="lg:hidden fixed inset-0 bg-black/50 z-40"
             onClick={() => setSelectedStaffId(null)}
           />
-          
+
           {/* Modal */}
           <div className="lg:hidden fixed inset-x-0 bottom-0 z-50 bg-white rounded-t-2xl shadow-xl max-h-[85vh] overflow-y-auto animate-slide-up">
             <div className="sticky top-0 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between z-10">
-              <h2 className="text-lg font-semibold text-gray-900">Staff Details</h2>
+              <h2 className="text-lg font-semibold text-gray-900">
+                Staff Details
+              </h2>
               <button
                 onClick={() => setSelectedStaffId(null)}
                 className="p-2 hover:bg-gray-100 rounded-full transition-colors"

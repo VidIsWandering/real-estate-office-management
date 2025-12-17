@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Edit2, Trash2, Mail, Phone } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Partner } from "@/pages/Partners";
+import { Partner } from "@/app/partners/page";
 
 interface PartnerTableProps {
   partners: Partner[];

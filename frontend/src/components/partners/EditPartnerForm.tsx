@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Partner, PartnerFormData } from "@/pages/Partners";
+import { Partner, PartnerFormData } from "@/app/partners/page";
 
 interface EditPartnerFormProps {
   isOpen: boolean;

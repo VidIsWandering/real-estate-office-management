@@ -33,7 +33,7 @@ export function StaffTable({
   onDeleteStaff,
 }: StaffTableProps) {
   const router = useRouter();
-  
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Active":

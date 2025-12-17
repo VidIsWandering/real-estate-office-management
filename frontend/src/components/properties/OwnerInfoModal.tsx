@@ -14,7 +14,11 @@ interface OwnerInfoModalProps {
   owner: Owner;
 }
 
-export function OwnerInfoModal({ isOpen, onClose, owner }: OwnerInfoModalProps) {
+export function OwnerInfoModal({
+  isOpen,
+  onClose,
+  owner,
+}: OwnerInfoModalProps) {
   if (!isOpen) return null;
 
   return (
@@ -125,14 +129,10 @@ export function OwnerInfoModal({ isOpen, onClose, owner }: OwnerInfoModalProps) 
                     <p className="text-xs text-blue-600 mb-1">
                       Loại khách hàng
                     </p>
-                    <p className="text-sm font-medium text-blue-900">
-                      Cá nhân
-                    </p>
+                    <p className="text-sm font-medium text-blue-900">Cá nhân</p>
                   </div>
                   <div className="bg-green-50 p-3 rounded-lg">
-                    <p className="text-xs text-green-600 mb-1">
-                      Trạng thái
-                    </p>
+                    <p className="text-xs text-green-600 mb-1">Trạng thái</p>
                     <p className="text-sm font-medium text-green-900">
                       Hoạt động
                     </p>

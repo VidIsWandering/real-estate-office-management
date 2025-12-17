@@ -1,8 +1,6 @@
 "use client";
 
-import {
-  ArrowLeft,
-} from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { EditStaffForm } from "@/components/staff/EditStaffForm";
@@ -131,13 +129,13 @@ export default function StaffDetailPage({
   const router = useRouter();
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [staffData, setStaffData] = useState<Staff[]>(initialStaffData);
-  
+
   const staff = staffData.find((s) => s.id === params.staffId);
 
   const handleStatusChange = (newStatus: "Active" | "Inactive") => {
     if (staff) {
       const updatedStaffData = staffData.map((s) =>
-        s.id === staff.id ? { ...s, status: newStatus } : s
+        s.id === staff.id ? { ...s, status: newStatus } : s,
       );
       setStaffData(updatedStaffData);
     }
@@ -146,7 +144,7 @@ export default function StaffDetailPage({
   const handleResetPassword = () => {
     if (staff) {
       const updatedStaffData = staffData.map((s) =>
-        s.id === staff.id ? { ...s, password: s.phone } : s
+        s.id === staff.id ? { ...s, password: s.phone } : s,
       );
       setStaffData(updatedStaffData);
       alert(`Password has been reset to phone number: ${staff.phone}`);
@@ -156,7 +154,7 @@ export default function StaffDetailPage({
   const handleEditStaff = (data: StaffFormData) => {
     if (staff) {
       const updatedStaffData = staffData.map((s) =>
-        s.id === staff.id ? { ...s, ...data } : s
+        s.id === staff.id ? { ...s, ...data } : s,
       );
       setStaffData(updatedStaffData);
       setIsEditDialogOpen(false);
@@ -164,7 +162,10 @@ export default function StaffDetailPage({
   };
 
   const handleDeleteStaff = () => {
-    if (staff && window.confirm(`Are you sure you want to delete ${staff.name}?`)) {
+    if (
+      staff &&
+      window.confirm(`Are you sure you want to delete ${staff.name}?`)
+    ) {
       router.push("/staff");
     }
   };
@@ -172,7 +173,9 @@ export default function StaffDetailPage({
   if (!staff) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen">
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">Staff Not Found</h1>
+        <h1 className="text-2xl font-bold text-gray-900 mb-4">
+          Staff Not Found
+        </h1>
         {/* <p className="text-gray-600 mb-6">The staff member you're looking for doesn't exist.</p> */}
         <button
           onClick={() => router.push("/staff")}

@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { StaffFormData } from "@/pages/Staff";
+import { StaffFormData } from "@/app/staff/page";
 
 interface AddStaffFormProps {
   isOpen: boolean;

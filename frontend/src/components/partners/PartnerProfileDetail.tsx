@@ -9,7 +9,7 @@ import {
   MessageSquare,
 } from "lucide-react";
 import { useState } from "react";
-import { Partner } from "@/pages/Partners";
+import { Partner } from "@/app/partners/page";
 import { Badge } from "@/components/ui/badge";
 
 interface PartnerProfileDetailProps {
