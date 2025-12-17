@@ -1,5 +1,8 @@
-import { ChevronLeft, ChevronRight, Pencil, Trash2 } from "lucide-react";
+"use client";
+
+import { ChevronLeft, ChevronRight, Pencil, Trash2, Eye } from "lucide-react";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export interface Property {
   id: string;
@@ -96,6 +99,7 @@ export function PropertyTable({
   filterStatus,
   filterType,
 }: PropertyTableProps) {
+  const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
@@ -150,7 +154,8 @@ export function PropertyTable({
               {paginatedProperties.map((property) => (
                 <tr
                   key={property.id}
-                  className="hover:bg-gray-50 transition-colors"
+                  onClick={() => router.push(`/properties/${property.id}`)}
+                  className="hover:bg-blue-50 transition-colors cursor-pointer"
                 >
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
@@ -187,10 +192,28 @@ export function PropertyTable({
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-center gap-2">
-                      <button className="p-1.5 text-gray-600 hover:bg-gray-100 rounded transition-colors">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          router.push(`/properties/${property.id}`);
+                        }}
+                        className="p-1.5 text-blue-600 hover:bg-blue-100 rounded transition-colors"
+                        title="View details"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={(e) => e.stopPropagation()}
+                        className="p-1.5 text-gray-600 hover:bg-gray-100 rounded transition-colors"
+                        title="Edit property"
+                      >
                         <Pencil className="w-4 h-4" />
                       </button>
-                      <button className="p-1.5 text-gray-600 hover:bg-gray-100 rounded transition-colors">
+                      <button
+                        onClick={(e) => e.stopPropagation()}
+                        className="p-1.5 text-red-600 hover:bg-red-100 rounded transition-colors"
+                        title="Delete property"
+                      >
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
