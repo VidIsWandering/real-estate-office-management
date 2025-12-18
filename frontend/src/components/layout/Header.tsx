@@ -21,6 +21,15 @@ export function Header() {
   const { user, logout } = useAuth();
   const router = useRouter();
   const { toggleSidebar } = useSidebar();
+  const handleGoProfile = () => {
+    setIsProfileOpen(false);
+    router.push("/settings/account?mode=profile");
+  };
+
+  const handleGoSettings = () => {
+    setIsProfileOpen(false);
+    router.push("/settings");
+  };
   const handleLogout = () => {
     logout();
     router.push("/login"); // điều hướng bằng Next router
@@ -99,11 +108,18 @@ export function Header() {
                 <p className="text-xs text-gray-600">{userEmail}</p>
               </div>
               <nav className="py-2">
-                <button className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                <button
+                  onClick={handleGoProfile}
+                  className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                >
                   <User className="w-4 h-4" />
                   My Profile
                 </button>
-                <button className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+
+                <button
+                  onClick={handleGoSettings}
+                  className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                >
                   <Settings className="w-4 h-4" />
                   Settings
                 </button>
