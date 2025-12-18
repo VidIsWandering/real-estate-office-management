@@ -1,15 +1,40 @@
 "use client";
 
-import { KPICard } from "@/components/dashboard/KPICard";
-import { RevenueChart } from "@/components/dashboard/chart/RevenueChart";
-import { PropertySalesChart } from "@/components/reports/PropertySalesChart";
-import { AgentPerformanceChart } from "@/components/reports/AgentPerformanceChart";
-import { PropertyTypesChart } from "@/components/reports/PropertyTypesChart";
-import { RecentTransactions } from "@/components/reports/RecentTransactions";
-import { TopProperties } from "@/components/reports/TopProperties";
-import { DollarSign, Handshake, Users, TrendingUp } from "lucide-react";
+import { useState } from "react";
+import { RevenueReport } from "@/components/reports/RevenueReport";
+import { AgentPerformanceReport } from "@/components/reports/AgentPerformanceReport";
+import { DebtReport } from "@/components/reports/DebtReport";
+import { FileText, TrendingUp, DollarSign } from "lucide-react";
 
 export default function Reports() {
+  const [activeTab, setActiveTab] = useState<
+    "revenue" | "performance" | "debt"
+  >("revenue");
+
+  const handleExport = (format: "xlsx" | "pdf") => {
+    console.log(`Exporting ${activeTab} report as ${format}`);
+    // TODO: Implement export functionality
+    alert(`Export report as ${format.toUpperCase()}`);
+  };
+
+  const tabs = [
+    {
+      id: "revenue" as const,
+      label: "Revenue Reports",
+      icon: <DollarSign className="w-4 h-4" />,
+    },
+    {
+      id: "performance" as const,
+      label: "Agent Performance",
+      icon: <TrendingUp className="w-4 h-4" />,
+    },
+    {
+      id: "debt" as const,
+      label: "Debt",
+      icon: <FileText className="w-4 h-4" />,
+    },
+  ];
+
   return (
     <>
       {/* Page Title */}
@@ -18,50 +43,42 @@ export default function Reports() {
           Reports & Analytics
         </h1>
         <p className="text-gray-600 mt-1">
-          Comprehensive business analytics and performance metrics.
+          Business reporting and performance analytics.
         </p>
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <KPICard
-          title="Total Revenue"
-          value="$4.2M"
-          icon={<DollarSign className="w-6 h-6" />}
-          trend={{ value: 18, positive: true }}
-        />
-        <KPICard
-          title="Active Deals"
-          value="87"
-          icon={<Handshake className="w-6 h-6" />}
-          trend={{ value: 12, positive: true }}
-        />
-        <KPICard
-          title="New Clients This Month"
-          value="24"
-          icon={<Users className="w-6 h-6" />}
-          trend={{ value: 8, positive: true }}
-        />
-        <KPICard
-          title="Average Property Price"
-          value="$625K"
-          icon={<TrendingUp className="w-6 h-6" />}
-          trend={{ value: 5, positive: false }}
-        />
+      {/* Tabs */}
+      <div className="mb-6">
+        <div className="border-b border-gray-200">
+          <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`
+                  group inline-flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm
+                  ${
+                    activeTab === tab.id
+                      ? "border-primary text-primary"
+                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                  }
+                `}
+              >
+                {tab.icon}
+                {tab.label}
+              </button>
+            ))}
+          </nav>
+        </div>
       </div>
 
-      {/* Charts Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-        <RevenueChart />
-        <PropertySalesChart />
-        <AgentPerformanceChart />
-        <PropertyTypesChart />
-      </div>
-
-      {/* Bottom Section - Lists */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <RecentTransactions />
-        <TopProperties />
+      {/* Tab Content */}
+      <div>
+        {activeTab === "revenue" && <RevenueReport onExport={handleExport} />}
+        {activeTab === "performance" && (
+          <AgentPerformanceReport onExport={handleExport} />
+        )}
+        {activeTab === "debt" && <DebtReport onExport={handleExport} />}
       </div>
     </>
   );

@@ -109,10 +109,10 @@ export function EditPartnerForm({
 
         <form
           onSubmit={handleSubmit}
-          className="space-y-4 max-h-[70vh] overflow-y-auto"
+          className="space-y-6 max-h-[70vh] overflow-y-auto"
         >
           {/* Partner Name */}
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="name">Partner Name *</Label>
             <Input
               id="name"
@@ -123,12 +123,12 @@ export function EditPartnerForm({
               className={errors.name ? "border-red-500" : ""}
             />
             {errors.name && (
-              <p className="text-red-500 text-sm mt-1">{errors.name}</p>
+              <p className="text-red-500 text-xs">{errors.name}</p>
             )}
           </div>
 
           {/* Email */}
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="email">Email *</Label>
             <Input
               id="email"
@@ -140,12 +140,12 @@ export function EditPartnerForm({
               className={errors.email ? "border-red-500" : ""}
             />
             {errors.email && (
-              <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+              <p className="text-red-500 text-xs">{errors.email}</p>
             )}
           </div>
 
           {/* Phone */}
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="phone">Phone *</Label>
             <Input
               id="phone"
@@ -156,12 +156,12 @@ export function EditPartnerForm({
               className={errors.phone ? "border-red-500" : ""}
             />
             {errors.phone && (
-              <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
+              <p className="text-red-500 text-xs">{errors.phone}</p>
             )}
           </div>
 
           {/* Address */}
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="address">Address *</Label>
             <Input
               id="address"
@@ -172,12 +172,12 @@ export function EditPartnerForm({
               className={errors.address ? "border-red-500" : ""}
             />
             {errors.address && (
-              <p className="text-red-500 text-sm mt-1">{errors.address}</p>
+              <p className="text-red-500 text-xs">{errors.address}</p>
             )}
           </div>
 
           {/* Partner Type */}
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="partnerType">Partner Type *</Label>
             <Select
               value={formData.partnerType}
@@ -196,7 +196,7 @@ export function EditPartnerForm({
           </div>
 
           {/* Assigned Staff */}
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="assignedStaff">Assigned Staff *</Label>
             <Select
               value={formData.assignedStaff}
@@ -216,14 +216,14 @@ export function EditPartnerForm({
               </SelectContent>
             </Select>
             {errors.assignedStaff && (
-              <p className="text-red-500 text-sm mt-1">
+              <p className="text-red-500 text-xs">
                 {errors.assignedStaff}
               </p>
             )}
           </div>
 
           {/* Status */}
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="status">Status</Label>
             <Select
               value={formData.status}
@@ -242,7 +242,7 @@ export function EditPartnerForm({
           </div>
         </form>
 
-        <DialogFooter>
+        <DialogFooter className="gap-2">
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>

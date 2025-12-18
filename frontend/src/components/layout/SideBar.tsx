@@ -12,6 +12,10 @@ import {
   BarChart3,
   Settings,
   ChevronRight,
+  ShoppingCart,
+  ShoppingBag,
+  FileText,
+  Wallet,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSidebar } from "@/lib/context/SidebarProvider";
@@ -21,8 +25,10 @@ const navItems = [
   { name: "Dashboard", path: "/", icon: LayoutDashboard },
   { name: "Properties", path: "/properties", icon: Home },
   { name: "Staffs", path: "/staff", icon: Users },
-  { name: "Partners", path: "/partners", icon: UserCheck },
+  { name: "Client", path: "/partners", icon: UserCheck },
   { name: "Transactions", path: "/transactions", icon: ScrollText },
+  { name: "Contracts", path: "/contracts", icon: FileText },
+  { name: "Payments", path: "/payments", icon: Wallet },
   { name: "Calendar", path: "/calendar", icon: Calendar },
   { name: "Reports", path: "/reports", icon: BarChart3 },
   { name: "Settings", path: "/settings", icon: Settings },
