@@ -12,71 +12,12 @@ export interface Property {
   status: "Available" | "For Sale" | "Sold" | "Rented";
   price: number;
   agent: string;
+  address: string;
+  bedrooms: number;
+  bathrooms: number;
+  area: number;
   lastUpdated: string;
 }
-
-const properties: Property[] = [
-  {
-    id: "1",
-    image: "🏢",
-    name: "Downtown Luxury Penthouse",
-    type: "Apartment",
-    status: "For Sale",
-    price: 950000,
-    agent: "Alice Chen",
-    lastUpdated: "2024-01-15",
-  },
-  {
-    id: "2",
-    image: "🏠",
-    name: "Suburban Family Home",
-    type: "House",
-    status: "Available",
-    price: 425000,
-    agent: "Bob Smith",
-    lastUpdated: "2024-01-18",
-  },
-  {
-    id: "3",
-    image: "🏢",
-    name: "Commercial Office Space",
-    type: "Commercial",
-    status: "For Sale",
-    price: 1200000,
-    agent: "Carol Davis",
-    lastUpdated: "2024-01-20",
-  },
-  {
-    id: "4",
-    image: "🏖️",
-    name: "Beachfront Condo",
-    type: "Apartment",
-    status: "Rented",
-    price: 650000,
-    agent: "David Lee",
-    lastUpdated: "2024-01-17",
-  },
-  {
-    id: "5",
-    image: "🌳",
-    name: "Residential Land Plot",
-    type: "Land",
-    status: "Available",
-    price: 280000,
-    agent: "Emma Wilson",
-    lastUpdated: "2024-01-19",
-  },
-  {
-    id: "6",
-    image: "🏠",
-    name: "Modern Urban Townhouse",
-    type: "House",
-    status: "Sold",
-    price: 580000,
-    agent: "Frank Brown",
-    lastUpdated: "2024-01-10",
-  },
-];
 
 function getStatusColor(status: Property["status"]) {
   const colors = {
@@ -89,15 +30,21 @@ function getStatusColor(status: Property["status"]) {
 }
 
 interface PropertyTableProps {
+  properties: Property[];
   searchTerm: string;
   filterStatus: string;
   filterType: string;
+  onEditProperty: (property: Property) => void;
+  onDeleteProperty: (propertyId: string) => void;
 }
 
 export function PropertyTable({
+  properties,
   searchTerm,
   filterStatus,
   filterType,
+  onEditProperty,
+  onDeleteProperty,
 }: PropertyTableProps) {
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
@@ -203,14 +150,24 @@ export function PropertyTable({
                         <Eye className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={(e) => e.stopPropagation()}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onEditProperty(property);
+                        }}
                         className="p-1.5 text-gray-600 hover:bg-gray-100 rounded transition-colors"
                         title="Edit property"
                       >
                         <Pencil className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={(e) => e.stopPropagation()}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const ok = window.confirm(
+                            `Delete "${property.name}"? This action cannot be undone.`,
+                          );
+                          if (!ok) return;
+                          onDeleteProperty(property.id);
+                        }}
                         className="p-1.5 text-red-600 hover:bg-red-100 rounded transition-colors"
                         title="Delete property"
                       >

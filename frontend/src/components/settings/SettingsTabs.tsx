@@ -1,13 +1,21 @@
 "use client";
 
-import { User, Bell, Lock, Building2, Plug2 } from "lucide-react";
+import {
+  User,
+  Bell,
+  Lock,
+  Building2,
+  Plug2,
+  SlidersHorizontal,
+} from "lucide-react";
 
 type TabKey =
   | "account"
   | "office"
   | "notifications"
   | "security"
-  | "integrations";
+  | "integrations"
+  | "config";
 
 interface Props {
   activeTab: TabKey;
@@ -28,6 +36,11 @@ export function SettingsTabs({ activeTab, onChange }: Props) {
       key: "integrations",
       label: "Integrations",
       icon: <Plug2 className="w-4 h-4" />,
+    },
+    {
+      key: "config",
+      label: "Config",
+      icon: <SlidersHorizontal className="w-4 h-4" />,
     },
   ];
 

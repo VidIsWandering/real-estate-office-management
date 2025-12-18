@@ -10,10 +10,16 @@ import { OfficeTab } from "@/components/settings/OfficeTab";
 import { NotificationsTab } from "@/components/settings/NotificationsTab";
 import { SecurityTab } from "@/components/settings/SecurityTab";
 import { IntegrationsTab } from "@/components/settings/IntegrationsTab";
+import { ConfigTab } from "@/components/settings/ConfigTab";
 
 export default function SettingsPage() {
   const [tab, setTab] = useState<
-    "account" | "office" | "notifications" | "security" | "integrations"
+    | "account"
+    | "office"
+    | "notifications"
+    | "security"
+    | "integrations"
+    | "config"
   >("account");
 
   return (
@@ -26,6 +32,7 @@ export default function SettingsPage() {
       {tab === "notifications" && <NotificationsTab />}
       {tab === "security" && <SecurityTab />}
       {tab === "integrations" && <IntegrationsTab />}
+      {tab === "config" && <ConfigTab />}
     </div>
   );
 }

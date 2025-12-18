@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -21,6 +21,9 @@ interface AddPropertyFormProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (data: PropertyFormData) => void;
+  title?: string;
+  submitLabel?: string;
+  initialData?: PropertyFormData;
 }
 
 export interface PropertyFormData {
@@ -35,24 +38,37 @@ export interface PropertyFormData {
   area: string;
 }
 
+const defaultFormData: PropertyFormData = {
+  name: "",
+  type: "Apartment",
+  status: "Available",
+  price: "",
+  agent: "",
+  address: "",
+  bedrooms: "",
+  bathrooms: "",
+  area: "",
+};
+
 export function AddPropertyForm({
   isOpen,
   onClose,
   onSubmit,
+  title,
+  submitLabel,
+  initialData,
 }: AddPropertyFormProps) {
-  const [formData, setFormData] = useState<PropertyFormData>({
-    name: "",
-    type: "Apartment",
-    status: "Available",
-    price: "",
-    agent: "",
-    address: "",
-    bedrooms: "",
-    bathrooms: "",
-    area: "",
-  });
+  const [formData, setFormData] = useState<PropertyFormData>(
+    initialData ?? defaultFormData,
+  );
 
   const [errors, setErrors] = useState<Partial<PropertyFormData>>({});
+
+  useEffect(() => {
+    if (!isOpen) return;
+    setErrors({});
+    setFormData(initialData ?? defaultFormData);
+  }, [isOpen, initialData]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
@@ -105,17 +121,6 @@ export function AddPropertyForm({
 
     if (validateForm()) {
       onSubmit(formData);
-      setFormData({
-        name: "",
-        type: "Apartment",
-        status: "Available",
-        price: "",
-        agent: "",
-        address: "",
-        bedrooms: "",
-        bathrooms: "",
-        area: "",
-      });
       onClose();
     }
   };
@@ -124,15 +129,15 @@ export function AddPropertyForm({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Add New Property</DialogTitle>
+          <DialogTitle>{title ?? "Add New Property"}</DialogTitle>
         </DialogHeader>
 
         <form
           onSubmit={handleSubmit}
-          className="space-y-4 max-h-[70vh] overflow-y-auto"
+          className="space-y-6 max-h-[70vh] overflow-y-auto"
         >
           {/* Property Name */}
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="name">Property Name *</Label>
             <Input
               id="name"
@@ -143,12 +148,12 @@ export function AddPropertyForm({
               className={errors.name ? "border-red-500" : ""}
             />
             {errors.name && (
-              <p className="text-red-500 text-sm mt-1">{errors.name}</p>
+              <p className="text-red-500 text-xs">{errors.name}</p>
             )}
           </div>
 
           {/* Address */}
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="address">Address *</Label>
             <Input
               id="address"
@@ -159,13 +164,13 @@ export function AddPropertyForm({
               className={errors.address ? "border-red-500" : ""}
             />
             {errors.address && (
-              <p className="text-red-500 text-sm mt-1">{errors.address}</p>
+              <p className="text-red-500 text-xs">{errors.address}</p>
             )}
           </div>
 
           {/* Type and Status Row */}
           <div className="grid grid-cols-2 gap-4">
-            <div>
+            <div className="space-y-2">
               <Label htmlFor="type">Type</Label>
               <Select
                 value={formData.type}
@@ -183,7 +188,7 @@ export function AddPropertyForm({
               </Select>
             </div>
 
-            <div>
+            <div className="space-y-2">
               <Label htmlFor="status">Status</Label>
               <Select
                 value={formData.status}
@@ -203,7 +208,7 @@ export function AddPropertyForm({
           </div>
 
           {/* Price */}
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="price">Price ($) *</Label>
             <Input
               id="price"
@@ -215,12 +220,12 @@ export function AddPropertyForm({
               className={errors.price ? "border-red-500" : ""}
             />
             {errors.price && (
-              <p className="text-red-500 text-sm mt-1">{errors.price}</p>
+              <p className="text-red-500 text-xs">{errors.price}</p>
             )}
           </div>
 
           {/* Agent */}
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="agent">Assigned Agent *</Label>
             <Input
               id="agent"
@@ -231,13 +236,13 @@ export function AddPropertyForm({
               className={errors.agent ? "border-red-500" : ""}
             />
             {errors.agent && (
-              <p className="text-red-500 text-sm mt-1">{errors.agent}</p>
+              <p className="text-red-500 text-xs">{errors.agent}</p>
             )}
           </div>
 
           {/* Bedrooms and Bathrooms Row */}
           <div className="grid grid-cols-2 gap-4">
-            <div>
+            <div className="space-y-2">
               <Label htmlFor="bedrooms">Bedrooms</Label>
               <Input
                 id="bedrooms"
@@ -249,7 +254,7 @@ export function AddPropertyForm({
               />
             </div>
 
-            <div>
+            <div className="space-y-2">
               <Label htmlFor="bathrooms">Bathrooms</Label>
               <Input
                 id="bathrooms"
@@ -263,7 +268,7 @@ export function AddPropertyForm({
           </div>
 
           {/* Area */}
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="area">Area (sq ft)</Label>
             <Input
               id="area"
@@ -276,11 +281,13 @@ export function AddPropertyForm({
           </div>
         </form>
 
-        <DialogFooter>
+        <DialogFooter className="gap-2">
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <Button onClick={handleSubmit}>Add Property</Button>
+          <Button onClick={handleSubmit}>
+            {submitLabel ?? "Add Property"}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
