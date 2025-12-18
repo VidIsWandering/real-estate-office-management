@@ -86,7 +86,10 @@ const mockEvents: CalendarEvent[] = [
   },
 ];
 
-export function CalendarView({ onDayClick, onAddEventForDate }: CalendarViewProps) {
+export function CalendarView({
+  onDayClick,
+  onAddEventForDate,
+}: CalendarViewProps) {
   const [currentDate, setCurrentDate] = useState(new Date(2024, 0, 1));
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [isViewEventsModalOpen, setIsViewEventsModalOpen] = useState(false);
@@ -170,11 +173,11 @@ export function CalendarView({ onDayClick, onAddEventForDate }: CalendarViewProp
   const handleDayRightClick = (e: React.MouseEvent, day: number | null) => {
     e.preventDefault();
     if (!day) return;
-    
+
     const dateStr = `${currentDate.getFullYear()}-${String(
       currentDate.getMonth() + 1,
     ).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-    
+
     setContextMenu({
       isOpen: true,
       x: e.clientX,

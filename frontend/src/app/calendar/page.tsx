@@ -11,7 +11,9 @@ import { useState } from "react";
 
 export default function Calendar() {
   const [isNewEventDialogOpen, setIsNewEventDialogOpen] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<string | undefined>(undefined);
+  const [selectedDate, setSelectedDate] = useState<string | undefined>(
+    undefined,
+  );
 
   const handleAddEvent = (data: EventFormData) => {
     console.log("New event added:", data);
@@ -48,7 +50,7 @@ export default function Calendar() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Calendar - Left side */}
         <div className="lg:col-span-2">
-          <CalendarView 
+          <CalendarView
             onDayClick={(date) => setIsNewEventDialogOpen(true)}
             onAddEventForDate={handleAddEventForDate}
           />

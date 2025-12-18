@@ -74,11 +74,13 @@ export function RecentTransactions() {
                   <p className="text-sm font-semibold text-gray-900">
                     {transaction.property}
                   </p>
-                  <span className={`text-xs font-medium px-2 py-0.5 rounded ${
-                    transaction.type === "Sale"
-                      ? "bg-green-50 text-green-700"
-                      : "bg-blue-50 text-blue-700"
-                  }`}>
+                  <span
+                    className={`text-xs font-medium px-2 py-0.5 rounded ${
+                      transaction.type === "Sale"
+                        ? "bg-green-50 text-green-700"
+                        : "bg-blue-50 text-blue-700"
+                    }`}
+                  >
                     {transaction.type}
                   </span>
                 </div>

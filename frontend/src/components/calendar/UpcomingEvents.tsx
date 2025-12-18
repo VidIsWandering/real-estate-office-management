@@ -99,14 +99,16 @@ function getEventBadgeColor(type: string) {
 export function UpcomingEvents() {
   return (
     <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">Upcoming Events</h3>
+      <h3 className="text-lg font-semibold text-gray-900 mb-4">
+        Upcoming Events
+      </h3>
 
       <div className="space-y-3">
         {upcomingEvents.map((event) => (
           <div
             key={event.id}
             className={`p-4 rounded-lg transition-colors cursor-pointer hover:shadow-md ${getEventColor(
-              event.type
+              event.type,
             )}`}
           >
             <div className="flex items-start justify-between mb-2">
@@ -115,7 +117,7 @@ export function UpcomingEvents() {
               </h4>
               <span
                 className={`px-2.5 py-0.5 rounded text-xs font-medium whitespace-nowrap ${getEventBadgeColor(
-                  event.type
+                  event.type,
                 )}`}
               >
                 {event.type}

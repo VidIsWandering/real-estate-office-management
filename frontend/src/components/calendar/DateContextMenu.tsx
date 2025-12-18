@@ -61,9 +61,7 @@ export function DateContextMenu({
         className="w-full px-4 py-2.5 flex items-center gap-3 hover:bg-gray-50 transition-colors text-left"
       >
         <Plus className="w-4 h-4 text-blue-600" />
-        <span className="text-sm font-medium text-gray-700">
-          New Event
-        </span>
+        <span className="text-sm font-medium text-gray-700">New Event</span>
       </button>
       {/* <button
         onClick={() => {
