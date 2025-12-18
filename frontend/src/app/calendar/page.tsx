@@ -1,24 +1,77 @@
 "use client";
 
-import { CalendarHeader } from "@/components/calendar/CalendarHeader";
-import { CalendarGrid } from "@/components/calendar/CalendarGrid";
+import { CalendarView } from "@/components/calendar/CalendarView";
 import { UpcomingEvents } from "@/components/calendar/UpcomingEvents";
+import {
+  NewEventForm,
+  EventFormData,
+} from "@/components/calendar/NewEventForm";
+import { Plus } from "lucide-react";
+import { useState } from "react";
 
-export default function CalendarPage() {
+export default function Calendar() {
+  const [isNewEventDialogOpen, setIsNewEventDialogOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<string | undefined>(
+    undefined,
+  );
+
+  const handleAddEvent = (data: EventFormData) => {
+    console.log("New event added:", data);
+    setIsNewEventDialogOpen(false);
+    setSelectedDate(undefined);
+  };
+
+  const handleAddEventForDate = (date: string) => {
+    setSelectedDate(date);
+    setIsNewEventDialogOpen(true);
+  };
+
   return (
-    <div className="flex flex-col lg:flex-row gap-6">
-      {/* Main Calendar Area */}
-      <div className="flex-1 space-y-4 md:space-y-6 min-w-0">
-        <CalendarHeader />
-        <CalendarGrid />
+    <>
+      <div className="mb-8 flex justify-between items-start">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Calendar & Scheduling
+          </h1>
+          <p className="text-gray-600 mt-1">
+            Schedule and manage appointments, viewings, and meetings.
+          </p>
+        </div>
+        <button
+          onClick={() => setIsNewEventDialogOpen(true)}
+          className="px-6 py-2.5 bg-primary text-white rounded-lg font-medium hover:bg-blue-600 transition-colors flex items-center gap-2 whitespace-nowrap shadow-sm"
+        >
+          <Plus className="w-5 h-5" />
+          New Event
+        </button>
       </div>
 
-      {/* RIGHT EVENTS SIDEBAR - Hidden on mobile, visible on lg+ */}
-      <div className="w-full lg:w-80 flex-shrink-0">
-        <div className="lg:sticky lg:top-20">
+      {/* Main Content */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Calendar - Left side */}
+        <div className="lg:col-span-2">
+          <CalendarView
+            onDayClick={(date) => setIsNewEventDialogOpen(true)}
+            onAddEventForDate={handleAddEventForDate}
+          />
+        </div>
+
+        {/* Upcoming Events - Right side */}
+        <div>
           <UpcomingEvents />
         </div>
       </div>
-    </div>
+
+      {/* New Event Form */}
+      <NewEventForm
+        isOpen={isNewEventDialogOpen}
+        onClose={() => {
+          setIsNewEventDialogOpen(false);
+          setSelectedDate(undefined);
+        }}
+        onSubmit={handleAddEvent}
+        initialDate={selectedDate}
+      />
+    </>
   );
 }
