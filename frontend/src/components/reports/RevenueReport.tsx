@@ -81,7 +81,7 @@ const agentOptions = [
 ];
 
 const areaOptions = [
-"All",
+  "All",
   "Downtown",
   "Suburban",
   "Business District",
@@ -103,7 +103,10 @@ export function RevenueReport({ onExport }: RevenueReportProps) {
 
   const [contracts] = useState<Contract[]>(mockContracts);
 
-  const totalRevenue = contracts.reduce((sum, contract) => sum + contract.value, 0);
+  const totalRevenue = contracts.reduce(
+    (sum, contract) => sum + contract.value,
+    0,
+  );
   const totalContracts = contracts.length;
 
   const getStatusColor = (status: string) => {
@@ -124,9 +127,7 @@ export function RevenueReport({ onExport }: RevenueReportProps) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">
-            Revenue Report
-          </h2>
+          <h2 className="text-2xl font-bold text-gray-900">Revenue Report</h2>
           {/* <p className="text-sm text-gray-600 mt-1">BM8.1</p> */}
         </div>
         <div className="flex gap-2">
@@ -184,7 +185,9 @@ export function RevenueReport({ onExport }: RevenueReportProps) {
             </Label>
             <Select
               value={filters.agent}
-              onValueChange={(value) => setFilters({ ...filters, agent: value })}
+              onValueChange={(value) =>
+                setFilters({ ...filters, agent: value })
+              }
             >
               <SelectTrigger id="agent">
                 <SelectValue />

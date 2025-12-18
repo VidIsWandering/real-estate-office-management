@@ -8,7 +8,12 @@ import { PartnerProfileDetail } from "@/components/partners/PartnerProfileDetail
 import { EditPartnerForm } from "@/components/partners/EditPartnerForm";
 import { StaffInfoModal } from "@/components/partners/StaffInfoModal";
 import { Staff } from "@/app/staff/page";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 
 export interface Partner {
   id: string;

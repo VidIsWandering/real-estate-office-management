@@ -1,37 +1,44 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Eye, Edit, Trash2 } from "lucide-react"
+import { useState } from "react";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Eye, Edit, Trash2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
 
 const statusColor = {
   green: "bg-green-100 text-green-700",
   yellow: "bg-yellow-100 text-yellow-700",
   blue: "bg-blue-100 text-blue-700",
   red: "bg-red-100 text-red-700",
-} as const
+} as const;
 
-type StatusColor = keyof typeof statusColor
+type StatusColor = keyof typeof statusColor;
 
 interface Transaction {
-  id: string
-  propertyCode: string
-  propertyLocation: string
-  customer: string
-  agent: string
-  finalPrice: string
-  preliminaryTerms: string
-  status: string
-  statusColor: StatusColor
-  cancellationReason?: string
+  id: string;
+  propertyCode: string;
+  propertyLocation: string;
+  customer: string;
+  agent: string;
+  finalPrice: string;
+  preliminaryTerms: string;
+  status: string;
+  statusColor: StatusColor;
+  cancellationReason?: string;
 }
 
 const transactions: Transaction[] = [
@@ -80,16 +87,16 @@ const transactions: Transaction[] = [
     statusColor: "red",
     cancellationReason: "Customer did not qualify for bank financing",
   },
-]
+];
 
 export function TransactionsTable() {
-  const [open, setOpen] = useState(false)
-  const [selected, setSelected] = useState<Transaction | null>(null)
+  const [open, setOpen] = useState(false);
+  const [selected, setSelected] = useState<Transaction | null>(null);
 
   const openDetails = (t: Transaction) => {
-    setSelected(t)
-    setOpen(true)
-  }
+    setSelected(t);
+    setOpen(true);
+  };
 
   return (
     <div className="bg-white border rounded-xl shadow-sm">
@@ -118,9 +125,7 @@ export function TransactionsTable() {
               <TableCell className="font-semibold">{t.finalPrice}</TableCell>
 
               <TableCell>
-                <Badge className={statusColor[t.statusColor]}>
-                  {t.status}
-                </Badge>
+                <Badge className={statusColor[t.statusColor]}>{t.status}</Badge>
               </TableCell>
 
               <TableCell>
@@ -130,8 +135,8 @@ export function TransactionsTable() {
                     size="sm"
                     className="h-8 w-8 p-0"
                     onClick={(e) => {
-                      e.stopPropagation()
-                      openDetails(t)
+                      e.stopPropagation();
+                      openDetails(t);
                     }}
                     aria-label="View details"
                     title="View details"
@@ -180,13 +185,17 @@ export function TransactionsTable() {
 
               <div>
                 <div className="text-xs text-gray-500">Status</div>
-                <Badge className={statusColor[selected.statusColor]}>{selected.status}</Badge>
+                <Badge className={statusColor[selected.statusColor]}>
+                  {selected.status}
+                </Badge>
               </div>
 
               <div>
                 <div className="text-xs text-gray-500">Property</div>
                 <div className="font-medium">{selected.propertyCode}</div>
-                <div className="text-sm text-gray-600">{selected.propertyLocation}</div>
+                <div className="text-sm text-gray-600">
+                  {selected.propertyLocation}
+                </div>
               </div>
 
               <div>
@@ -206,19 +215,26 @@ export function TransactionsTable() {
 
               <div className="md:col-span-2">
                 <div className="text-xs text-gray-500">Preliminary terms</div>
-                <div className="text-sm text-gray-700 whitespace-pre-wrap">{selected.preliminaryTerms}</div>
+                <div className="text-sm text-gray-700 whitespace-pre-wrap">
+                  {selected.preliminaryTerms}
+                </div>
               </div>
 
-              {selected.status === "Cancelled" && selected.cancellationReason && (
-                <div className="md:col-span-2">
-                  <div className="text-xs text-gray-500">Cancellation reason</div>
-                  <div className="text-sm text-gray-700 whitespace-pre-wrap">{selected.cancellationReason}</div>
-                </div>
-              )}
+              {selected.status === "Cancelled" &&
+                selected.cancellationReason && (
+                  <div className="md:col-span-2">
+                    <div className="text-xs text-gray-500">
+                      Cancellation reason
+                    </div>
+                    <div className="text-sm text-gray-700 whitespace-pre-wrap">
+                      {selected.cancellationReason}
+                    </div>
+                  </div>
+                )}
             </div>
           )}
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }

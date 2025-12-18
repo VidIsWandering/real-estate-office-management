@@ -171,7 +171,9 @@ export function AgentPerformanceReport({
             </Label>
             <Select
               value={filters.agent}
-              onValueChange={(value) => setFilters({ ...filters, agent: value })}
+              onValueChange={(value) =>
+                setFilters({ ...filters, agent: value })
+              }
             >
               <SelectTrigger id="agent">
                 <SelectValue />

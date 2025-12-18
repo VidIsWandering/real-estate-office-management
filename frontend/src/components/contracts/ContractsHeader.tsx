@@ -9,5 +9,5 @@ export function ContractsHeader() {
         Create, track, and manage real estate contracts.
       </p>
     </div>
-  )
+  );
 }

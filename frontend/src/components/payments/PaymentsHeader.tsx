@@ -9,5 +9,5 @@ export function PaymentsHeader() {
         Track and manage financial receipt/payment vouchers.
       </p>
     </div>
-  )
+  );
 }

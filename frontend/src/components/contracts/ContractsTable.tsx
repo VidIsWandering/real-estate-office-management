@@ -1,16 +1,23 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Eye, Edit, Trash2, FileText } from "lucide-react"
+import { useState } from "react";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Eye, Edit, Trash2, FileText } from "lucide-react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
 
 const statusColor = {
   gray: "bg-gray-100 text-gray-700",
@@ -19,33 +26,33 @@ const statusColor = {
   green: "bg-green-100 text-green-700",
   purple: "bg-purple-100 text-purple-700",
   red: "bg-red-100 text-red-700",
-} as const
+} as const;
 
-type StatusColor = keyof typeof statusColor
+type StatusColor = keyof typeof statusColor;
 
 const typeColor = {
   deposit: "bg-orange-100 text-orange-700",
   sale: "bg-blue-100 text-blue-700",
   lease: "bg-green-100 text-green-700",
-} as const
+} as const;
 
-type TypeColor = keyof typeof typeColor
+type TypeColor = keyof typeof typeColor;
 
 interface Contract {
-  id: string
-  transactionId: string
-  contractType: string
-  typeColor: TypeColor
-  partyA: string
-  partyB: string
-  totalValue: string
-  depositAmount: string
-  signDate: string
-  effectiveDate: string
-  legalStaff: string
-  status: string
-  statusColor: StatusColor
-  hasFile: boolean
+  id: string;
+  transactionId: string;
+  contractType: string;
+  typeColor: TypeColor;
+  partyA: string;
+  partyB: string;
+  totalValue: string;
+  depositAmount: string;
+  signDate: string;
+  effectiveDate: string;
+  legalStaff: string;
+  status: string;
+  statusColor: StatusColor;
+  hasFile: boolean;
 }
 
 const contracts: Contract[] = [
@@ -129,16 +136,16 @@ const contracts: Contract[] = [
     statusColor: "gray",
     hasFile: false,
   },
-]
+];
 
 export function ContractsTable() {
-  const [open, setOpen] = useState(false)
-  const [selected, setSelected] = useState<Contract | null>(null)
+  const [open, setOpen] = useState(false);
+  const [selected, setSelected] = useState<Contract | null>(null);
 
   const openDetails = (c: Contract) => {
-    setSelected(c)
-    setOpen(true)
-  }
+    setSelected(c);
+    setOpen(true);
+  };
 
   return (
     <div className="bg-white border rounded-xl shadow-sm">
@@ -168,7 +175,9 @@ export function ContractsTable() {
                   {contract.contractType}
                 </Badge>
               </TableCell>
-              <TableCell className="font-semibold">{contract.totalValue}</TableCell>
+              <TableCell className="font-semibold">
+                {contract.totalValue}
+              </TableCell>
               <TableCell>
                 <Badge className={statusColor[contract.statusColor]}>
                   {contract.status}
@@ -182,8 +191,8 @@ export function ContractsTable() {
                     size="sm"
                     className="h-8 w-8 p-0"
                     onClick={(e) => {
-                      e.stopPropagation()
-                      openDetails(contract)
+                      e.stopPropagation();
+                      openDetails(contract);
                     }}
                     aria-label="View details"
                     title="View details"
@@ -232,7 +241,9 @@ export function ContractsTable() {
 
               <div>
                 <div className="text-xs text-gray-500">Status</div>
-                <Badge className={statusColor[selected.statusColor]}>{selected.status}</Badge>
+                <Badge className={statusColor[selected.statusColor]}>
+                  {selected.status}
+                </Badge>
               </div>
 
               <div>
@@ -242,7 +253,9 @@ export function ContractsTable() {
 
               <div>
                 <div className="text-xs text-gray-500">Contract type</div>
-                <Badge className={typeColor[selected.typeColor]}>{selected.contractType}</Badge>
+                <Badge className={typeColor[selected.typeColor]}>
+                  {selected.contractType}
+                </Badge>
               </div>
 
               <div>
@@ -272,12 +285,16 @@ export function ContractsTable() {
 
               <div>
                 <div className="text-xs text-gray-500">Effective date</div>
-                <div className="font-medium">{selected.effectiveDate || "-"}</div>
+                <div className="font-medium">
+                  {selected.effectiveDate || "-"}
+                </div>
               </div>
 
               <div className="md:col-span-2">
                 <div className="text-xs text-gray-500">Legal staff</div>
-                <div className="text-sm text-gray-700 whitespace-pre-wrap">{selected.legalStaff}</div>
+                <div className="text-sm text-gray-700 whitespace-pre-wrap">
+                  {selected.legalStaff}
+                </div>
               </div>
 
               <div>
@@ -296,5 +313,5 @@ export function ContractsTable() {
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }

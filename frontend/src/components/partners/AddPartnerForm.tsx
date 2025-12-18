@@ -223,9 +223,7 @@ export function AddPartnerForm({
               </SelectContent>
             </Select>
             {errors.assignedStaff && (
-              <p className="text-red-500 text-xs">
-                {errors.assignedStaff}
-              </p>
+              <p className="text-red-500 text-xs">{errors.assignedStaff}</p>
             )}
           </div>
 

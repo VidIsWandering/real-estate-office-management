@@ -1,15 +1,16 @@
-import { Badge } from "@/components/ui/badge"
+import { Badge } from "@/components/ui/badge";
 
 export function ContractsStats() {
   return (
     <div className="space-y-4">
-
       {/* Total Contracts */}
       <div className="bg-white rounded-xl border p-4 shadow-sm space-y-1">
         <p className="text-sm text-gray-500">Total contracts</p>
         <div className="flex items-end gap-1">
           <h2 className="text-2xl font-bold">42</h2>
-          <Badge className="bg-blue-100 text-blue-700 text-xs">↑ 15% this month</Badge>
+          <Badge className="bg-blue-100 text-blue-700 text-xs">
+            ↑ 15% this month
+          </Badge>
         </div>
       </div>
 
@@ -36,18 +37,19 @@ export function ContractsStats() {
         <p className="text-sm font-semibold">Contract types</p>
 
         <div className="flex items-center gap-2 text-sm">
-          <span className="w-2 h-2 bg-blue-500 rounded-full"></span> Sale & purchase 60%
+          <span className="w-2 h-2 bg-blue-500 rounded-full"></span> Sale &
+          purchase 60%
         </div>
 
         <div className="flex items-center gap-2 text-sm">
-          <span className="w-2 h-2 bg-orange-500 rounded-full"></span> Deposit 25%
+          <span className="w-2 h-2 bg-orange-500 rounded-full"></span> Deposit
+          25%
         </div>
 
         <div className="flex items-center gap-2 text-sm">
           <span className="w-2 h-2 bg-green-500 rounded-full"></span> Lease 15%
         </div>
       </div>
-
     </div>
-  )
+  );
 }

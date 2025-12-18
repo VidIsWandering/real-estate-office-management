@@ -9,5 +9,5 @@ export function TransactionsHeader() {
         Track and manage your real estate transactions.
       </p>
     </div>
-  )
+  );
 }

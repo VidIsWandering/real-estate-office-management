@@ -1,37 +1,51 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Eye, Edit, Trash2, FileText, ArrowUpCircle, ArrowDownCircle } from "lucide-react"
+import { useState } from "react";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Eye,
+  Edit,
+  Trash2,
+  FileText,
+  ArrowUpCircle,
+  ArrowDownCircle,
+} from "lucide-react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
 
 const statusColor = {
   gray: "bg-gray-100 text-gray-700",
   green: "bg-green-100 text-green-700",
-} as const
+} as const;
 
-type StatusColor = keyof typeof statusColor
+type StatusColor = keyof typeof statusColor;
 
 interface Payment {
-  id: string
-  contractId: string
-  voucherType: string
-  paymentDate: string
-  amount: string
-  paymentMethod: string
-  payer: string
-  content: string
-  createdBy: string
-  status: string
-  statusColor: StatusColor
-  hasDocument: boolean
+  id: string;
+  contractId: string;
+  voucherType: string;
+  paymentDate: string;
+  amount: string;
+  paymentMethod: string;
+  payer: string;
+  content: string;
+  createdBy: string;
+  status: string;
+  statusColor: StatusColor;
+  hasDocument: boolean;
 }
 
 const payments: Payment[] = [
@@ -105,16 +119,16 @@ const payments: Payment[] = [
     statusColor: "green",
     hasDocument: true,
   },
-]
+];
 
 export function PaymentsTable() {
-  const [open, setOpen] = useState(false)
-  const [selected, setSelected] = useState<Payment | null>(null)
+  const [open, setOpen] = useState(false);
+  const [selected, setSelected] = useState<Payment | null>(null);
 
   const openDetails = (p: Payment) => {
-    setSelected(p)
-    setOpen(true)
-  }
+    setSelected(p);
+    setOpen(true);
+  };
 
   return (
     <div className="bg-white border rounded-xl shadow-sm">
@@ -146,7 +160,13 @@ export function PaymentsTable() {
                   ) : (
                     <ArrowUpCircle className="h-4 w-4 text-red-600" />
                   )}
-                  <span className={payment.voucherType === "Receipt" ? "text-green-600" : "text-red-600"}>
+                  <span
+                    className={
+                      payment.voucherType === "Receipt"
+                        ? "text-green-600"
+                        : "text-red-600"
+                    }
+                  >
                     {payment.voucherType}
                   </span>
                 </div>
@@ -165,8 +185,8 @@ export function PaymentsTable() {
                     size="sm"
                     className="h-8 w-8 p-0"
                     onClick={(e) => {
-                      e.stopPropagation()
-                      openDetails(payment)
+                      e.stopPropagation();
+                      openDetails(payment);
                     }}
                     aria-label="View details"
                     title="View details"
@@ -215,7 +235,9 @@ export function PaymentsTable() {
 
               <div>
                 <div className="text-xs text-gray-500">Status</div>
-                <Badge className={statusColor[selected.statusColor]}>{selected.status}</Badge>
+                <Badge className={statusColor[selected.statusColor]}>
+                  {selected.status}
+                </Badge>
               </div>
 
               <div>
@@ -231,7 +253,13 @@ export function PaymentsTable() {
                   ) : (
                     <ArrowUpCircle className="h-4 w-4 text-red-600" />
                   )}
-                  <div className={selected.voucherType === "Receipt" ? "font-medium text-green-600" : "font-medium text-red-600"}>
+                  <div
+                    className={
+                      selected.voucherType === "Receipt"
+                        ? "font-medium text-green-600"
+                        : "font-medium text-red-600"
+                    }
+                  >
                     {selected.voucherType}
                   </div>
                 </div>
@@ -259,7 +287,9 @@ export function PaymentsTable() {
 
               <div className="md:col-span-2">
                 <div className="text-xs text-gray-500">Description</div>
-                <div className="text-sm text-gray-700 whitespace-pre-wrap">{selected.content}</div>
+                <div className="text-sm text-gray-700 whitespace-pre-wrap">
+                  {selected.content}
+                </div>
               </div>
 
               <div>
@@ -283,5 +313,5 @@ export function PaymentsTable() {
         </DialogContent>
       </Dialog>
     </div>
-  )
+  );
 }
