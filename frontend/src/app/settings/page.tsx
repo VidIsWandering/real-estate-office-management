@@ -12,8 +12,9 @@ import { SecurityTab } from "@/components/settings/SecurityTab";
 import { IntegrationsTab } from "@/components/settings/IntegrationsTab";
 
 export default function SettingsPage() {
-  const [tab, setTab] =
-    useState<"account" | "office" | "notifications" | "security" | "integrations">("account");
+  const [tab, setTab] = useState<
+    "account" | "office" | "notifications" | "security" | "integrations"
+  >("account");
 
   return (
     <div className="space-y-8">

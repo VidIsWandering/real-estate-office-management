@@ -109,16 +109,16 @@ export function Header() {
               </div>
               <nav className="py-2">
                 <button
-                    onClick={handleGoProfile}
-                    className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                  onClick={handleGoProfile}
+                  className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                 >
                   <User className="w-4 h-4" />
                   My Profile
                 </button>
 
                 <button
-                    onClick={handleGoSettings}
-                    className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                  onClick={handleGoSettings}
+                  className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                 >
                   <Settings className="w-4 h-4" />
                   Settings

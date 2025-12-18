@@ -6,84 +6,68 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export interface AccountFormData {
-    name: string;
-    username: string;
-    password: string;
-    email: string;
-    phone: string;
-    status: "Active" | "Inactive";
+  name: string;
+  username: string;
+  password: string;
+  email: string;
+  phone: string;
+  status: "Active" | "Inactive";
 }
 
 interface Props {
-    initialData: AccountFormData;
-    onSubmit: (data: AccountFormData) => void;
-    onCancel: () => void;
+  initialData: AccountFormData;
+  onSubmit: (data: AccountFormData) => void;
+  onCancel: () => void;
 }
 
 const editableFields: Array<{
-    key: keyof AccountFormData;
-    label: string;
-    disabled?: boolean;
-    type?: string;
+  key: keyof AccountFormData;
+  label: string;
+  disabled?: boolean;
+  type?: string;
 }> = [
-    { key: "name", label: "Name" },
-    { key: "username", label: "Username", disabled: true },
-    { key: "password", label: "Password", type: "password" },
-    { key: "email", label: "Email", type: "email" },
-    { key: "phone", label: "Phone" },
+  { key: "name", label: "Name" },
+  { key: "username", label: "Username", disabled: true },
+  { key: "password", label: "Password", type: "password" },
+  { key: "email", label: "Email", type: "email" },
+  { key: "phone", label: "Phone" },
 ];
 
-export function AccountEditForm({
-                                    initialData,
-                                    onSubmit,
-                                    onCancel,
-                                }: Props) {
-    const [formData, setFormData] =
-        useState<AccountFormData>(initialData);
+export function AccountEditForm({ initialData, onSubmit, onCancel }: Props) {
+  const [formData, setFormData] = useState<AccountFormData>(initialData);
 
-    const handleChange = (
-        key: keyof AccountFormData,
-        value: string,
-    ) => {
-        setFormData((prev) => ({
-            ...prev,
-            [key]: value,
-        }));
-    };
+  const handleChange = (key: keyof AccountFormData, value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+  };
 
-    return (
-        <div className="bg-white border rounded-xl p-6 shadow-sm max-w-2xl">
-            <h2 className="text-xl font-semibold mb-6">
-                Edit Account
-            </h2>
+  return (
+    <div className="bg-white border rounded-xl p-6 shadow-sm max-w-2xl">
+      <h2 className="text-xl font-semibold mb-6">Edit Account</h2>
 
-            <div className="space-y-4">
-                {editableFields.map(
-                    ({ key, label, disabled, type }) => (
-                        <div key={key}>
-                            <Label htmlFor={key}>{label}</Label>
-                            <Input
-                                id={key}
-                                type={type ?? "text"}
-                                value={formData[key]}
-                                disabled={disabled}
-                                onChange={(e) =>
-                                    handleChange(key, e.target.value)
-                                }
-                            />
-                        </div>
-                    ),
-                )}
-            </div>
+      <div className="space-y-4">
+        {editableFields.map(({ key, label, disabled, type }) => (
+          <div key={key}>
+            <Label htmlFor={key}>{label}</Label>
+            <Input
+              id={key}
+              type={type ?? "text"}
+              value={formData[key]}
+              disabled={disabled}
+              onChange={(e) => handleChange(key, e.target.value)}
+            />
+          </div>
+        ))}
+      </div>
 
-            <div className="flex gap-4 mt-6">
-                <Button onClick={() => onSubmit(formData)}>
-                    Save
-                </Button>
-                <Button variant="outline" onClick={onCancel}>
-                    Cancel
-                </Button>
-            </div>
-        </div>
-    );
+      <div className="flex gap-4 mt-6">
+        <Button onClick={() => onSubmit(formData)}>Save</Button>
+        <Button variant="outline" onClick={onCancel}>
+          Cancel
+        </Button>
+      </div>
+    </div>
+  );
 }

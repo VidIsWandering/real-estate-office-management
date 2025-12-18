@@ -1,24 +1,33 @@
-import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
+"use client";
+
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 
 const statusColor = {
   green: "bg-green-100 text-green-700",
   yellow: "bg-yellow-100 text-yellow-700",
   blue: "bg-blue-100 text-blue-700",
-} as const
+} as const;
 
-type StatusColor = keyof typeof statusColor
+type StatusColor = keyof typeof statusColor;
 
 interface Transaction {
-  id: string
-  property: string
-  client: string
-  agent: string
-  type: string
-  status: string
-  statusColor: StatusColor
-  amount: string
-  date: string
+  id: string;
+  property: string;
+  client: string;
+  agent: string;
+  type: string;
+  status: string;
+  statusColor: StatusColor;
+  amount: string;
+  date: string;
 }
 
 const transactions: Transaction[] = [
@@ -55,9 +64,13 @@ const transactions: Transaction[] = [
     amount: "$480k",
     date: "Jan 14",
   },
-]
+];
 
-export function TransactionsTable() {
+interface TransactionsTableProps {
+  onSelect: (id: string) => void;
+}
+
+export function TransactionsTable({ onSelect }: TransactionsTableProps) {
   return (
     <Table className="rounded-xl border">
       <TableHeader>
@@ -74,23 +87,23 @@ export function TransactionsTable() {
 
       <TableBody>
         {transactions.map((t) => (
-          <TableRow key={t.id}>
+          <TableRow
+            key={t.id}
+            onClick={() => onSelect(t.id)}
+            className="cursor-pointer hover:bg-muted/50"
+          >
             <TableCell>{t.id}</TableCell>
             <TableCell>{t.property}</TableCell>
             <TableCell>{t.client}</TableCell>
             <TableCell>{t.type}</TableCell>
-
             <TableCell>
-              <Badge className={statusColor[t.statusColor]}>
-                {t.status}
-              </Badge>
+              <Badge className={statusColor[t.statusColor]}>{t.status}</Badge>
             </TableCell>
-
             <TableCell>{t.amount}</TableCell>
             <TableCell>{t.date}</TableCell>
           </TableRow>
         ))}
       </TableBody>
     </Table>
-  )
+  );
 }
