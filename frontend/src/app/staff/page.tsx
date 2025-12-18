@@ -1,11 +1,17 @@
 "use client";
 
-import { Plus, X } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useState } from "react";
 import { StaffTable } from "@/components/staff/StaffTable";
 import { AddStaffForm } from "@/components/staff/AddStaffForm";
 import { StaffProfileDetail } from "@/components/staff/StaffProfileDetail";
 import { EditStaffForm } from "@/components/staff/EditStaffForm";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 
 export interface Staff {
   id: string;
@@ -124,6 +130,7 @@ const initialStaffData: Staff[] = [
 export default function Staff() {
   const [staffData, setStaffData] = useState<Staff[]>(initialStaffData);
   const [selectedStaffId, setSelectedStaffId] = useState<string | null>(null);
+  const [isStaffDetailOpen, setIsStaffDetailOpen] = useState(false);
   const [isAddStaffDialogOpen, setIsAddStaffDialogOpen] = useState(false);
   const [isEditStaffDialogOpen, setIsEditStaffDialogOpen] = useState(false);
 
@@ -209,75 +216,56 @@ export default function Staff() {
             <div className="overflow-x-auto">
               <StaffTable
                 staff={staffData}
-                onSelectStaff={setSelectedStaffId}
+                onSelectStaff={(staffId) => {
+                  setSelectedStaffId(staffId);
+                  setIsEditStaffDialogOpen(false);
+                  setIsStaffDetailOpen(true);
+                }}
                 selectedStaffId={selectedStaffId}
+                onEditStaff={(staffId) => {
+                  setSelectedStaffId(staffId);
+                  setIsStaffDetailOpen(false);
+                  setIsEditStaffDialogOpen(true);
+                }}
                 onResetPassword={handleResetPassword}
                 onDeleteStaff={handleDeleteStaff}
               />
             </div>
           </div>
         </div>
-
-        {/* Right Detail Panel - Desktop Only */}
-        {selectedStaff && (
-          <div className="hidden lg:block w-96 sticky top-20 h-fit max-h-[calc(100vh-120px)] overflow-y-auto flex-shrink-0">
-            <div className="relative">
-              <button
-                onClick={() => setSelectedStaffId(null)}
-                className="absolute -top-2 -right-2 p-1 bg-gray-200 hover:bg-gray-300 rounded-full transition-colors z-10"
-              >
-                <X className="w-5 h-5 text-gray-700" />
-              </button>
-              <StaffProfileDetail
-                staff={selectedStaff}
-                onEdit={() => setIsEditStaffDialogOpen(true)}
-                onDelete={() => handleDeleteStaff(selectedStaff.id)}
-                onStatusChange={(newStatus: "Active" | "Inactive") =>
-                  handleStatusChange(selectedStaff.id, newStatus)
-                }
-                onResetPassword={() => handleResetPassword(selectedStaff.id)}
-              />
-            </div>
-          </div>
-        )}
       </div>
 
-      {/* Mobile Detail Modal */}
-      {selectedStaff && (
-        <>
-          {/* Backdrop */}
-          <div
-            className="lg:hidden fixed inset-0 bg-black/50 z-40"
-            onClick={() => setSelectedStaffId(null)}
-          />
+      {/* Right Slide-in Detail Drawer */}
+      <Sheet
+        open={isStaffDetailOpen}
+        onOpenChange={(open) => {
+          setIsStaffDetailOpen(open);
+          if (!open) setSelectedStaffId(null);
+        }}
+      >
+        <SheetContent side="right" className="sm:max-w-md">
+          <SheetHeader>
+            <SheetTitle>Staff details</SheetTitle>
+          </SheetHeader>
 
-          {/* Modal */}
-          <div className="lg:hidden fixed inset-x-0 bottom-0 z-50 bg-white rounded-t-2xl shadow-xl max-h-[85vh] overflow-y-auto animate-slide-up">
-            <div className="sticky top-0 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between z-10">
-              <h2 className="text-lg font-semibold text-gray-900">
-                Staff Details
-              </h2>
-              <button
-                onClick={() => setSelectedStaffId(null)}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-              >
-                <X className="w-5 h-5 text-gray-700" />
-              </button>
-            </div>
-            <div className="p-4">
+          <div className="px-4 pb-6 overflow-y-auto">
+            {selectedStaff && (
               <StaffProfileDetail
                 staff={selectedStaff}
-                onEdit={() => setIsEditStaffDialogOpen(true)}
+                onEdit={() => {
+                  setIsStaffDetailOpen(false);
+                  setIsEditStaffDialogOpen(true);
+                }}
                 onDelete={() => handleDeleteStaff(selectedStaff.id)}
                 onStatusChange={(newStatus: "Active" | "Inactive") =>
                   handleStatusChange(selectedStaff.id, newStatus)
                 }
                 onResetPassword={() => handleResetPassword(selectedStaff.id)}
               />
-            </div>
+            )}
           </div>
-        </>
-      )}
+        </SheetContent>
+      </Sheet>
 
       {/* Add Staff Dialog */}
       <AddStaffForm

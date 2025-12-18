@@ -3,7 +3,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Edit2, Trash2, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useRouter } from "next/navigation";
 
 export interface Staff {
   id: string;
@@ -21,6 +20,7 @@ interface StaffTableProps {
   staff: Staff[];
   onSelectStaff: (id: string) => void;
   selectedStaffId: string | null;
+  onEditStaff: (id: string) => void;
   onResetPassword: (id: string) => void;
   onDeleteStaff: (id: string) => void;
 }
@@ -29,11 +29,10 @@ export function StaffTable({
   staff,
   onSelectStaff,
   selectedStaffId,
+  onEditStaff,
   onResetPassword,
   onDeleteStaff,
 }: StaffTableProps) {
-  const router = useRouter();
-
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Active":
@@ -90,7 +89,7 @@ export function StaffTable({
           {staff.map((member, index) => (
             <tr
               key={member.id}
-              onClick={() => router.push(`/staff/${member.id}`)}
+              onClick={() => onSelectStaff(member.id)}
               className={cn(
                 "border-b border-gray-200 hover:bg-blue-50 transition-colors cursor-pointer",
                 selectedStaffId === member.id && "bg-blue-100",
@@ -139,7 +138,7 @@ export function StaffTable({
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      onSelectStaff(member.id);
+                      onEditStaff(member.id);
                     }}
                     className="p-1.5 text-gray-600 hover:bg-gray-200 rounded transition-colors"
                     title="Edit staff"

@@ -134,10 +134,10 @@ export function AddStaffForm({ isOpen, onClose, onSubmit }: AddStaffFormProps) {
 
         <form
           onSubmit={handleSubmit}
-          className="space-y-4 max-h-[70vh] overflow-y-auto"
+          className="max-h-[70vh] overflow-y-auto space-y-6"
         >
           {/* Staff Name */}
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="name">Staff Name *</Label>
             <Input
               id="name"
@@ -148,12 +148,12 @@ export function AddStaffForm({ isOpen, onClose, onSubmit }: AddStaffFormProps) {
               className={errors.name ? "border-red-500" : ""}
             />
             {errors.name && (
-              <p className="text-red-500 text-sm mt-1">{errors.name}</p>
+              <p className="text-xs text-red-500">{errors.name}</p>
             )}
           </div>
 
           {/* Username */}
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="username">Username *</Label>
             <Input
               id="username"
@@ -164,12 +164,12 @@ export function AddStaffForm({ isOpen, onClose, onSubmit }: AddStaffFormProps) {
               className={errors.username ? "border-red-500" : ""}
             />
             {errors.username && (
-              <p className="text-red-500 text-sm mt-1">{errors.username}</p>
+              <p className="text-xs text-red-500">{errors.username}</p>
             )}
           </div>
 
           {/* Password */}
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="password">Password *</Label>
             <Input
               id="password"
@@ -181,12 +181,12 @@ export function AddStaffForm({ isOpen, onClose, onSubmit }: AddStaffFormProps) {
               className={errors.password ? "border-red-500" : ""}
             />
             {errors.password && (
-              <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+              <p className="text-xs text-red-500">{errors.password}</p>
             )}
           </div>
 
           {/* Email */}
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="email">Email *</Label>
             <Input
               id="email"
@@ -198,12 +198,12 @@ export function AddStaffForm({ isOpen, onClose, onSubmit }: AddStaffFormProps) {
               className={errors.email ? "border-red-500" : ""}
             />
             {errors.email && (
-              <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+              <p className="text-xs text-red-500">{errors.email}</p>
             )}
           </div>
 
           {/* Phone */}
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="phone">Phone *</Label>
             <Input
               id="phone"
@@ -214,12 +214,12 @@ export function AddStaffForm({ isOpen, onClose, onSubmit }: AddStaffFormProps) {
               className={errors.phone ? "border-red-500" : ""}
             />
             {errors.phone && (
-              <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
+              <p className="text-xs text-red-500">{errors.phone}</p>
             )}
           </div>
 
           {/* Position */}
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="position">Position</Label>
             <Select
               value={formData.position}
@@ -239,7 +239,7 @@ export function AddStaffForm({ isOpen, onClose, onSubmit }: AddStaffFormProps) {
           </div>
 
           {/* Assigned Area */}
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="assignedArea">Assigned Area *</Label>
             <Select
               value={formData.assignedArea}
@@ -259,12 +259,12 @@ export function AddStaffForm({ isOpen, onClose, onSubmit }: AddStaffFormProps) {
               </SelectContent>
             </Select>
             {errors.assignedArea && (
-              <p className="text-red-500 text-sm mt-1">{errors.assignedArea}</p>
+              <p className="text-xs text-red-500">{errors.assignedArea}</p>
             )}
           </div>
 
           {/* Status */}
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="status">Status</Label>
             <Select
               value={formData.status}
