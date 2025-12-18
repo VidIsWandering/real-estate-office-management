@@ -323,9 +323,7 @@ export function AddPropertyForm({
 
           {/* Details */}
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold text-gray-900">
-              Details
-            </h3>
+            <h3 className="text-sm font-semibold text-gray-900">Details</h3>
 
             <div className="space-y-2">
               <Label htmlFor="area">Area (m²) *</Label>
@@ -397,7 +395,7 @@ export function AddPropertyForm({
             </h3>
 
             <div className="space-y-2">
-              <Label htmlFor="ownerName">Owner  *</Label>
+              <Label htmlFor="ownerName">Owner *</Label>
               <Select
                 value={formData.ownerName}
                 onValueChange={(value) =>

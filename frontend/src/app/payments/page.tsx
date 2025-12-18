@@ -104,7 +104,7 @@ export default function PaymentsPage() {
 
   const handleDelete = (payment: Payment) => {
     const ok = window.confirm(
-      `Delete voucher ${payment.id}? This action cannot be undone.`
+      `Delete voucher ${payment.id}? This action cannot be undone.`,
     );
     if (!ok) return;
 
@@ -126,8 +126,8 @@ export default function PaymentsPage() {
               ...data,
               statusColor: deriveStatusColor(data.status),
             }
-          : p
-      )
+          : p,
+      ),
     );
     setShowEditForm(false);
     setEditing(null);

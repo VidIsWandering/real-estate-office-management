@@ -56,30 +56,32 @@ export function PaymentForm({
 }) {
   const [contractId, setContractId] = useState(initialData?.contractId ?? "");
   const [voucherType, setVoucherType] = useState<VoucherType | "">(
-    initialData?.voucherType ?? ""
+    initialData?.voucherType ?? "",
   );
   const [paymentDateISO, setPaymentDateISO] = useState(
-    initialData?.paymentDate ? toISODate(initialData.paymentDate) : ""
+    initialData?.paymentDate ? toISODate(initialData.paymentDate) : "",
   );
   const [amount, setAmount] = useState(initialData?.amount ?? "");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | "">(
-    initialData?.paymentMethod ?? ""
+    initialData?.paymentMethod ?? "",
   );
   const [payer, setPayer] = useState(initialData?.payer ?? "");
   const [content, setContent] = useState(initialData?.content ?? "");
   const [createdBy, setCreatedBy] = useState(initialData?.createdBy ?? "");
   const [status, setStatus] = useState<PaymentStatus | "">(
-    initialData?.status ?? ""
+    initialData?.status ?? "",
   );
   const [hasDocument, setHasDocument] = useState(
-    initialData?.hasDocument ?? false
+    initialData?.hasDocument ?? false,
   );
 
   useEffect(() => {
     if (!initialData) return;
     setContractId(initialData.contractId ?? "");
     setVoucherType(initialData.voucherType ?? "");
-    setPaymentDateISO(initialData.paymentDate ? toISODate(initialData.paymentDate) : "");
+    setPaymentDateISO(
+      initialData.paymentDate ? toISODate(initialData.paymentDate) : "",
+    );
     setAmount(initialData.amount ?? "");
     setPaymentMethod(initialData.paymentMethod ?? "");
     setPayer(initialData.payer ?? "");

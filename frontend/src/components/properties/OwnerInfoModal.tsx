@@ -34,9 +34,7 @@ export function OwnerInfoModal({
         <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
           {/* Header */}
           <div className="sticky top-0 bg-gradient-to-r from-primary to-blue-600 px-6 py-4 flex items-center justify-between">
-            <h2 className="text-xl font-bold text-white">
-              Owner details
-            </h2>
+            <h2 className="text-xl font-bold text-white">Owner details</h2>
             <button
               onClick={onClose}
               className="p-1 hover:bg-white/20 rounded-full transition-colors"
@@ -126,18 +124,14 @@ export function OwnerInfoModal({
                 </h4>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="bg-blue-50 p-3 rounded-lg">
-                    <p className="text-xs text-blue-600 mb-1">
-                      Customer type
-                    </p>
+                    <p className="text-xs text-blue-600 mb-1">Customer type</p>
                     <p className="text-sm font-medium text-blue-900">
                       Individual
                     </p>
                   </div>
                   <div className="bg-green-50 p-3 rounded-lg">
                     <p className="text-xs text-green-600 mb-1">Status</p>
-                    <p className="text-sm font-medium text-green-900">
-                      Active
-                    </p>
+                    <p className="text-sm font-medium text-green-900">Active</p>
                   </div>
                 </div>
               </div>
@@ -151,9 +145,7 @@ export function OwnerInfoModal({
                   </p>
                 </div>
                 <p className="text-2xl font-bold text-indigo-900">1 property</p>
-                <p className="text-xs text-indigo-600 mt-1">
-                  Currently listed
-                </p>
+                <p className="text-xs text-indigo-600 mt-1">Currently listed</p>
               </div>
             </div>
 
