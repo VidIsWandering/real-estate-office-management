@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Table,
   TableHeader,
@@ -25,103 +25,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Payment, statusColor } from "@/components/payments/payment.types";
 
-const statusColor = {
-  gray: "bg-gray-100 text-gray-700",
-  green: "bg-green-100 text-green-700",
-} as const;
-
-type StatusColor = keyof typeof statusColor;
-
-interface Payment {
-  id: string;
-  contractId: string;
-  voucherType: string;
-  paymentDate: string;
-  amount: string;
-  paymentMethod: string;
-  payer: string;
-  content: string;
-  createdBy: string;
-  status: string;
-  statusColor: StatusColor;
-  hasDocument: boolean;
-}
-
-const payments: Payment[] = [
-  {
-    id: "PT001",
-    contractId: "HD001",
-    voucherType: "Receipt",
-    paymentDate: "15/12/2024",
-    amount: "200,000,000",
-    paymentMethod: "Bank transfer",
-    payer: "Nguyễn Văn A",
-    content: "Contract deposit payment",
-    createdBy: "NV001",
-    status: "Confirmed",
-    statusColor: "green",
-    hasDocument: true,
-  },
-  {
-    id: "PC001",
-    contractId: "HD001",
-    voucherType: "Payment",
-    paymentDate: "16/12/2024",
-    amount: "17,000,000",
-    paymentMethod: "Cash",
-    payer: "Công ty ABC",
-    content: "Brokerage commission payout",
-    createdBy: "NV002",
-    status: "Confirmed",
-    statusColor: "green",
-    hasDocument: true,
-  },
-  {
-    id: "PT002",
-    contractId: "HD002",
-    voucherType: "Receipt",
-    paymentDate: "20/11/2024",
-    amount: "100,000,000",
-    paymentMethod: "Bank transfer",
-    payer: "Trần Thị B",
-    content: "Deposit payment",
-    createdBy: "NV001",
-    status: "Confirmed",
-    statusColor: "green",
-    hasDocument: true,
-  },
-  {
-    id: "PT003",
-    contractId: "HD003",
-    voucherType: "Receipt",
-    paymentDate: "01/12/2024",
-    amount: "50,000,000",
-    paymentMethod: "Bank transfer",
-    payer: "Lê Văn C",
-    content: "December rent payment",
-    createdBy: "NV003",
-    status: "Created",
-    statusColor: "gray",
-    hasDocument: false,
-  },
-  {
-    id: "PC002",
-    contractId: "HD002",
-    voucherType: "Payment",
-    paymentDate: "22/11/2024",
-    amount: "4,800,000",
-    paymentMethod: "Cash",
-    payer: "Nhân viên kinh doanh",
-    content: "Commission payout",
-    createdBy: "NV002",
-    status: "Confirmed",
-    statusColor: "green",
-    hasDocument: true,
-  },
-];
-
-export function PaymentsTable() {
+export function PaymentsTable({
+  payments,
+  onEdit,
+  onDelete,
+}: {
+  payments: Payment[];
+  onEdit: (payment: Payment) => void;
+  onDelete: (payment: Payment) => void;
+}) {
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<Payment | null>(null);
 
@@ -129,6 +43,19 @@ export function PaymentsTable() {
     setSelected(p);
     setOpen(true);
   };
+
+  useEffect(() => {
+    if (!open || !selected) return;
+
+    const fresh = payments.find((p) => p.id === selected.id);
+    if (!fresh) {
+      setOpen(false);
+      setSelected(null);
+      return;
+    }
+
+    setSelected(fresh);
+  }, [open, payments, selected]);
 
   return (
     <div className="bg-white border rounded-xl shadow-sm">
@@ -197,7 +124,10 @@ export function PaymentsTable() {
                     variant="ghost"
                     size="sm"
                     className="h-8 w-8 p-0"
-                    onClick={(e) => e.stopPropagation()}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onEdit(payment);
+                    }}
                     aria-label="Edit"
                     title="Edit"
                   >
@@ -207,7 +137,10 @@ export function PaymentsTable() {
                     variant="ghost"
                     size="sm"
                     className="h-8 w-8 p-0 text-red-500 hover:text-red-600"
-                    onClick={(e) => e.stopPropagation()}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDelete(payment);
+                    }}
                     aria-label="Delete"
                     title="Delete"
                   >

@@ -16,7 +16,7 @@ const initialProperties: Property[] = [
     image: "🏢",
     name: "Downtown Luxury Penthouse",
     type: "Apartment",
-    status: "For Sale",
+    status: "Listed",
     price: 950000,
     agent: "Alice Chen",
     address: "123 Main St, Downtown",
@@ -30,7 +30,7 @@ const initialProperties: Property[] = [
     image: "🏠",
     name: "Suburban Family Home",
     type: "House",
-    status: "Available",
+    status: "New",
     price: 425000,
     agent: "Bob Smith",
     address: "456 Maple Ave, Suburb",
@@ -44,7 +44,7 @@ const initialProperties: Property[] = [
     image: "🏢",
     name: "Commercial Office Space",
     type: "Commercial",
-    status: "For Sale",
+    status: "Pending legal review",
     price: 1200000,
     agent: "Carol Davis",
     address: "789 Business Rd, City Center",
@@ -58,7 +58,7 @@ const initialProperties: Property[] = [
     image: "🏖️",
     name: "Beachfront Condo",
     type: "Apartment",
-    status: "Rented",
+    status: "Negotiating",
     price: 650000,
     agent: "David Lee",
     address: "321 Ocean Dr, Beach District",
@@ -72,7 +72,7 @@ const initialProperties: Property[] = [
     image: "🌳",
     name: "Residential Land Plot",
     type: "Land",
-    status: "Available",
+    status: "Paused",
     price: 280000,
     agent: "Emma Wilson",
     address: "654 Cedar Ln, Outskirts",
@@ -86,7 +86,7 @@ const initialProperties: Property[] = [
     image: "🏠",
     name: "Modern Urban Townhouse",
     type: "House",
-    status: "Sold",
+    status: "Closed",
     price: 580000,
     agent: "Frank Brown",
     address: "987 Birch Blvd, Urban",
@@ -242,10 +242,12 @@ export default function Properties() {
             className="px-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
           >
             <option value="all">All Status</option>
-            <option value="Available">Available</option>
-            <option value="For Sale">For Sale</option>
-            <option value="Sold">Sold</option>
-            <option value="Rented">Rented</option>
+            <option value="New">New</option>
+            <option value="Pending legal review">Pending legal review</option>
+            <option value="Listed">Listed</option>
+            <option value="Negotiating">Negotiating</option>
+            <option value="Closed">Closed</option>
+            <option value="Paused">Paused</option>
           </select>
         </div>
 
@@ -294,8 +296,8 @@ export default function Properties() {
             setEditingPropertyId(null);
           }}
           onSubmit={handleEditProperty}
-          title="Edit Property"
-          submitLabel="Save Changes"
+          title="Edit property"
+          submitLabel="Save changes"
           initialData={{
             name: editingProperty.name,
             type: editingProperty.type,

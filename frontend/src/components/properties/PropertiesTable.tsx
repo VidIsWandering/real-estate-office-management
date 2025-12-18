@@ -9,7 +9,13 @@ export interface Property {
   image: string;
   name: string;
   type: "Apartment" | "House" | "Land" | "Commercial";
-  status: "Available" | "For Sale" | "Sold" | "Rented";
+  status:
+    | "New"
+    | "Pending legal review"
+    | "Listed"
+    | "Negotiating"
+    | "Closed"
+    | "Paused";
   price: number;
   agent: string;
   address: string;
@@ -21,10 +27,12 @@ export interface Property {
 
 function getStatusColor(status: Property["status"]) {
   const colors = {
-    Available: "bg-green-50 text-green-700",
-    "For Sale": "bg-blue-50 text-blue-700",
-    Sold: "bg-gray-50 text-gray-700",
-    Rented: "bg-purple-50 text-purple-700",
+    "New": "bg-gray-50 text-gray-700",
+    "Pending legal review": "bg-blue-50 text-blue-700",
+    "Listed": "bg-blue-50 text-blue-700",
+    "Negotiating": "bg-purple-50 text-purple-700",
+    "Closed": "bg-green-50 text-green-700",
+    "Paused": "bg-gray-50 text-gray-700",
   };
   return colors[status];
 }

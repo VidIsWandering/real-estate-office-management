@@ -152,11 +152,9 @@ export function RevenueReport({ onExport }: RevenueReportProps) {
 
       {/* Filters */}
       <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div>
-            <Label htmlFor="fromDate" className="mb-2 block">
-              From
-            </Label>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-x-6 lg:grid-cols-4">
+          <div className="space-y-2">
+            <Label htmlFor="fromDate">From</Label>
             <Input
               id="fromDate"
               type="date"
@@ -166,10 +164,8 @@ export function RevenueReport({ onExport }: RevenueReportProps) {
               }
             />
           </div>
-          <div>
-            <Label htmlFor="toDate" className="mb-2 block">
-              To
-            </Label>
+          <div className="space-y-2">
+            <Label htmlFor="toDate">To</Label>
             <Input
               id="toDate"
               type="date"
@@ -179,10 +175,8 @@ export function RevenueReport({ onExport }: RevenueReportProps) {
               }
             />
           </div>
-          <div>
-            <Label htmlFor="agent" className="mb-2 block">
-              Agent
-            </Label>
+          <div className="space-y-2">
+            <Label htmlFor="agent">Agent</Label>
             <Select
               value={filters.agent}
               onValueChange={(value) =>
@@ -201,10 +195,8 @@ export function RevenueReport({ onExport }: RevenueReportProps) {
               </SelectContent>
             </Select>
           </div>
-          <div>
-            <Label htmlFor="area" className="mb-2 block">
-              Area
-            </Label>
+          <div className="space-y-2">
+            <Label htmlFor="area">Area</Label>
             <Select
               value={filters.area}
               onValueChange={(value) => setFilters({ ...filters, area: value })}

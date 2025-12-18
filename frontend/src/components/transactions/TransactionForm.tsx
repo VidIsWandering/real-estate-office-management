@@ -33,17 +33,6 @@ export function TransactionForm() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-muted-foreground">
-                Transaction ID
-              </label>
-              <Input
-                disabled
-                placeholder="Auto-generated"
-                className="bg-gray-50"
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium text-muted-foreground">
                 Agreed price
               </label>
               <Input placeholder="e.g., 8.5B VND" />
