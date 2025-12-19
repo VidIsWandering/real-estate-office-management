@@ -159,10 +159,10 @@ export function NewEventForm({
 
         <form
           onSubmit={handleSubmit}
-          className="space-y-4 max-h-[70vh] overflow-y-auto"
+          className="space-y-6 max-h-[70vh] overflow-y-auto"
         >
           {/* Event Title */}
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="title">Event Title *</Label>
             <Input
               id="title"
@@ -173,13 +173,13 @@ export function NewEventForm({
               className={errors.title ? "border-red-500" : ""}
             />
             {errors.title && (
-              <p className="text-red-500 text-sm mt-1">{errors.title}</p>
+              <p className="text-red-500 text-xs">{errors.title}</p>
             )}
           </div>
 
           {/* Date and Time Row */}
           <div className="grid grid-cols-2 gap-4">
-            <div>
+            <div className="space-y-2">
               <Label htmlFor="date">Date *</Label>
               <Input
                 id="date"
@@ -190,11 +190,11 @@ export function NewEventForm({
                 className={errors.date ? "border-red-500" : ""}
               />
               {errors.date && (
-                <p className="text-red-500 text-sm mt-1">{errors.date}</p>
+                <p className="text-red-500 text-xs">{errors.date}</p>
               )}
             </div>
 
-            <div>
+            <div className="space-y-2">
               <Label htmlFor="time">Time *</Label>
               <Input
                 id="time"
@@ -205,13 +205,13 @@ export function NewEventForm({
                 className={errors.time ? "border-red-500" : ""}
               />
               {errors.time && (
-                <p className="text-red-500 text-sm mt-1">{errors.time}</p>
+                <p className="text-red-500 text-xs">{errors.time}</p>
               )}
             </div>
           </div>
 
           {/* Event Type */}
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="type">Event Type</Label>
             <Select
               value={formData.type}
@@ -233,7 +233,7 @@ export function NewEventForm({
           </div>
 
           {/* Property Selection */}
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="property">Property</Label>
             <Select
               value={formData.property}
@@ -253,7 +253,7 @@ export function NewEventForm({
           </div>
 
           {/* Client Selection */}
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="client">Client</Label>
             <Select
               value={formData.client}
@@ -273,7 +273,7 @@ export function NewEventForm({
           </div>
 
           {/* Agent Selection */}
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="agent">Agent</Label>
             <Select
               value={formData.agent}
@@ -293,7 +293,7 @@ export function NewEventForm({
           </div>
 
           {/* Location */}
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="location">Location</Label>
             <Input
               id="location"
@@ -305,7 +305,7 @@ export function NewEventForm({
           </div>
         </form>
 
-        <DialogFooter>
+        <DialogFooter className="gap-2">
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>

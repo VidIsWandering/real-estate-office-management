@@ -50,10 +50,10 @@ export function PartnerTable({
         <thead>
           <tr className="border-b border-gray-200 bg-gray-50">
             <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">
-              Partner Code
+              Client Code
             </th>
             <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">
-              Partner Name
+              Client Name
             </th>
             <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">
               Email
@@ -65,7 +65,7 @@ export function PartnerTable({
               Address
             </th>
             <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">
-              Partner Type
+              Client Type
             </th>
             <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">
               Assigned Staff

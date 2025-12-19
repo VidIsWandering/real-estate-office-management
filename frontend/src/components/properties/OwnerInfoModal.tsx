@@ -1,4 +1,4 @@
-import { X, User, Mail, Phone, MapPin, Building, Calendar } from "lucide-react";
+import { X, Mail, Phone, MapPin, Building } from "lucide-react";
 
 interface Owner {
   id: string;
@@ -34,9 +34,7 @@ export function OwnerInfoModal({
         <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
           {/* Header */}
           <div className="sticky top-0 bg-gradient-to-r from-primary to-blue-600 px-6 py-4 flex items-center justify-between">
-            <h2 className="text-xl font-bold text-white">
-              Chi tiết chủ sở hữu
-            </h2>
+            <h2 className="text-xl font-bold text-white">Owner details</h2>
             <button
               onClick={onClose}
               className="p-1 hover:bg-white/20 rounded-full transition-colors"
@@ -93,7 +91,7 @@ export function OwnerInfoModal({
                   </div>
                   <div className="flex-1">
                     <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-                      Số điện thoại
+                      Phone
                     </p>
                     <p className="text-sm font-medium text-gray-900">
                       {owner.phone}
@@ -110,7 +108,7 @@ export function OwnerInfoModal({
                   </div>
                   <div className="flex-1">
                     <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-                      Địa chỉ
+                      Address
                     </p>
                     <p className="text-sm font-medium text-gray-900">
                       {owner.address}
@@ -122,20 +120,18 @@ export function OwnerInfoModal({
               {/* Additional Info Section */}
               <div className="pt-4 border-t border-gray-200">
                 <h4 className="text-sm font-semibold text-gray-900 mb-3">
-                  Thông tin bổ sung
+                  Additional information
                 </h4>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="bg-blue-50 p-3 rounded-lg">
-                    <p className="text-xs text-blue-600 mb-1">
-                      Loại khách hàng
+                    <p className="text-xs text-blue-600 mb-1">Customer type</p>
+                    <p className="text-sm font-medium text-blue-900">
+                      Individual
                     </p>
-                    <p className="text-sm font-medium text-blue-900">Cá nhân</p>
                   </div>
                   <div className="bg-green-50 p-3 rounded-lg">
-                    <p className="text-xs text-green-600 mb-1">Trạng thái</p>
-                    <p className="text-sm font-medium text-green-900">
-                      Hoạt động
-                    </p>
+                    <p className="text-xs text-green-600 mb-1">Status</p>
+                    <p className="text-sm font-medium text-green-900">Active</p>
                   </div>
                 </div>
               </div>
@@ -145,26 +141,24 @@ export function OwnerInfoModal({
                 <div className="flex items-center gap-2 mb-2">
                   <Building className="w-4 h-4 text-indigo-600" />
                   <p className="text-xs font-semibold text-indigo-900 uppercase tracking-wide">
-                    Bất động sản sở hữu
+                    Properties owned
                   </p>
                 </div>
                 <p className="text-2xl font-bold text-indigo-900">1 property</p>
-                <p className="text-xs text-indigo-600 mt-1">
-                  Đang hiển thị trong danh sách
-                </p>
+                <p className="text-xs text-indigo-600 mt-1">Currently listed</p>
               </div>
             </div>
 
             {/* Action Buttons */}
             <div className="mt-6 flex gap-3">
               <button className="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-primary rounded-lg hover:bg-blue-600 transition-colors">
-                Liên hệ
+                Contact
               </button>
               <button
                 onClick={onClose}
                 className="flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
               >
-                Đóng
+                Close
               </button>
             </div>
           </div>

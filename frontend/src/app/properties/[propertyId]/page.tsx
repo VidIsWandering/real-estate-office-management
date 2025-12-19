@@ -3,12 +3,10 @@
 import {
   ArrowLeft,
   Home,
-  DollarSign,
   MapPin,
   User,
   Mail,
   Phone,
-  Calendar,
   Edit2,
   Trash2,
   Maximize,
@@ -29,26 +27,32 @@ interface Property {
   image: string;
   name: string;
   type: "Apartment" | "House" | "Land" | "Commercial";
-  status: "Available" | "For Sale" | "Sold" | "Rented";
+  status:
+    | "New"
+    | "Pending legal review"
+    | "Listed"
+    | "Negotiating"
+    | "Closed"
+    | "Paused";
   price: number;
   agent: string;
   lastUpdated: string;
-  // Thông tin khuôn viên
-  plotWidth: number; // mét
-  plotLength: number; // mét
+  // Plot information
+  plotWidth: number; // meters
+  plotLength: number; // meters
   plotArea: number; // m²
-  // Thông tin xây dựng
-  buildingWidth: number; // mét
-  buildingLength: number; // mét
+  // Building information
+  buildingWidth: number; // meters
+  buildingLength: number; // meters
   buildingArea: number; // m²
-  // Thông tin chi tiết
-  direction: string; // Hướng
-  floors: number; // Số tầng
-  bedrooms: number; // Phòng ngủ
-  bathrooms: number; // Phòng tắm
-  livingRooms: number; // Phòng khách
-  notes: string; // Ghi chú
-  // Thông tin chủ sở hữu
+  // Details
+  direction: string;
+  floors: number;
+  bedrooms: number;
+  bathrooms: number;
+  livingRooms: number;
+  notes: string;
+  // Owner information
   ownerId: string;
   ownerName: string;
   ownerEmail: string;
@@ -63,7 +67,7 @@ const propertiesData: Property[] = [
     image: "🏢",
     name: "Downtown Luxury Penthouse",
     type: "Apartment",
-    status: "For Sale",
+    status: "Listed",
     price: 950000,
     agent: "Alice Chen",
     lastUpdated: "2024-01-15",
@@ -73,24 +77,24 @@ const propertiesData: Property[] = [
     buildingWidth: 15,
     buildingLength: 25,
     buildingArea: 375,
-    direction: "Đông Nam",
+    direction: "Southeast",
     floors: 2,
     bedrooms: 4,
     bathrooms: 3,
     livingRooms: 2,
-    notes: "Căn hộ cao cấp với view đẹp, nội thất sang trọng",
+    notes: "Premium apartment with a great view and luxury interior.",
     ownerId: "C001",
-    ownerName: "Nguyễn Văn A",
+    ownerName: "Nguyen Van A",
     ownerEmail: "nguyenvana@gmail.com",
     ownerPhone: "0901234567",
-    ownerAddress: "123 Nguyễn Huệ, Quận 1, TP.HCM",
+    ownerAddress: "123 Nguyen Hue St, District 1, Ho Chi Minh City",
   },
   {
     id: "2",
     image: "🏠",
     name: "Suburban Family Home",
     type: "House",
-    status: "Available",
+    status: "New",
     price: 425000,
     agent: "Bob Smith",
     lastUpdated: "2024-01-18",
@@ -100,24 +104,24 @@ const propertiesData: Property[] = [
     buildingWidth: 8,
     buildingLength: 15,
     buildingArea: 120,
-    direction: "Nam",
+    direction: "South",
     floors: 1,
     bedrooms: 3,
     bathrooms: 2,
     livingRooms: 1,
-    notes: "Nhà mới xây, khu vực yên tĩnh",
+    notes: "Newly built home in a quiet neighborhood.",
     ownerId: "C002",
-    ownerName: "Trần Thị B",
+    ownerName: "Tran Thi B",
     ownerEmail: "tranthib@gmail.com",
     ownerPhone: "0912345678",
-    ownerAddress: "456 Lê Lợi, Quận 3, TP.HCM",
+    ownerAddress: "456 Le Loi St, District 3, Ho Chi Minh City",
   },
   {
     id: "3",
     image: "🏢",
     name: "Commercial Office Space",
     type: "Commercial",
-    status: "For Sale",
+    status: "Pending legal review",
     price: 1200000,
     agent: "Carol Davis",
     lastUpdated: "2024-01-20",
@@ -127,24 +131,24 @@ const propertiesData: Property[] = [
     buildingWidth: 20,
     buildingLength: 35,
     buildingArea: 700,
-    direction: "Đông",
+    direction: "East",
     floors: 3,
     bedrooms: 0,
     bathrooms: 4,
     livingRooms: 0,
-    notes: "Văn phòng cho thuê, vị trí đẹp",
+    notes: "Office space in a prime location.",
     ownerId: "C003",
-    ownerName: "Lê Văn C",
+    ownerName: "Le Van C",
     ownerEmail: "levanc@gmail.com",
     ownerPhone: "0923456789",
-    ownerAddress: "789 Hai Bà Trưng, Quận 1, TP.HCM",
+    ownerAddress: "789 Hai Ba Trung St, District 1, Ho Chi Minh City",
   },
   {
     id: "4",
     image: "🏖️",
     name: "Beachfront Condo",
     type: "Apartment",
-    status: "Rented",
+    status: "Negotiating",
     price: 650000,
     agent: "David Lee",
     lastUpdated: "2024-01-17",
@@ -154,24 +158,24 @@ const propertiesData: Property[] = [
     buildingWidth: 10,
     buildingLength: 15,
     buildingArea: 150,
-    direction: "Đông Nam",
+    direction: "Southeast",
     floors: 1,
     bedrooms: 2,
     bathrooms: 2,
     livingRooms: 1,
-    notes: "Căn hộ view biển tuyệt đẹp",
+    notes: "Condo with an amazing ocean view.",
     ownerId: "C004",
-    ownerName: "Phạm Thị D",
+    ownerName: "Pham Thi D",
     ownerEmail: "phamthid@gmail.com",
     ownerPhone: "0934567890",
-    ownerAddress: "321 Trần Hưng Đạo, Quận 5, TP.HCM",
+    ownerAddress: "321 Tran Hung Dao St, District 5, Ho Chi Minh City",
   },
   {
     id: "5",
     image: "🌳",
     name: "Residential Land Plot",
     type: "Land",
-    status: "Available",
+    status: "Paused",
     price: 280000,
     agent: "Emma Wilson",
     lastUpdated: "2024-01-19",
@@ -181,24 +185,24 @@ const propertiesData: Property[] = [
     buildingWidth: 0,
     buildingLength: 0,
     buildingArea: 0,
-    direction: "Bắc",
+    direction: "North",
     floors: 0,
     bedrooms: 0,
     bathrooms: 0,
     livingRooms: 0,
-    notes: "Đất nền dự án, sổ hồng riêng",
+    notes: "Project land plot with separate ownership certificate.",
     ownerId: "C005",
-    ownerName: "Hoàng Văn E",
+    ownerName: "Hoang Van E",
     ownerEmail: "hoangvane@gmail.com",
     ownerPhone: "0945678901",
-    ownerAddress: "654 Cách Mạng Tháng 8, Quận 10, TP.HCM",
+    ownerAddress: "654 Cach Mang Thang 8 St, District 10, Ho Chi Minh City",
   },
   {
     id: "6",
     image: "🏠",
     name: "Modern Urban Townhouse",
     type: "House",
-    status: "Sold",
+    status: "Closed",
     price: 580000,
     agent: "Frank Brown",
     lastUpdated: "2024-01-10",
@@ -208,26 +212,28 @@ const propertiesData: Property[] = [
     buildingWidth: 7,
     buildingLength: 18,
     buildingArea: 126,
-    direction: "Tây",
+    direction: "West",
     floors: 2,
     bedrooms: 3,
     bathrooms: 3,
     livingRooms: 1,
-    notes: "Nhà phố hiện đại, thiết kế sang trọng",
+    notes: "Modern townhouse with a premium design.",
     ownerId: "C006",
-    ownerName: "Vũ Thị F",
+    ownerName: "Vu Thi F",
     ownerEmail: "vuthif@gmail.com",
     ownerPhone: "0956789012",
-    ownerAddress: "987 Nguyễn Thị Minh Khai, Quận 3, TP.HCM",
+    ownerAddress: "987 Nguyen Thi Minh Khai St, District 3, Ho Chi Minh City",
   },
 ];
 
 function getStatusColor(status: Property["status"]) {
   const colors = {
-    Available: "bg-green-100 text-green-800",
-    "For Sale": "bg-blue-100 text-blue-800",
-    Sold: "bg-gray-100 text-gray-800",
-    Rented: "bg-purple-100 text-purple-800",
+    New: "bg-gray-100 text-gray-800",
+    "Pending legal review": "bg-blue-100 text-blue-800",
+    Listed: "bg-blue-100 text-blue-800",
+    Negotiating: "bg-purple-100 text-purple-800",
+    Closed: "bg-green-100 text-green-800",
+    Paused: "bg-gray-100 text-gray-800",
   };
   return colors[status];
 }
@@ -304,17 +310,17 @@ export default function PropertyDetailPage({
             <div>
               <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <Home className="w-5 h-5" />
-                Thông tin cơ bản
+                Basic information
               </h2>
               <div className="space-y-3 bg-gray-50 p-4 rounded-lg">
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Loại:</span>
+                  <span className="text-sm text-gray-600">Type:</span>
                   <span className="text-sm font-medium text-gray-900">
                     {property.type}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Giá:</span>
+                  <span className="text-sm text-gray-600">Price:</span>
                   <span className="text-lg font-bold text-primary">
                     ${property.price.toLocaleString()}
                   </span>
@@ -326,7 +332,7 @@ export default function PropertyDetailPage({
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Cập nhật:</span>
+                  <span className="text-sm text-gray-600">Updated:</span>
                   <span className="text-sm font-medium text-gray-900">
                     {property.lastUpdated}
                   </span>
@@ -334,29 +340,29 @@ export default function PropertyDetailPage({
               </div>
             </div>
 
-            {/* Thông tin khuôn viên */}
+            {/* Plot information */}
             <div>
               <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <Maximize className="w-5 h-5" />
-                Thông tin khuôn viên
+                Plot information
               </h2>
               <div className="space-y-3">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="bg-gray-50 p-3 rounded-lg">
-                    <p className="text-xs text-gray-500 mb-1">Chiều rộng:</p>
+                    <p className="text-xs text-gray-500 mb-1">Width:</p>
                     <p className="text-sm font-medium text-gray-900">
                       {property.plotWidth} m
                     </p>
                   </div>
                   <div className="bg-gray-50 p-3 rounded-lg">
-                    <p className="text-xs text-gray-500 mb-1">Chiều dài:</p>
+                    <p className="text-xs text-gray-500 mb-1">Length:</p>
                     <p className="text-sm font-medium text-gray-900">
                       {property.plotLength} m
                     </p>
                   </div>
                 </div>
                 <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-                  <p className="text-xs text-blue-600 mb-1">Diện tích:</p>
+                  <p className="text-xs text-blue-600 mb-1">Area:</p>
                   <p className="text-lg font-bold text-blue-900">
                     {property.plotArea} m²
                   </p>
@@ -364,29 +370,29 @@ export default function PropertyDetailPage({
               </div>
             </div>
 
-            {/* Thông tin xây dựng */}
+            {/* Building information */}
             <div>
               <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <Layers className="w-5 h-5" />
-                Thông tin xây dựng
+                Building information
               </h2>
               <div className="space-y-3">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="bg-gray-50 p-3 rounded-lg">
-                    <p className="text-xs text-gray-500 mb-1">Chiều rộng:</p>
+                    <p className="text-xs text-gray-500 mb-1">Width:</p>
                     <p className="text-sm font-medium text-gray-900">
                       {property.buildingWidth} m
                     </p>
                   </div>
                   <div className="bg-gray-50 p-3 rounded-lg">
-                    <p className="text-xs text-gray-500 mb-1">Chiều dài:</p>
+                    <p className="text-xs text-gray-500 mb-1">Length:</p>
                     <p className="text-sm font-medium text-gray-900">
                       {property.buildingLength} m
                     </p>
                   </div>
                 </div>
                 <div className="bg-green-50 p-3 rounded-lg border border-green-200">
-                  <p className="text-xs text-green-600 mb-1">Diện tích:</p>
+                  <p className="text-xs text-green-600 mb-1">Area:</p>
                   <p className="text-lg font-bold text-green-900">
                     {property.buildingArea} m²
                   </p>
@@ -397,16 +403,16 @@ export default function PropertyDetailPage({
 
           {/* Right Column */}
           <div className="space-y-6">
-            {/* Thông tin chi tiết */}
+            {/* Details */}
             <div>
               <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                Thông tin chi tiết
+                Details
               </h2>
               <div className="space-y-3">
                 <div className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
                   <div className="flex items-center gap-2">
                     <Compass className="w-4 h-4 text-gray-500" />
-                    <span className="text-sm text-gray-600">Hướng:</span>
+                    <span className="text-sm text-gray-600">Direction:</span>
                   </div>
                   <span className="text-sm font-medium text-gray-900">
                     {property.direction}
@@ -416,17 +422,17 @@ export default function PropertyDetailPage({
                 <div className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
                   <div className="flex items-center gap-2">
                     <Layers className="w-4 h-4 text-gray-500" />
-                    <span className="text-sm text-gray-600">Số tầng:</span>
+                    <span className="text-sm text-gray-600">Floors:</span>
                   </div>
                   <span className="text-sm font-medium text-gray-900">
-                    {property.floors} tầng
+                    {property.floors}
                   </span>
                 </div>
 
                 <div className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
                   <div className="flex items-center gap-2">
                     <Bed className="w-4 h-4 text-gray-500" />
-                    <span className="text-sm text-gray-600">Phòng ngủ:</span>
+                    <span className="text-sm text-gray-600">Bedrooms:</span>
                   </div>
                   <span className="text-sm font-medium text-gray-900">
                     {property.bedrooms}
@@ -436,7 +442,7 @@ export default function PropertyDetailPage({
                 <div className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
                   <div className="flex items-center gap-2">
                     <Bath className="w-4 h-4 text-gray-500" />
-                    <span className="text-sm text-gray-600">Phòng tắm:</span>
+                    <span className="text-sm text-gray-600">Bathrooms:</span>
                   </div>
                   <span className="text-sm font-medium text-gray-900">
                     {property.bathrooms}
@@ -446,7 +452,7 @@ export default function PropertyDetailPage({
                 <div className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
                   <div className="flex items-center gap-2">
                     <Sofa className="w-4 h-4 text-gray-500" />
-                    <span className="text-sm text-gray-600">Phòng khách:</span>
+                    <span className="text-sm text-gray-600">Living rooms:</span>
                   </div>
                   <span className="text-sm font-medium text-gray-900">
                     {property.livingRooms}
@@ -455,22 +461,22 @@ export default function PropertyDetailPage({
               </div>
             </div>
 
-            {/* Ghi chú */}
+            {/* Notes */}
             <div>
               <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <StickyNote className="w-5 h-5" />
-                Ghi chú
+                Notes
               </h2>
               <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
                 <p className="text-sm text-gray-700">{property.notes}</p>
               </div>
             </div>
 
-            {/* Thông tin chủ sở hữu */}
+            {/* Owner information */}
             <div>
               <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <User className="w-5 h-5" />
-                Thông tin chủ sở hữu
+                Owner information
               </h2>
               <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-lg border border-blue-200">
                 <button
@@ -505,7 +511,7 @@ export default function PropertyDetailPage({
                   </div>
                 </button>
                 <p className="text-xs text-blue-600 mt-2 text-center">
-                  Click để xem chi tiết chủ sở hữu
+                  Click to view owner details
                 </p>
               </div>
             </div>
@@ -516,11 +522,11 @@ export default function PropertyDetailPage({
         <div className="px-4 md:px-6 pb-4 md:pb-6 flex flex-col sm:flex-row gap-3">
           <button className="flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center gap-2">
             <Edit2 className="w-4 h-4" />
-            Chỉnh sửa
+            Edit
           </button>
           <button className="flex-1 px-4 py-2.5 text-sm font-medium text-red-600 border border-red-200 rounded-lg hover:bg-red-50 transition-colors flex items-center justify-center gap-2">
             <Trash2 className="w-4 h-4" />
-            Xóa
+            Delete
           </button>
         </div>
       </div>

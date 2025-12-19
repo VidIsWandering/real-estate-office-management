@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus, X, Search } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import { useState } from "react";
 import { PartnerTable } from "@/components/partners/PartnerTable";
 import { AddPartnerForm } from "@/components/partners/AddPartnerForm";
@@ -8,6 +8,12 @@ import { PartnerProfileDetail } from "@/components/partners/PartnerProfileDetail
 import { EditPartnerForm } from "@/components/partners/EditPartnerForm";
 import { StaffInfoModal } from "@/components/partners/StaffInfoModal";
 import { Staff } from "@/app/staff/page";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 
 export interface Partner {
   id: string;
@@ -271,10 +277,10 @@ export default function Partners() {
         {/* Page Title */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">
-            Partner Management
+            Client Management
           </h1>
           <p className="text-gray-600 mt-1">
-            Manage your partners (owners and customers) and their information.
+            Manage your client (owners and customers) and their information.
           </p>
         </div>
 
@@ -285,7 +291,7 @@ export default function Partners() {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
               type="text"
-              placeholder="Search partners..."
+              placeholder="Search client..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
@@ -298,7 +304,7 @@ export default function Partners() {
             className="px-6 py-2.5 bg-primary text-white rounded-lg font-medium hover:bg-blue-600 transition-colors flex items-center gap-2 shadow-sm whitespace-nowrap"
           >
             <Plus className="w-5 h-5" />
-            Add New Partner
+            Add New Client
           </button>
         </div>
 
@@ -314,24 +320,29 @@ export default function Partners() {
         </div>
       </div>
 
-      {/* Right Detail Panel */}
-      {selectedPartner && (
-        <div className="w-96 sticky top-20 h-fit max-h-[calc(100vh-120px)] overflow-y-auto">
-          <div className="relative">
-            <button
-              onClick={() => setSelectedPartnerId(null)}
-              className="absolute -top-2 -right-2 p-1 bg-gray-200 hover:bg-gray-300 rounded-full transition-colors z-10"
-            >
-              <X className="w-5 h-5 text-gray-700" />
-            </button>
-            <PartnerProfileDetail
-              partner={selectedPartner}
-              onEdit={() => setIsEditPartnerDialogOpen(true)}
-              onDelete={() => handleDeletePartner(selectedPartner.id)}
-            />
+      {/* Right Slide-in Detail Drawer */}
+      <Sheet
+        open={selectedPartnerId !== null}
+        onOpenChange={(open) => {
+          if (!open) setSelectedPartnerId(null);
+        }}
+      >
+        <SheetContent side="right" className="sm:max-w-md">
+          <SheetHeader>
+            <SheetTitle>Client details</SheetTitle>
+          </SheetHeader>
+
+          <div className="px-4 pb-6 overflow-y-auto">
+            {selectedPartner && (
+              <PartnerProfileDetail
+                partner={selectedPartner}
+                onEdit={() => setIsEditPartnerDialogOpen(true)}
+                onDelete={() => handleDeletePartner(selectedPartner.id)}
+              />
+            )}
           </div>
-        </div>
-      )}
+        </SheetContent>
+      </Sheet>
 
       {/* Add Partner Dialog */}
       <AddPartnerForm

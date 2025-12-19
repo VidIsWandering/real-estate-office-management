@@ -111,16 +111,16 @@ export function AddPartnerForm({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>Add New Partner</DialogTitle>
+          <DialogTitle>Add New Client</DialogTitle>
         </DialogHeader>
 
         <form
           onSubmit={handleSubmit}
-          className="space-y-4 max-h-[70vh] overflow-y-auto"
+          className="space-y-6 max-h-[70vh] overflow-y-auto"
         >
           {/* Partner Name */}
-          <div>
-            <Label htmlFor="name">Partner Name *</Label>
+          <div className="space-y-2">
+            <Label htmlFor="name">Client Name *</Label>
             <Input
               id="name"
               name="name"
@@ -130,12 +130,12 @@ export function AddPartnerForm({
               className={errors.name ? "border-red-500" : ""}
             />
             {errors.name && (
-              <p className="text-red-500 text-sm mt-1">{errors.name}</p>
+              <p className="text-red-500 text-xs">{errors.name}</p>
             )}
           </div>
 
           {/* Email */}
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="email">Email *</Label>
             <Input
               id="email"
@@ -147,12 +147,12 @@ export function AddPartnerForm({
               className={errors.email ? "border-red-500" : ""}
             />
             {errors.email && (
-              <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+              <p className="text-red-500 text-xs">{errors.email}</p>
             )}
           </div>
 
           {/* Phone */}
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="phone">Phone *</Label>
             <Input
               id="phone"
@@ -163,12 +163,12 @@ export function AddPartnerForm({
               className={errors.phone ? "border-red-500" : ""}
             />
             {errors.phone && (
-              <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
+              <p className="text-red-500 text-xs">{errors.phone}</p>
             )}
           </div>
 
           {/* Address */}
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="address">Address *</Label>
             <Input
               id="address"
@@ -179,13 +179,13 @@ export function AddPartnerForm({
               className={errors.address ? "border-red-500" : ""}
             />
             {errors.address && (
-              <p className="text-red-500 text-sm mt-1">{errors.address}</p>
+              <p className="text-red-500 text-xs">{errors.address}</p>
             )}
           </div>
 
           {/* Partner Type */}
-          <div>
-            <Label htmlFor="partnerType">Partner Type *</Label>
+          <div className="space-y-2">
+            <Label htmlFor="partnerType">Client Type *</Label>
             <Select
               value={formData.partnerType}
               onValueChange={(value) =>
@@ -203,7 +203,7 @@ export function AddPartnerForm({
           </div>
 
           {/* Assigned Staff */}
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="assignedStaff">Assigned Staff *</Label>
             <Select
               value={formData.assignedStaff}
@@ -223,14 +223,12 @@ export function AddPartnerForm({
               </SelectContent>
             </Select>
             {errors.assignedStaff && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.assignedStaff}
-              </p>
+              <p className="text-red-500 text-xs">{errors.assignedStaff}</p>
             )}
           </div>
 
           {/* Status */}
-          <div>
+          <div className="space-y-2">
             <Label htmlFor="status">Status</Label>
             <Select
               value={formData.status}
@@ -249,11 +247,11 @@ export function AddPartnerForm({
           </div>
         </form>
 
-        <DialogFooter>
+        <DialogFooter className="gap-2">
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <Button onClick={handleSubmit}>Add Partner</Button>
+          <Button onClick={handleSubmit}>Add Client</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
