@@ -13,41 +13,46 @@ import { IntegrationsTab } from "@/components/settings/IntegrationsTab";
 import { ConfigTab } from "@/components/settings/ConfigTab";
 
 type TabKey =
-    | "account"
-    | "office"
-    | "notifications"
-    | "security"
-    | "integrations"
-    | "config";
+  | "account"
+  | "office"
+  | "notifications"
+  | "security"
+  | "integrations"
+  | "config";
 
 export default function SettingsPage() {
-    const searchParams = useSearchParams();
-    const tabParam = searchParams.get("tab") as TabKey | null;
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get("tab") as TabKey | null;
 
-    const [tab, setTab] = useState<TabKey>("account");
+  const [tab, setTab] = useState<TabKey>("account");
 
-    useEffect(() => {
-        if (
-            tabParam &&
-            ["account", "office", "notifications", "security", "integrations", "config"].includes(
-                tabParam,
-            )
-        ) {
-            setTab(tabParam);
-        }
-    }, [tabParam]);
+  useEffect(() => {
+    if (
+      tabParam &&
+      [
+        "account",
+        "office",
+        "notifications",
+        "security",
+        "integrations",
+        "config",
+      ].includes(tabParam)
+    ) {
+      setTab(tabParam);
+    }
+  }, [tabParam]);
 
-    return (
-        <div className="space-y-8">
-            <SettingsHeader />
-            <SettingsTabs activeTab={tab} onChange={setTab} />
+  return (
+    <div className="space-y-8">
+      <SettingsHeader />
+      <SettingsTabs activeTab={tab} onChange={setTab} />
 
-            {tab === "account" && <AccountTab />}
-            {tab === "office" && <OfficeTab />}
-            {tab === "notifications" && <NotificationsTab />}
-            {tab === "security" && <SecurityTab />}
-            {tab === "integrations" && <IntegrationsTab />}
-            {tab === "config" && <ConfigTab />}
-        </div>
-    );
+      {tab === "account" && <AccountTab />}
+      {tab === "office" && <OfficeTab />}
+      {tab === "notifications" && <NotificationsTab />}
+      {tab === "security" && <SecurityTab />}
+      {tab === "integrations" && <IntegrationsTab />}
+      {tab === "config" && <ConfigTab />}
+    </div>
+  );
 }
