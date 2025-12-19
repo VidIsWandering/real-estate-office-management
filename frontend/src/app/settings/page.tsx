@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 import { SettingsHeader } from "@/components/settings/SettingsHeader";
 import { SettingsTabs } from "@/components/settings/SettingsTabs";
-
 import { AccountTab } from "@/components/settings/account/AccountTab";
 import { OfficeTab } from "@/components/settings/OfficeTab";
 import { NotificationsTab } from "@/components/settings/NotificationsTab";
@@ -12,27 +12,42 @@ import { SecurityTab } from "@/components/settings/SecurityTab";
 import { IntegrationsTab } from "@/components/settings/IntegrationsTab";
 import { ConfigTab } from "@/components/settings/ConfigTab";
 
-export default function SettingsPage() {
-  const [tab, setTab] = useState<
+type TabKey =
     | "account"
     | "office"
     | "notifications"
     | "security"
     | "integrations"
-    | "config"
-  >("account");
+    | "config";
 
-  return (
-    <div className="space-y-8">
-      <SettingsHeader />
-      <SettingsTabs activeTab={tab} onChange={setTab} />
+export default function SettingsPage() {
+    const searchParams = useSearchParams();
+    const tabParam = searchParams.get("tab") as TabKey | null;
 
-      {tab === "account" && <AccountTab />}
-      {tab === "office" && <OfficeTab />}
-      {tab === "notifications" && <NotificationsTab />}
-      {tab === "security" && <SecurityTab />}
-      {tab === "integrations" && <IntegrationsTab />}
-      {tab === "config" && <ConfigTab />}
-    </div>
-  );
+    const [tab, setTab] = useState<TabKey>("account");
+
+    useEffect(() => {
+        if (
+            tabParam &&
+            ["account", "office", "notifications", "security", "integrations", "config"].includes(
+                tabParam,
+            )
+        ) {
+            setTab(tabParam);
+        }
+    }, [tabParam]);
+
+    return (
+        <div className="space-y-8">
+            <SettingsHeader />
+            <SettingsTabs activeTab={tab} onChange={setTab} />
+
+            {tab === "account" && <AccountTab />}
+            {tab === "office" && <OfficeTab />}
+            {tab === "notifications" && <NotificationsTab />}
+            {tab === "security" && <SecurityTab />}
+            {tab === "integrations" && <IntegrationsTab />}
+            {tab === "config" && <ConfigTab />}
+        </div>
+    );
 }
