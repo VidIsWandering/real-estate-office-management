@@ -1,71 +1,122 @@
 services:
-  # 1. Dịch vụ Database (PostgreSQL)
+  # ==========================================================================
+  # 1. Database (PostgreSQL)
+  # ==========================================================================
   db:
     image: postgres:15-alpine
     container_name: se100-db
     ports:
-      # Mở cổng 5432 của container ra cổng 5433 trên máy thật
-      # (Tránh xung đột nếu bạn đã cài Postgres local ở cổng 5432)
-      - "5433:5432"
+      - "${DB_EXTERNAL_PORT:-5433}:5432"
     environment:
-      # Đây là các biến môi trường để tạo DB, user, pass cho dev
-      POSTGRES_USER: devuser
-      POSTGRES_PASSWORD: devpassword
-      POSTGRES_DB: se100_dev_db
+      POSTGRES_USER: ${DB_USER:-devuser}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-devpassword}
+      POSTGRES_DB: ${DB_NAME:-se100_dev_db}
     volumes:
-      # Dòng này giúp giữ lại dữ liệu database ngay cả khi bạn tắt/mở container
+      # Persist data
       - postgres_data:/var/lib/postgresql/data
+      # Auto-init database với script.sql khi lần đầu khởi động
+      - ./backend/script.sql:/docker-entrypoint-initdb.d/init.sql:ro
     networks:
       - se100-network
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${DB_USER:-devuser} -d ${DB_NAME:-se100_dev_db}",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
-  # 2. Dịch vụ Backend (Node.js/Express)
+  # ==========================================================================
+  # 2. Backend (Node.js/Express)
+  # ==========================================================================
   backend:
     container_name: se100-backend
-    # Build từ Dockerfile trong thư mục ./backend
     build:
       context: ./backend
       dockerfile: Dockerfile
+      target: ${BUILD_TARGET:-builder}
     ports:
-      # Mở cổng 8080 của container ra cổng 8081 trên máy thật
-      - "8081:8080"
+      - "${BACKEND_PORT:-8081}:8080"
+    env_file:
+      - ./backend/.env
     environment:
-      # Cung cấp URL kết nối DB cho backend
-      # (Lưu ý: "db" chính là tên của dịch vụ 'db' ở trên)
-      DATABASE_URL: "postgresql://devuser:devpassword@db:5432/se100_dev_db"
-      # (Các biến môi trường khác sẽ được thêm vào sau, ví dụ Cloudinary)
+      # Override DB connection để trỏ đến container 'db'
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-devuser}
+      DB_PASSWORD: ${DB_PASSWORD:-devpassword}
+      DB_NAME: ${DB_NAME:-se100_dev_db}
+      NODE_ENV: ${NODE_ENV:-development}
     volumes:
-      # Mount code local vào container
-      # Giúp code tự động cập nhật (hot-reload) mà không cần build lại
-      - ./backend:/app
-      # Bỏ qua node_modules, vì chúng ta đã cài trong image
+      # Mount source code (hot-reload)
+      - ./backend/src:/app/src:ro
+      - ./backend/package.json:/app/package.json:ro
+      # Exclude node_modules
       - /app/node_modules
     networks:
       - se100-network
-    # Phụ thuộc: Chỉ khởi động 'backend' SAU KHI 'db' đã sẵn sàng
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    command: npm run dev
+    restart: unless-stopped
 
-  # 3. Dịch vụ Frontend (React/Nginx)
+  # ==========================================================================
+  # 3. Frontend (Next.js) - Development mode with hot-reload
+  # ==========================================================================
   frontend:
     container_name: se100-frontend
-    # Build từ Dockerfile trong thư mục ./frontend
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      target: dev # Use development stage
     ports:
-      # Mở cổng 80 của container ra cổng 3000 trên máy thật
-      - "3000:80"
+      - "${FRONTEND_PORT:-3000}:3000"
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=http://localhost:${BACKEND_PORT:-8081}/api/v1
+    volumes:
+      # Mount source for hot-reload
+      - ./frontend/src:/app/src:ro
+      - ./frontend/public:/app/public:ro
+      # Exclude node_modules
+      - /app/node_modules
+      - /app/.next
     networks:
       - se100-network
-    # Phụ thuộc: Chỉ khởi động 'frontend' SAU KHI 'backend' đã sẵn sàng
     depends_on:
       - backend
+    profiles:
+      - full # Only runs with: docker-compose --profile full up
+    restart: unless-stopped
 
-# Định nghĩa mạng (network) để các container "nói chuyện" với nhau
+  # ==========================================================================
+  # 4. Adminer - Lightweight Database GUI (alternative to pgAdmin)
+  # ==========================================================================
+  adminer:
+    image: adminer:latest
+    container_name: se100-adminer
+    ports:
+      - "${ADMINER_PORT:-8082}:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: db
+      ADMINER_DESIGN: nette
+    networks:
+      - se100-network
+    depends_on:
+      - db
+    profiles:
+      - tools # Only runs with: docker-compose --profile tools up
+
+# ==========================================================================
+# Networks & Volumes
+# ==========================================================================
 networks:
   se100-network:
     driver: bridge
 
-# Định nghĩa volume (nơi lưu trữ) cho database
 volumes:
   postgres_data:

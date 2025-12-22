@@ -24,11 +24,12 @@ const startServer = async () => {
       logger.info(`
         
         ================================================
-         Server is running!
+         🚀 Server is running!
         ================================================
         Environment: ${config.node_env}
         Port: ${PORT}
         API URL: http://localhost:${PORT}${config.api_prefix}
+        API Docs: http://localhost:${PORT}/api-docs
         Health Check: http://localhost:${PORT}/health
         ================================================
       `);
