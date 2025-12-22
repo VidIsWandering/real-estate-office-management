@@ -13,7 +13,7 @@ class StaffController {
    */
   async getAll(req, res) {
     // TODO: Implement với staffService.getAll(req.query)
-    const { page = 1, limit = 10, role, status, search } = req.query;
+    const { page = 1, limit = 10 } = req.query;
 
     return successResponse(
       res,
