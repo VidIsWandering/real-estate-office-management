@@ -1,0 +1,237 @@
+/**
+ * @swagger
+ * /auth/register:
+ *   post:
+ *     summary: Register new account
+ *     description: Đăng ký tài khoản mới (chỉ Manager/Admin mới có quyền tạo)
+ *     tags: [Auth]
+ *     security: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - username
+ *               - password
+ *               - full_name
+ *             properties:
+ *               username:
+ *                 type: string
+ *                 minLength: 3
+ *                 maxLength: 50
+ *                 example: agent01
+ *               password:
+ *                 type: string
+ *                 minLength: 6
+ *                 format: password
+ *                 example: SecurePass123
+ *               full_name:
+ *                 type: string
+ *                 example: Nguyễn Văn A
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: agent01@company.com
+ *               phone_number:
+ *                 type: string
+ *                 example: '0901234567'
+ *               role:
+ *                 $ref: '#/components/schemas/StaffRole'
+ *     responses:
+ *       201:
+ *         description: Account created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Account registered successfully
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     account:
+ *                       $ref: '#/components/schemas/Account'
+ *                     staff:
+ *                       $ref: '#/components/schemas/Staff'
+ *       400:
+ *         $ref: '#/components/responses/ValidationError'
+ *       409:
+ *         description: Username or email already exists
+ *
+ * /auth/login:
+ *   post:
+ *     summary: User login
+ *     description: |
+ *       Đăng nhập vào hệ thống.
+ *       - Trả về access_token (expire: 7 ngày) và refresh_token (expire: 30 ngày)
+ *       - Access token dùng cho các request API
+ *       - Refresh token dùng để lấy access token mới khi hết hạn
+ *     tags: [Auth]
+ *     security: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - username
+ *               - password
+ *             properties:
+ *               username:
+ *                 type: string
+ *                 example: agent01
+ *               password:
+ *                 type: string
+ *                 format: password
+ *                 example: SecurePass123
+ *     responses:
+ *       200:
+ *         description: Login successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Login successful
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     account:
+ *                       $ref: '#/components/schemas/Account'
+ *                     staff:
+ *                       $ref: '#/components/schemas/Staff'
+ *                     tokens:
+ *                       type: object
+ *                       properties:
+ *                         access_token:
+ *                           type: string
+ *                         refresh_token:
+ *                           type: string
+ *       401:
+ *         description: Invalid credentials
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *             example:
+ *               success: false
+ *               message: Invalid username or password
+ *       403:
+ *         description: Account disabled
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *             example:
+ *               success: false
+ *               message: Account is not active
+ *
+ * /auth/profile:
+ *   get:
+ *     summary: Get current user profile
+ *     description: Lấy thông tin profile của user đang đăng nhập
+ *     tags: [Auth]
+ *     responses:
+ *       200:
+ *         description: Profile retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     account:
+ *                       $ref: '#/components/schemas/Account'
+ *                     staff:
+ *                       $ref: '#/components/schemas/Staff'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *
+ * /auth/change-password:
+ *   put:
+ *     summary: Change password
+ *     description: Đổi mật khẩu cho tài khoản hiện tại
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - old_password
+ *               - new_password
+ *             properties:
+ *               old_password:
+ *                 type: string
+ *                 format: password
+ *               new_password:
+ *                 type: string
+ *                 format: password
+ *                 minLength: 6
+ *     responses:
+ *       200:
+ *         description: Password changed successfully
+ *       400:
+ *         description: Current password is incorrect
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *
+ * /auth/refresh-token:
+ *   post:
+ *     summary: Refresh access token
+ *     description: Lấy access token mới bằng refresh token
+ *     tags: [Auth]
+ *     security: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - refresh_token
+ *             properties:
+ *               refresh_token:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Token refreshed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     access_token:
+ *                       type: string
+ *                     refresh_token:
+ *                       type: string
+ *       401:
+ *         description: Invalid or expired refresh token
+ */
+
+module.exports = {};

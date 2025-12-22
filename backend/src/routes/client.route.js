@@ -1,0 +1,63 @@
+/**
+ * Client Routes
+ */
+
+const express = require('express');
+const router = express.Router();
+
+const clientController = require('../controllers/client.controller');
+const { authenticate } = require('../middlewares/auth.middleware');
+
+// All routes require authentication
+router.use(authenticate);
+
+/**
+ * @route   GET /api/v1/clients
+ * @desc    Get all clients
+ * @access  Private
+ */
+router.get('/', clientController.getAll);
+
+/**
+ * @route   GET /api/v1/clients/:id
+ * @desc    Get client by ID
+ * @access  Private
+ */
+router.get('/:id', clientController.getById);
+
+/**
+ * @route   POST /api/v1/clients
+ * @desc    Create new client
+ * @access  Private
+ */
+router.post('/', clientController.create);
+
+/**
+ * @route   PUT /api/v1/clients/:id
+ * @desc    Update client
+ * @access  Private
+ */
+router.put('/:id', clientController.update);
+
+/**
+ * @route   DELETE /api/v1/clients/:id
+ * @desc    Delete client
+ * @access  Private
+ */
+router.delete('/:id', clientController.delete);
+
+/**
+ * @route   GET /api/v1/clients/:id/notes
+ * @desc    Get client contact notes
+ * @access  Private
+ */
+router.get('/:id/notes', clientController.getNotes);
+
+/**
+ * @route   POST /api/v1/clients/:id/notes
+ * @desc    Add client contact note
+ * @access  Private
+ */
+router.post('/:id/notes', clientController.addNote);
+
+module.exports = router;

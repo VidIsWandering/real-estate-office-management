@@ -51,18 +51,14 @@ class AuthController {
   }
 }
 
-module.exports = {
-  register: asyncHandler((req, res) => new AuthController().register(req, res)),
-  login: asyncHandler((req, res) => new AuthController().login(req, res)),
-  getProfile: asyncHandler((req, res) =>
-    new AuthController().getProfile(req, res)
-  ),
-  changePassword: asyncHandler((req, res) =>
-    new AuthController().changePassword(req, res)
-  ),
-  refreshToken: asyncHandler((req, res) =>
-    new AuthController().refreshToken(req, res)
-  ),
-};
+const controller = new AuthController();
 
-module.exports = new AuthController();
+module.exports = {
+  register: asyncHandler((req, res) => controller.register(req, res)),
+  login: asyncHandler((req, res) => controller.login(req, res)),
+  getProfile: asyncHandler((req, res) => controller.getProfile(req, res)),
+  changePassword: asyncHandler((req, res) =>
+    controller.changePassword(req, res)
+  ),
+  refreshToken: asyncHandler((req, res) => controller.refreshToken(req, res)),
+};

@@ -1,42 +1,56 @@
-# ----- Tầng 1: Tầng Build (Build Stage) -----
-# Sử dụng một image Node.js 18 (Alpine) làm base
+# ==============================================================================
+# REAL ESTATE MANAGEMENT SYSTEM - Backend Dockerfile
+# ==============================================================================
+# Multi-stage build với named stages để có thể target riêng
+# Usage:
+#   Development: docker build --target builder -t se100-backend:dev .
+#   Production:  docker build --target production -t se100-backend:prod .
+# ==============================================================================
+
+# ----- Stage 1: Builder (Development) -----
 FROM node:18-alpine AS builder
 
-# Thiết lập thư mục làm việc bên trong container
 WORKDIR /app
 
-# Sao chép package.json và package-lock.json vào trước
-# Điều này tận dụng Docker cache, giúp build nhanh hơn
+# Install dependencies first (better layer caching)
 COPY package.json package-lock.json ./
-
-# Cài đặt 'npm ci' (Clean Install) thay vì 'npm install'
-# 'ci' nhanh hơn và an toàn hơn cho production/build
 RUN npm ci
 
-# Sao chép toàn bộ phần code còn lại của backend vào
+# Copy source code
 COPY . .
 
-# (Tùy chọn - Nếu bạn có bước build Typescript, hãy thêm vào đây)
-# RUN npm run build
+# Development port
+EXPOSE 8080
+
+# Development command (with hot-reload via nodemon)
+CMD ["npm", "run", "dev"]
 
 
-# ----- Tầng 2: Tầng Production (Production Stage) -----
-# Sử dụng một image Node.js 18 (Alpine) mới, sạch sẽ
-FROM node:18-alpine
+# ----- Stage 2: Production -----
+FROM node:18-alpine AS production
 
 WORKDIR /app
 
-# Chỉ sao chép các file cần thiết từ tầng 'builder'
-# 1. Sao chép thư mục node_modules đã được cài đặt
-COPY --from=builder /app/node_modules ./node_modules
+# Copy only production dependencies
+COPY package.json package-lock.json ./
+RUN npm ci --only=production && npm cache clean --force
 
-# 2. Sao chép code đã được sao chép ở tầng builder
-COPY --from=builder /app ./
+# Copy source code
+COPY --from=builder /app/src ./src
 
-# Mở cổng (port) mà ứng dụng Node.js của bạn sẽ chạy
-# (Giả sử bạn chạy ở cổng 8080, hãy đổi nếu cần)
+# Create non-root user for security
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nodejs -u 1001 -G nodejs && \
+    chown -R nodejs:nodejs /app
+
+USER nodejs
+
+# Production port
 EXPOSE 8080
 
-# Lệnh để khởi động ứng dụng
-# (Chúng ta sẽ dùng 'npm start' làm chuẩn, bạn cần đảm bảo 'package.json' có script này)
-CMD [ "npm", "start" ]
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:8080/health || exit 1
+
+# Production command
+CMD ["npm", "start"]
