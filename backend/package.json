@@ -11,7 +11,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write \"src/**/*.{js,json}\"",
-    "format:check": "prettier --check \"src/**/*.{js,json}\"",
+    "check:format": "prettier --check \"src/**/*.{js,json}\"",
     "db:reset": "docker-compose down -v && docker-compose up -d db",
     "docker:dev": "docker-compose up -d db backend",
     "docker:down": "docker-compose down",
