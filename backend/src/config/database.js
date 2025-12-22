@@ -7,6 +7,12 @@ const { Pool } = require('pg');
 const config = require('./environment');
 
 // Tạo connection pool
+
+// SSL config for cloud/staging (Render, Heroku, etc.)
+const sslEnabled =
+  process.env.DB_SSL === 'true' ||
+  process.env.DATABASE_SSL === 'true' ||
+  process.env.NODE_ENV === 'production';
 const db = new Pool({
   host: config.db.host,
   port: config.db.port,
@@ -15,6 +21,7 @@ const db = new Pool({
   database: config.db.database,
   min: config.db.min,
   max: config.db.max,
+  ssl: sslEnabled ? { rejectUnauthorized: false } : false,
 });
 
 /**
