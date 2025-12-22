@@ -26,7 +26,7 @@ module.exports = [
 
   // 4. Bật jest globals cho file test
   {
-    files: ["**/__tests__/**/*.js", "**/*.test.js", "**/*.spec.js"],
+    files: ['**/__tests__/**/*.js', '**/*.test.js', '**/*.spec.js'],
     languageOptions: {
       globals: {
         ...globals.jest,
