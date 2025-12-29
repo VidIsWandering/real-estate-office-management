@@ -1,90 +1,90 @@
-# 🚀 Đồ án SE100: Phần mềm Quản lý Văn phòng Bất động sản
+# 🚀 SE100 Project: Real Estate Office Management
 
-Dự án này là hệ thống Quản lý Văn phòng Bất động sản, bao gồm Frontend (Next.js), Backend (Node.js/Express), và Database (PostgreSQL).
+This repository contains a Real Estate Office Management system with a **Frontend** (Next.js), **Backend** (Node.js/Express), and **Database** (PostgreSQL).
 
-## 📋 Mục lục
+## 📋 Table of Contents
 
-- [Yêu cầu Môi trường](#1-yêu-cầu-môi-trường-bắt-buộc)
-- [Hướng dẫn Chạy Local](#2-hướng-dẫn-chạy-local-phát-triển)
-- [API Documentation](#-api-documentation)
-- [Quy trình Làm việc](#3-quy-trình-làm-việc-workflow)
-- [Các Môi trường Cloud](#4-các-môi-trường-cloud)
+- [System Requirements](#1-system-requirements)
+- [Local Development](#2-local-development)
+- [API Documentation](#api-documentation)
+- [Workflow](#3-workflow)
+- [Cloud Environments](#4-cloud-environments)
 
-## 1. Yêu cầu Môi trường (Bắt buộc)
+## 1. System Requirements
 
-Trước khi bắt đầu, bạn cần cài đặt:
+Before getting started, install the following:
 
 - **Git**
-- **Docker Desktop** (Đảm bảo Docker Desktop đang ở trạng thái Running trước khi chạy lệnh)
-- **Make** (optional - để dùng các lệnh tắt)
+- **Docker Desktop** (ensure Docker is running before executing commands)
+- **Make** (optional — the Makefile provides convenience targets)
 
-## 2. Hướng dẫn Chạy Local (Phát triển)
+## 2. Local Development
 
-### 🚀 Quick Start (sử dụng Make)
+### 🚀 Quick Start (using Make)
 
 ```bash
-# 1. Setup lần đầu
+# 1. Initial setup
 make setup
 
-# 2. Chỉnh sửa backend/.env với JWT_SECRET và các config cần thiết
+# 2. Edit backend/.env to set JWT secrets and other required configs
 
-# 3. Chạy development
+# 3. Start development environment
 make dev
 
-# 4. Truy cập
+# 4. Access services
 # - API: http://localhost:8081
 # - Swagger Docs: http://localhost:8081/api-docs
 ```
 
-### 📝 Hướng dẫn Chi tiết
+### 📝 Detailed Steps
 
-#### Bước 1: Lấy "Chìa khóa" (Secrets)
+#### Step 1: Obtain Secrets
 
-Chúng ta cần các "chìa khóa" (biến môi trường) để chạy dự án.
+This project requires environment variables to run.
 
-**Tạo tài khoản Cloudinary**: Mỗi thành viên bắt buộc phải tự tạo một tài khoản Cloudinary miễn phí (dùng cho việc test upload file cá nhân).
+**Cloudinary account**: Each team member should create a free Cloudinary account for file upload testing.
 
-Sau khi tạo, vào Dashboard và lấy 3 "chìa khóa":
+From Cloudinary Dashboard, obtain the following keys:
 
 - `CLOUDINARY_CLOUD_NAME`
 - `CLOUDINARY_API_KEY`
 - `CLOUDINARY_API_SECRET`
 
-**Lấy "Chìa khóa" JWT**: Tạo 2 chuỗi bí mật ngẫu nhiên:
+**JWT secrets**: Generate two random secrets for tokens:
 
 ```bash
-# Chạy 2 lần để lấy 2 key khác nhau
+# Run twice to generate two distinct keys
 openssl rand -base64 32
 ```
 
-#### Bước 2: Thiết lập file .env
+#### Step 2: Prepare `.env`
 
 ```bash
-# Copy file mẫu
+# Copy example env file
 cp backend/.env.example backend/.env
 
-# Mở và chỉnh sửa
-nano backend/.env  # hoặc dùng editor khác
+# Edit the file
+nano backend/.env  # or use your preferred editor
 ```
 
-Các biến **BẮT BUỘC** phải điền:
+Required variables:
 
-- `JWT_SECRET` - chuỗi bí mật cho access token
-- `JWT_REFRESH_SECRET` - chuỗi bí mật cho refresh token
+- `JWT_SECRET` — secret for access tokens
+- `JWT_REFRESH_SECRET` — secret for refresh tokens
 
-#### Bước 3: Khởi động Docker
+#### Step 3: Start Docker
 
 ```bash
-# Sử dụng Makefile (recommended)
+# Recommended: use Makefile
 make dev
 
-# Hoặc sử dụng docker-compose trực tiếp
+# Or use docker-compose directly
 docker-compose up db backend
 ```
 
-#### Bước 4: Truy cập Môi trường Local
+#### Step 4: Access Local Services
 
-| Service      | URL                                 | Mô tả          |
+| Service      | URL                                 | Description    |
 | ------------ | ----------------------------------- | -------------- |
 | Backend API  | http://localhost:8081               | REST API       |
 | **API Docs** | http://localhost:8081/api-docs      | **Swagger UI** |
@@ -92,143 +92,144 @@ docker-compose up db backend
 | Health Check | http://localhost:8081/health        | Server status  |
 | Database     | localhost:5433                      | PostgreSQL     |
 
-### 🛠️ Các lệnh hữu ích
+### Useful Commands
 
 ```bash
-# Xem tất cả lệnh có sẵn
+# Show available make targets
 make help
 
 # Development
-make dev          # Chạy backend + db (hot-reload)
-make up           # Chạy ở background
-make down         # Tắt services
-make logs         # Xem logs backend
+make dev          # Run backend + db (hot-reload)
+make up           # Run in background
+make down         # Stop services
+make logs         # Tail backend logs
 
 # Database
-make db-reset     # Reset database (xóa hết data)
-make db-shell     # Mở PostgreSQL shell
+make db-reset     # Reset the database (wipe data and re-init)
+make db-shell     # Open PostgreSQL shell
+make db-gui       # Start Adminer (DB web GUI)
 
 # Quality
-make test         # Chạy tests
-make lint         # Kiểm tra code style
-make format       # Format code
+make test         # Run backend tests
+make lint         # Run ESLint
+make format       # Format code with Prettier
 ```
 
-## 📚 API Documentation
+## API Documentation
 
-Sau khi chạy backend, truy cập **Swagger UI** tại:
+After the backend is running, visit **Swagger UI**:
 
 👉 **http://localhost:8081/api-docs**
 
-### Các Module API
+### API Modules
 
-| Module       | Prefix                 | Mô tả                            |
-| ------------ | ---------------------- | -------------------------------- |
-| Auth         | `/api/v1/auth`         | Đăng nhập, đăng ký, đổi mật khẩu |
-| Staff        | `/api/v1/staff`        | Quản lý nhân viên                |
-| Clients      | `/api/v1/clients`      | Quản lý khách hàng               |
-| Real Estates | `/api/v1/real-estates` | Quản lý BĐS                      |
-| Appointments | `/api/v1/appointments` | Lịch hẹn xem nhà                 |
-| Transactions | `/api/v1/transactions` | Giao dịch & đàm phán             |
-| Contracts    | `/api/v1/contracts`    | Quản lý hợp đồng                 |
-| Vouchers     | `/api/v1/vouchers`     | Chứng từ thu chi                 |
-| Reports      | `/api/v1/reports`      | Báo cáo & thống kê               |
-| System       | `/api/v1/system`       | Cấu hình hệ thống                |
+| Module       | Prefix                 | Description                       |
+| ------------ | ---------------------- | --------------------------------- |
+| Auth         | `/api/v1/auth`         | Login, register, password reset   |
+| Staff        | `/api/v1/staff`        | Staff management                  |
+| Clients      | `/api/v1/clients`      | Client management                 |
+| Real Estates | `/api/v1/real-estates` | Real estate listings & management |
+| Appointments | `/api/v1/appointments` | Viewing appointments              |
+| Transactions | `/api/v1/transactions` | Transactions & negotiations       |
+| Contracts    | `/api/v1/contracts`    | Contract management               |
+| Vouchers     | `/api/v1/vouchers`     | Payment vouchers                  |
+| Reports      | `/api/v1/reports`      | Reporting & analytics             |
+| System       | `/api/v1/system`       | System configuration              |
 
 ### Roles & Permissions
 
-> **Architecture**: Layered Architecture với Service-Repository Pattern
+> **Architecture**: Layered architecture, Service → Repository pattern
 
-| Position        | Mô tả                                        |
-| --------------- | -------------------------------------------- |
-| `manager`       | Quản lý nhân viên, xem báo cáo, audit logs   |
-| `agent`         | Quản lý BĐS, khách hàng, lịch hẹn, giao dịch |
-| `legal_officer` | Kiểm tra pháp lý BĐS, xử lý hợp đồng         |
-| `accountant`    | Quản lý chứng từ thu chi, payments           |
+| Role            | Description                                     |
+| --------------- | ----------------------------------------------- |
+| `manager`       | Manage staff, view reports, audit logs          |
+| `agent`         | Manage properties, clients, appointments, deals |
+| `legal_officer` | Legal checks and contract handling              |
+| `accountant`    | Manage vouchers and payments                    |
 
 ### Test Accounts (Development)
 
-| Username    | Password    | Position      |
+| Username    | Password    | Role          |
 | ----------- | ----------- | ------------- |
 | manager1    | password123 | manager       |
 | agent1      | password123 | agent         |
 | legal1      | password123 | legal_officer |
 | accountant1 | password123 | accountant    |
 
-- `--build`: Chỉ cần chạy lần đầu tiên (hoặc khi Dockerfile thay đổi).
-- `-d`: Chạy ở chế độ nền (detached).
+Notes:
 
-### Bước 4: Truy cập Môi trường Local
+- `--build` is required only the first time or when Dockerfiles change.
+- `-d` runs containers in detached mode.
 
-Sau khi các container khởi động (có thể mất 1-2 phút lần đầu), bạn có thể truy cập:
+### Local Access After Containers Start
 
-- **Frontend (React)**: http://localhost:3000
+It may take 1–2 minutes for containers to initialize on first run. Available services:
+
+- **Frontend (Next.js)**: http://localhost:3000
 - **Backend (Node.js)**: http://localhost:8081
-- **Database (Postgres)**: localhost:5433 (có thể kết nối bằng DataGrip/DBeaver nếu cần)
+- **Database (Postgres)**: localhost:5433 (connect with DataGrip/DBeaver if needed)
 
-### Các lệnh Docker hữu ích
+### Docker Useful Commands
 
-**Khởi động lại (Tắt và Mở)**:
+**Start (create or recreate containers)**:
 
 ```bash
 docker compose up -d
 ```
 
-**Xem Logs (Nhật ký) của Backend**:
+**Tail backend logs**:
 
 ```bash
 docker compose logs -f backend
 ```
 
-**Tắt toàn bộ (Stop & Xóa container)**:
+**Stop and remove containers**:
 
 ```bash
 docker compose down
 ```
 
-## 3. Quy trình Làm việc (Workflow)
+## 3. Workflow
 
-**TUYỆT ĐỐI KHÔNG** push thẳng lên `main` hoặc `develop`.
+**DO NOT** push directly to `main` or `develop`.
 
-1. **Luôn bắt đầu từ develop**:
+1. **Start from `develop`**:
 
 ```bash
 git checkout develop
 git pull origin develop
 ```
 
-2. **Tạo nhánh Feature mới**: Đặt tên theo quy ước: `feature/ten-tinh-nang` (ví dụ: `feature/be-login-api`)
+2. **Create a feature branch**: Use `feature/<feature-name>` (e.g. `feature/be-login-api`)
 
 ```bash
-git checkout -b feature/ten-tinh-nang
+git checkout -b feature/your-feature-name
 ```
 
-3. **Code & Commit**: Thực hiện code trên nhánh này.
+3. **Code & Commit** on the feature branch.
 
-4. **Tạo Pull Request (PR)**:
+4. **Create a Pull Request (PR)**:
 
-   - Đẩy (push) nhánh của bạn lên GitHub:
+```bash
+git push -u origin feature/your-feature-name
+```
 
-   ```bash
-   git push -u origin feature/ten-tinh-nang
-   ```
+Then open a PR from your branch into `develop` on GitHub.
 
-   - Lên GitHub, tạo Pull Request từ nhánh của bạn vào nhánh `develop`.
+5. **Review & Merge**: Assign reviewers. After approval, the leader or maintainer will merge the PR.
 
-5. **Review & Merge**: Gắn thẻ (tag) Leader hoặc thành viên khác vào review. Sau khi được chấp thuận (approve), Leader sẽ merge PR.
+## 4. Cloud Environments
 
-## 4. Các Môi trường Cloud
-
-### Staging (Kiểm thử):
+### Staging
 
 - **Frontend**: https://real-estate-offic-git-8f9a7b-nguyen-quoc-baos-projects-076482f2.vercel.app/
 - **Backend**: https://real-estate-office-management-stag.onrender.com/
 
-**Mục đích**: Tự động deploy mỗi khi code được merge vào `develop`. Dùng để cả team kiểm thử tích hợp.
+Purpose: Automatic deployments from `develop` branch for team integration testing.
 
-### Production (Demo):
+### Production (Demo)
 
 - **Frontend**: https://real-estate-office-management-prod.vercel.app/
 - **Backend**: https://real-estate-office-management-prod.onrender.com/
 
-**Mục đích**: Chỉ Leader mới merge code vào `main`. Dùng để demo cho giảng viên.
+Purpose: Only leaders merge to `main`. Used for demos to instructors.
