@@ -16,7 +16,7 @@ class AuthService {
    * Register new account + staff
    */
   async register(registerData) {
-    const { username, password, full_name, email, phone_number, role } =
+    const { username, password, full_name, email, phone_number, position } =
       registerData;
 
     // Check username đã tồn tại chưa
@@ -45,7 +45,7 @@ class AuthService {
       full_name,
       email,
       phone_number,
-      role: role || STAFF_ROLES.STAFF,
+      position: position || STAFF_ROLES.STAFF,
       status: 'working',
     };
 
@@ -89,7 +89,7 @@ class AuthService {
       id: account.id,
       username: account.username,
       staff_id: staff.id,
-      role: staff.role,
+      position: staff.position,
     };
 
     const accessToken = generateAccessToken(payload);

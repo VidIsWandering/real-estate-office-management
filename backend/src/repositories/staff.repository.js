@@ -26,7 +26,7 @@ class StaffRepository {
       staffData.phone_number || null,
       staffData.address || null,
       staffData.assigned_area || null,
-      staffData.role || 'staff',
+      staffData.position || 'staff',
       staffData.status || 'working',
     ];
 
@@ -125,7 +125,7 @@ class StaffRepository {
       staffData?.phone_number,
       staffData?.address,
       staffData?.assigned_area,
-      staffData?.role,
+      staffData?.position,
       staffData?.status,
       id,
     ];
@@ -156,10 +156,10 @@ class StaffRepository {
     let paramCount = 0;
 
     // Apply filters
-    if (filters.role) {
+    if (filters.position) {
       paramCount++;
-      sql += ` AND s.role = $${paramCount}`;
-      values.push(filters.role);
+      sql += ` AND s.position = $${paramCount}`;
+      values.push(filters.position);
     }
 
     if (filters.status) {
