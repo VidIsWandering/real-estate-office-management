@@ -13,7 +13,7 @@ class StaffRepository {
     const sql = `
       INSERT INTO staff (
         account_id, full_name, email, phone_number, 
-        address, assigned_area, role, status
+        address, assigned_area, position, status
       )
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
       RETURNING *
