@@ -11,7 +11,7 @@ class Staff {
     this.phone_number = data.phone_number;
     this.address = data.address;
     this.assigned_area = data.assigned_area;
-    this.role = data.role;
+    this.position = data.position;
     this.status = data.status;
   }
 
@@ -27,7 +27,7 @@ class Staff {
       phone_number: this.phone_number,
       address: this.address,
       assigned_area: this.assigned_area,
-      role: this.role,
+      position: this.position,
       status: this.status,
     };
   }
