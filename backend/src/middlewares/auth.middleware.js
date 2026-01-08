@@ -31,8 +31,10 @@ const authenticate = (req, res, next) => {
       id: decoded.id,
       username: decoded.username,
       staff_id: decoded.staff_id,
-      role: decoded.role,
+      position: decoded.position,
     };
+
+    console.log(req.user)
 
     next();
   } catch (error) {
@@ -54,7 +56,8 @@ const authorize = (allowedRoles = []) => {
       return next();
     }
 
-    if (!allowedRoles.includes(req.user.role)) {
+    console.log(req.user.position)
+    if (!allowedRoles.includes(req.user.position)) {
       return forbiddenResponse(
         res,
         'You do not have permission to access this resource'
