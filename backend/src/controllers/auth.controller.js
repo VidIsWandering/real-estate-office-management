@@ -32,6 +32,12 @@ class AuthController {
     return successResponse(res, result, 'Profile retrieved successfully');
   }
 
+  async updateProfile(req, res) {
+    const result = await authService.updateProfile(req.user.id, req.body);
+
+    return successResponse(res, result, 'Profile updated successfully');
+  }
+
   async changePassword(req, res) {
     const { old_password, new_password } = req.body;
     const result = await authService.changePassword(
@@ -57,6 +63,7 @@ module.exports = {
   register: asyncHandler((req, res) => controller.register(req, res)),
   login: asyncHandler((req, res) => controller.login(req, res)),
   getProfile: asyncHandler((req, res) => controller.getProfile(req, res)),
+  updateProfile: asyncHandler((req, res) => controller.updateProfile(req, res)),
   changePassword: asyncHandler((req, res) =>
     controller.changePassword(req, res)
   ),

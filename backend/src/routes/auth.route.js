@@ -36,6 +36,13 @@ router.post('/login', loginValidator, validate, authController.login);
 router.get('/profile', authenticate, authController.getProfile);
 
 /**
+ * @route   PUT /api/auth/profile
+ * @desc    update current user profile
+ * @access  Private
+ */
+router.put('/profile', authenticate, authController.updateProfile);
+
+/**
  * @route   PUT /api/auth/change-password
  * @desc    Change password
  * @access  Private

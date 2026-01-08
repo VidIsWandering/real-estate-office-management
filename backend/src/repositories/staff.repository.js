@@ -113,20 +113,20 @@ class StaffRepository {
         phone_number = COALESCE($3, phone_number),
         address = COALESCE($4, address),
         assigned_area = COALESCE($5, assigned_area),
-        role = COALESCE($6, role),
+        position = COALESCE($6, position),
         status = COALESCE($7, status)
       WHERE id = $8
       RETURNING *
     `;
 
     const values = [
-      staffData.full_name,
-      staffData.email,
-      staffData.phone_number,
-      staffData.address,
-      staffData.assigned_area,
-      staffData.role,
-      staffData.status,
+      staffData?.full_name,
+      staffData?.email,
+      staffData?.phone_number,
+      staffData?.address,
+      staffData?.assigned_area,
+      staffData?.role,
+      staffData?.status,
       id,
     ];
 
