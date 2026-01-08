@@ -38,6 +38,7 @@ class RealEstateController {
    */
   async create(req, res) {
     // TODO: Implement - Handle file uploads via req.files
+    console.log(req.body)
     return successResponse(
       res,
       { ...req.body, staff_id: req.user.staff_id, status: 'created' },
