@@ -5,42 +5,47 @@
 const { successResponse } = require('../utils/response.util');
 const { HTTP_STATUS } = require('../config/constants');
 const { asyncHandler } = require('../middlewares/error.middleware');
+const clientService = require('../services/client.service');
 
 class ClientController {
   /**
    * GET /clients
    */
   async getAll(req, res) {
-    // TODO: Implement với clientService.getAll(req.query)
-    const { page = 1, limit = 10 } = req.query;
+    const result = await clientService.getAll(req.query);
 
     return successResponse(
       res,
       {
-        items: [],
-        pagination: { page: Number(page), limit: Number(limit), total: 0 },
+        items: result.items.map(c => c.toJSON()),
+        pagination: result.pagination,
       },
       'Client list retrieved successfully'
     );
   }
 
+
   /**
    * GET /clients/:id
    */
   async getById(req, res) {
-    // TODO: Implement
     const { id } = req.params;
-    return successResponse(res, { id }, 'Client retrieved successfully');
+    const result = await clientService.getById(id)
+    return successResponse(res, { ...result }, 'Client retrieved successfully');
   }
 
   /**
    * POST /clients
    */
   async create(req, res) {
-    // TODO: Implement
+    const rawClientData = req.body;
+
+    const clientData = { ...rawClientData, staff_id: req.user.staff_id }
+
+    const result = await clientService.create(clientData)
     return successResponse(
       res,
-      { ...req.body, staff_id: req.user.staff_id },
+      { ...result },
       'Client created successfully',
       HTTP_STATUS.CREATED
     );
@@ -52,9 +57,11 @@ class ClientController {
   async update(req, res) {
     // TODO: Implement
     const { id } = req.params;
+    const updateData = req.body;
+    const result = await clientService.update(id, updateData)
     return successResponse(
       res,
-      { id, ...req.body },
+      { ...result },
       'Client updated successfully'
     );
   }
@@ -65,7 +72,8 @@ class ClientController {
   async delete(req, res) {
     // TODO: Implement (soft delete)
     const { id } = req.params;
-    return successResponse(res, { id }, 'Client deleted successfully');
+    const result = await clientService.delete(id)
+    return successResponse(res, { deleted: result }, 'Client deleted successfully');
   }
 
   /**

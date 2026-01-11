@@ -7,6 +7,9 @@ const router = express.Router();
 
 const clientController = require('../controllers/client.controller');
 const { authenticate } = require('../middlewares/auth.middleware');
+const { createValidator } = require('../validators/client.validator');
+const { validate } = require('../middlewares/validate.middleware');
+
 
 // All routes require authentication
 router.use(authenticate);
@@ -30,7 +33,7 @@ router.get('/:id', clientController.getById);
  * @desc    Create new client
  * @access  Private
  */
-router.post('/', clientController.create);
+router.post('/', createValidator, validate, clientController.create);
 
 /**
  * @route   PUT /api/v1/clients/:id
