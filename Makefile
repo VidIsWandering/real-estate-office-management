@@ -121,7 +121,7 @@ db-reset:
 	@echo "✅ Database reset complete!"
 
 db-shell:
-	docker-compose exec db psql -U devuser -d se100_dev_db
+	docker-compose exec db psql -U $$POSTGRES_USER -d $$POSTGRES_DB
 
 db-gui:
 	@echo "🗄️  Starting Adminer (Database Web GUI)..."
@@ -132,8 +132,8 @@ db-gui:
 	@echo "   - URL: http://localhost:8082"
 	@echo "   - System: PostgreSQL"
 	@echo "   - Server: db"
-	@echo "   - Username: devuser"
-	@echo "   - Password: devpassword"
+	@echo "   - Username: (see docker-compose.yml or .env)"
+	@echo "   - Password: (see docker-compose.yml or .env)"
 	@echo "   - Database: se100_dev_db"
 	@echo ""
 
