@@ -2,11 +2,12 @@
  * Constants - Các hằng số và ENUM values từ database
  */
 
+// Position per database schema: staff_position_enum
 const STAFF_ROLES = {
-  ADMIN: 'admin',
   MANAGER: 'manager',
   AGENT: 'agent',
-  STAFF: 'staff',
+  LEGAL_OFFICER: 'legal_officer',
+  ACCOUNTANT: 'accountant',
 };
 
 const STAFF_STATUS = {

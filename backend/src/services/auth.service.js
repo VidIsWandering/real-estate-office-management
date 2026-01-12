@@ -45,7 +45,7 @@ class AuthService {
       full_name,
       email,
       phone_number,
-      role: role || STAFF_ROLES.STAFF,
+      position: role || STAFF_ROLES.AGENT,
       status: 'working',
     };
 
@@ -89,7 +89,7 @@ class AuthService {
       id: account.id,
       username: account.username,
       staff_id: staff.id,
-      role: staff.role,
+      position: staff.position,
     };
 
     const accessToken = generateAccessToken(payload);
