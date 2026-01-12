@@ -1,5 +1,6 @@
 class Client {
     constructor(data) {
+        this.id = data.id;
         this.full_name = data.full_name;
         this.email = data.email;
         this.phone_number = data.phone_number;
@@ -12,6 +13,7 @@ class Client {
 
     toJSON() {
         return {
+            id: this.id,
             full_name: this.full_name,
             email: this.email,
             phone_number: this.phone_number,
