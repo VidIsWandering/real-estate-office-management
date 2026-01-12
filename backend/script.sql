@@ -20,8 +20,8 @@ CREATE INDEX idx_account_active ON account(is_active);
 -- ============================================================================
 -- 2. STAFF
 -- ============================================================================
--- Positions per context_design.md: AGENT, LEGAL_OFFICER, ACCOUNTANT, MANAGER
-CREATE TYPE staff_position_enum AS ENUM ('agent', 'legal_officer', 'accountant', 'manager');
+-- Positions: ADMIN, MANAGER, AGENT, LEGAL_OFFICER, ACCOUNTANT
+CREATE TYPE staff_position_enum AS ENUM ('admin', 'manager', 'agent', 'legal_officer', 'accountant');
 CREATE TYPE staff_status_enum AS ENUM ('working', 'off_duty');
 
 CREATE TABLE staff (
@@ -384,17 +384,19 @@ CREATE INDEX idx_audit_log_created ON audit_log(created_at);
 -- Sample accounts (passwords hashed with bcrypt, rounds=10)
 -- All passwords: "password123"
 INSERT INTO account (username, password, is_active) VALUES 
+    ('admin', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrqQlTBSM0QKS9RGkXfPe0HhI0xVQy', true),
     ('manager1', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrqQlTBSM0QKS9RGkXfPe0HhI0xVQy', true),
     ('agent1', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrqQlTBSM0QKS9RGkXfPe0HhI0xVQy', true),
     ('legal1', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrqQlTBSM0QKS9RGkXfPe0HhI0xVQy', true),
     ('accountant1', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrqQlTBSM0QKS9RGkXfPe0HhI0xVQy', true);
 
--- Sample staff (positions per context_design.md)
+-- Sample staff
 INSERT INTO staff (account_id, full_name, email, position, status) VALUES 
-    (1, 'Nguyễn Văn Manager', 'manager@example.com', 'manager', 'working'),
-    (2, 'Trần Thị Agent', 'agent@example.com', 'agent', 'working'),
-    (3, 'Lê Văn Legal', 'legal@example.com', 'legal_officer', 'working'),
-    (4, 'Phạm Thị Accountant', 'accountant@example.com', 'accountant', 'working');
+    (1, 'Admin User', 'admin@example.com', 'admin', 'working'),
+    (2, 'Nguyễn Văn Manager', 'manager@example.com', 'manager', 'working'),
+    (3, 'Trần Thị Agent', 'agent@example.com', 'agent', 'working'),
+    (4, 'Lê Văn Legal', 'legal@example.com', 'legal_officer', 'working'),
+    (5, 'Phạm Thị Accountant', 'accountant@example.com', 'accountant', 'working');
 
 -- Sample terms
 INSERT INTO term (name, content) VALUES 
@@ -406,7 +408,7 @@ INSERT INTO term (name, content) VALUES
 -- Comments
 -- ============================================================================
 COMMENT ON TABLE account IS 'Tài khoản đăng nhập hệ thống';
-COMMENT ON TABLE staff IS 'Nhân viên (positions: manager, agent, legal_officer, accountant)';
+COMMENT ON TABLE staff IS 'Nhân viên (positions: admin, manager, agent, legal_officer, accountant)';
 COMMENT ON TABLE client IS 'Khách hàng (buyer, seller, landlord, tenant)';
 COMMENT ON TABLE real_estate IS 'Bất động sản';
 COMMENT ON TABLE appointment IS 'Lịch hẹn xem nhà';
