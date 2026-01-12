@@ -11,6 +11,7 @@ const { validate } = require('../middlewares/validate.middleware');
 const {
   registerValidator,
   loginValidator,
+  updateProfileValidator,
   changePasswordValidator,
 } = require('../validators/auth.validator');
 
@@ -34,6 +35,19 @@ router.post('/login', loginValidator, validate, authController.login);
  * @access  Private
  */
 router.get('/profile', authenticate, authController.getProfile);
+
+/**
+ * @route   PUT /api/auth/profile
+ * @desc    Update current user profile
+ * @access  Private
+ */
+router.put(
+  '/profile',
+  authenticate,
+  updateProfileValidator,
+  validate,
+  authController.updateProfile
+);
 
 /**
  * @route   PUT /api/auth/change-password

@@ -126,6 +126,47 @@ class AuthService {
   }
 
   /**
+   * Update profile
+   */
+  async updateProfile(accountId, updateData) {
+    const { full_name, email, phone_number, address, assigned_area } =
+      updateData;
+
+    // Get current staff profile
+    const staff = await staffRepository.findByAccountId(accountId);
+    if (!staff) {
+      throw new Error('Staff profile not found');
+    }
+
+    // Check if email is being changed and already exists
+    if (email && email !== staff.email) {
+      const emailExists = await staffRepository.existsByEmail(email);
+      if (emailExists) {
+        throw new Error('Email already exists');
+      }
+    }
+
+    // Update staff profile
+    const staffData = {
+      full_name,
+      email,
+      phone_number,
+      address,
+      assigned_area,
+    };
+
+    const updatedStaff = await staffRepository.update(staff.id, staffData);
+
+    // Get updated account info
+    const account = await accountRepository.findById(accountId);
+
+    return {
+      account: account.toJSON(),
+      staff: updatedStaff.toJSON(),
+    };
+  }
+
+  /**
    * Change password
    */
   async changePassword(accountId, oldPassword, newPassword) {

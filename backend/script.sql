@@ -384,11 +384,11 @@ CREATE INDEX idx_audit_log_created ON audit_log(created_at);
 -- Sample accounts (passwords hashed with bcrypt, rounds=10)
 -- All passwords: "password123"
 INSERT INTO account (username, password, is_active) VALUES 
-    ('admin', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrqQlTBSM0QKS9RGkXfPe0HhI0xVQy', true),
-    ('manager1', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrqQlTBSM0QKS9RGkXfPe0HhI0xVQy', true),
-    ('agent1', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrqQlTBSM0QKS9RGkXfPe0HhI0xVQy', true),
-    ('legal1', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrqQlTBSM0QKS9RGkXfPe0HhI0xVQy', true),
-    ('accountant1', '$2a$10$N9qo8uLOickgx2ZMRZoMy.MqrqQlTBSM0QKS9RGkXfPe0HhI0xVQy', true);
+    ('admin', '$2a$10$FfyY6fa1UHD8su5OEDOxc.cEHwbyjM4yN1wUizLL4NK2zLFSdxSOa', true),
+    ('manager1', '$2a$10$FfyY6fa1UHD8su5OEDOxc.cEHwbyjM4yN1wUizLL4NK2zLFSdxSOa', true),
+    ('agent1', '$2a$10$FfyY6fa1UHD8su5OEDOxc.cEHwbyjM4yN1wUizLL4NK2zLFSdxSOa', true),
+    ('legal1', '$2a$10$FfyY6fa1UHD8su5OEDOxc.cEHwbyjM4yN1wUizLL4NK2zLFSdxSOa', true),
+    ('accountant1', '$2a$10$FfyY6fa1UHD8su5OEDOxc.cEHwbyjM4yN1wUizLL4NK2zLFSdxSOa', true);
 
 -- Sample staff
 INSERT INTO staff (account_id, full_name, email, position, status) VALUES 
