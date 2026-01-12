@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
-    "test": "NODE_ENV=test jest --coverage",
+    "test": "NODE_ENV=test jest --coverage --maxWorkers=1 --forceExit",
     "test:watch": "NODE_ENV=test jest --watch",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",

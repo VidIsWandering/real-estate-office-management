@@ -8,6 +8,8 @@ const router = express.Router();
 const systemController = require('../controllers/system.controller');
 const voucherController = require('../controllers/voucher.controller');
 const { authenticate, authorize } = require('../middlewares/auth.middleware');
+const { validate } = require('../middlewares/validate.middleware');
+const { updateConfigSchema } = require('../validators/system.validator');
 const { STAFF_ROLES } = require('../config/constants');
 
 // ============================================================================
@@ -65,6 +67,8 @@ router.put(
   '/system/config',
   authenticate,
   authorize([STAFF_ROLES.ADMIN]),
+  ...updateConfigSchema,
+  validate,
   systemController.updateConfig
 );
 

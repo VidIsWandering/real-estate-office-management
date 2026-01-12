@@ -2,7 +2,7 @@
  * System Controller - Cấu hình hệ thống & Logs
  */
 
-const systemConfigRepository = require('../repositories/system-config.repository');
+const systemService = require('../services/system.service');
 const { successResponse } = require('../utils/response.util');
 const { HTTP_STATUS } = require('../config/constants');
 const { asyncHandler } = require('../middlewares/error.middleware');
@@ -30,7 +30,7 @@ class SystemController {
    * Lấy cấu hình hệ thống
    */
   async getConfig(req, res) {
-    const config = await systemConfigRepository.getMergedConfig();
+    const config = await systemService.getConfig();
 
     return successResponse(res, config, 'System config retrieved successfully');
   }
@@ -40,41 +40,10 @@ class SystemController {
    * Cập nhật cấu hình hệ thống
    */
   async updateConfig(req, res) {
-    const updateData = req.body;
-    const updatedBy = req.user.staff_id; // From JWT
-
-    // Extract and update company_info
-    const companyInfo = {
-      company_name: updateData.company_name,
-      company_address: updateData.company_address,
-      company_phone: updateData.company_phone,
-      company_email: updateData.company_email,
-    };
-
-    // Extract and update business_config
-    const businessConfig = {
-      working_hours: updateData.working_hours,
-      appointment_duration_default: updateData.appointment_duration_default,
-    };
-
-    // Update configurations
-    await systemConfigRepository.update('company_info', companyInfo, updatedBy);
-    await systemConfigRepository.update(
-      'business_config',
-      businessConfig,
-      updatedBy
+    const updatedConfig = await systemService.updateConfig(
+      req.body,
+      req.user.staff_id
     );
-
-    if (updateData.notification_settings) {
-      await systemConfigRepository.update(
-        'notification_settings',
-        updateData.notification_settings,
-        updatedBy
-      );
-    }
-
-    // Get updated config
-    const updatedConfig = await systemConfigRepository.getMergedConfig();
 
     return successResponse(
       res,

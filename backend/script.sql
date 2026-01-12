@@ -34,6 +34,7 @@ CREATE TABLE staff (
     assigned_area VARCHAR(100),
     position staff_position_enum NOT NULL DEFAULT 'agent',
     status staff_status_enum DEFAULT 'working',
+    preferences JSONB DEFAULT '{}',
     
     CONSTRAINT fk_staff_account 
         FOREIGN KEY (account_id) 
@@ -376,6 +377,25 @@ CREATE INDEX idx_audit_log_actor ON audit_log(actor_id);
 CREATE INDEX idx_audit_log_action ON audit_log(action_type);
 CREATE INDEX idx_audit_log_target ON audit_log(target_type, target_id);
 CREATE INDEX idx_audit_log_created ON audit_log(created_at);
+
+-- ============================================================================
+-- 10. SYSTEM_CONFIG - System configuration with JSONB storage
+-- ============================================================================
+CREATE TABLE system_config (
+    key VARCHAR(50) PRIMARY KEY,
+    value JSONB NOT NULL DEFAULT '{}',
+    description TEXT,
+    updated_by BIGINT,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    CONSTRAINT fk_system_config_updated_by
+        FOREIGN KEY (updated_by)
+        REFERENCES staff(id)
+        ON DELETE SET NULL
+);
+
+CREATE INDEX idx_system_config_updated_by ON system_config(updated_by);
+CREATE INDEX idx_system_config_updated_at ON system_config(updated_at);
 
 -- ============================================================================
 -- Insert sample data
