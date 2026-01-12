@@ -5,6 +5,8 @@
 const { successResponse } = require('../utils/response.util');
 const { HTTP_STATUS } = require('../config/constants');
 const { asyncHandler } = require('../middlewares/error.middleware');
+const { formatUploadedFiles } = require('../utils/file.utils');
+const realEstateService = require('../services/real-estate.service');
 
 class RealEstateController {
   /**
@@ -12,13 +14,15 @@ class RealEstateController {
    */
   async getAll(req, res) {
     // TODO: Implement với realEstateService.getAll(req.query)
-    const { page = 1, limit = 10 } = req.query;
+    const query = { limit: 10, page: 1, ...req.query };
+
+    const result = await realEstateService.getRealEstates(query)
 
     return successResponse(
       res,
       {
-        items: [],
-        pagination: { page: Number(page), limit: Number(limit), total: 0 },
+        items: result,
+        pagination: { page: Number(query.page), limit: Number(query.limit), total: 0 },
       },
       'Real estate list retrieved successfully'
     );
@@ -30,7 +34,8 @@ class RealEstateController {
   async getById(req, res) {
     // TODO: Implement
     const { id } = req.params;
-    return successResponse(res, { id }, 'Real estate retrieved successfully');
+    const result = await realEstateService.getRealEstateById(id)
+    return successResponse(res, { ...result }, 'Real estate retrieved successfully');
   }
 
   /**
@@ -38,10 +43,16 @@ class RealEstateController {
    */
   async create(req, res) {
     // TODO: Implement - Handle file uploads via req.files
-    console.log(req.body)
+    const media_files = formatUploadedFiles(req.files?.media_files)
+    const legal_docs = formatUploadedFiles(req.files?.legal_docs)
+
+    const data = { ...req.body, media_files, legal_docs, staff_id: req.user.staff_id }
+
+    const result = await realEstateService.create(data)
+
     return successResponse(
       res,
-      { ...req.body, staff_id: req.user.staff_id, status: 'created' },
+      { ...result },
       'Real estate created successfully',
       HTTP_STATUS.CREATED
     );
@@ -53,9 +64,14 @@ class RealEstateController {
   async update(req, res) {
     // TODO: Implement - Track price history if price changes
     const { id } = req.params;
+    const media_files = formatUploadedFiles(req.files?.media_files)
+    const legal_docs = formatUploadedFiles(req.files?.legal_docs)
+
+    const data = { ...req.body, media_files, legal_docs, staff_id: req.user.staff_id }
+    const result = await realEstateService.updateRealEstateById(id, data)
     return successResponse(
       res,
-      { id, ...req.body },
+      { ...result },
       'Real estate updated successfully'
     );
   }
