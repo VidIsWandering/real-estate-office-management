@@ -38,7 +38,7 @@
  *                 type: string
  *                 example: '0901234567'
  *               role:
- *                 $ref: '#/components/schemas/StaffRole'
+ *                 $ref: '#/components/schemas/StaffPosition'
  *     responses:
  *       201:
  *         description: Account created successfully
@@ -164,6 +164,66 @@
  *                       $ref: '#/components/schemas/Staff'
  *       401:
  *         $ref: '#/components/responses/UnauthorizedError'
+ *
+ *   put:
+ *     summary: Update current user profile
+ *     description: Cập nhật thông tin cá nhân của user đang đăng nhập
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               full_name:
+ *                 type: string
+ *                 minLength: 1
+ *                 maxLength: 50
+ *                 example: Nguyễn Văn Updated
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: updated@example.com
+ *               phone_number:
+ *                 type: string
+ *                 pattern: '^[0-9]{10,12}$'
+ *                 example: '0912345678'
+ *               address:
+ *                 type: string
+ *                 maxLength: 255
+ *                 example: 123 Main Street, District 1
+ *               assigned_area:
+ *                 type: string
+ *                 maxLength: 100
+ *                 example: District 1, District 3
+ *     responses:
+ *       200:
+ *         description: Profile updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Profile updated successfully
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     account:
+ *                       $ref: '#/components/schemas/Account'
+ *                     staff:
+ *                       $ref: '#/components/schemas/Staff'
+ *       400:
+ *         $ref: '#/components/responses/ValidationError'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       409:
+ *         description: Email already exists
  *
  * /auth/change-password:
  *   put:
