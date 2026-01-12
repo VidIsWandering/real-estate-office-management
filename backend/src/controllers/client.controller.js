@@ -6,6 +6,8 @@ const { successResponse } = require('../utils/response.util');
 const { HTTP_STATUS } = require('../config/constants');
 const { asyncHandler } = require('../middlewares/error.middleware');
 const clientService = require('../services/client.service');
+const clientNoteRepository = require('../repositories/client-note.repository');
+const { query } = require('winston');
 
 class ClientController {
   /**
@@ -82,9 +84,12 @@ class ClientController {
   async getNotes(req, res) {
     // TODO: Implement
     const { id } = req.params;
+    const { from, to } = req.query
+    const query = { client_id: id, from, to }
+    const result = await clientNoteRepository.findAll(query)
     return successResponse(
       res,
-      { client_id: id, notes: [] },
+      { client_id: id, notes: result },
       'Notes retrieved successfully'
     );
   }
@@ -95,9 +100,12 @@ class ClientController {
   async addNote(req, res) {
     // TODO: Implement
     const { id } = req.params;
+    const { content } = req.body;
+    const data = { client_id: id, staff_id: req.user.staff_id, content }
+    const result = await clientService.addNote(data)
     return successResponse(
       res,
-      { client_id: id, ...req.body },
+      { ...result },
       'Note added successfully',
       HTTP_STATUS.CREATED
     );

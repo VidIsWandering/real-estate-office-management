@@ -1,3 +1,4 @@
+const clientNoteRepository = require("../repositories/client-note.repository")
 const clientRepository = require("../repositories/client.repository")
 const staffRepository = require("../repositories/staff.repository")
 
@@ -48,6 +49,22 @@ class ClientService {
 
     return res ? true : false
 
+  }
+
+  async addNote(data) {
+    const res = await clientNoteRepository.create(data)
+    const client = await clientRepository.findById(data.client_id)
+    const staff = await staffRepository.findById(data.staff_id)
+    return {
+      client_note: res.toJSON(),
+      client: client.toJSON(),
+      staff: staff.toJSON()
+    }
+  }
+
+  async getNotes(query){
+    const res = await clientNoteRepository.findAll(query)
+    return res
   }
 }
 
