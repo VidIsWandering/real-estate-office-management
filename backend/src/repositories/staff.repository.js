@@ -114,8 +114,9 @@ class StaffRepository {
         address = COALESCE($4, address),
         assigned_area = COALESCE($5, assigned_area),
         position = COALESCE($6, position),
-        status = COALESCE($7, status)
-      WHERE id = $8
+        status = COALESCE($7, status),
+        preferences = COALESCE($8, preferences)
+      WHERE id = $9
       RETURNING *
     `;
 
@@ -127,6 +128,7 @@ class StaffRepository {
       staffData.assigned_area,
       staffData.position,
       staffData.status,
+      staffData.preferences ? JSON.stringify(staffData.preferences) : null,
       id,
     ];
 

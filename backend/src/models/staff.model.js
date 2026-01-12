@@ -13,6 +13,11 @@ class Staff {
     this.assigned_area = data.assigned_area;
     this.position = data.position;
     this.status = data.status;
+    this.preferences = data.preferences || {
+      email: true,
+      sms: false,
+      push: true,
+    };
   }
 
   /**
@@ -29,6 +34,7 @@ class Staff {
       assigned_area: this.assigned_area,
       position: this.position,
       status: this.status,
+      preferences: this.preferences,
     };
   }
 }

@@ -95,6 +95,26 @@ const updateProfileValidator = [
     .trim()
     .isLength({ max: 100 })
     .withMessage('Assigned area must not exceed 100 characters'),
+
+  body('preferences')
+    .optional()
+    .isObject()
+    .withMessage('Preferences must be an object'),
+
+  body('preferences.email')
+    .optional()
+    .isBoolean()
+    .withMessage('Email preference must be boolean'),
+
+  body('preferences.sms')
+    .optional()
+    .isBoolean()
+    .withMessage('SMS preference must be boolean'),
+
+  body('preferences.push')
+    .optional()
+    .isBoolean()
+    .withMessage('Push preference must be boolean'),
 ];
 
 /**

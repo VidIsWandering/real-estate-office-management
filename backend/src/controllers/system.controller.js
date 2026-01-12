@@ -2,6 +2,7 @@
  * System Controller - Cấu hình hệ thống & Logs
  */
 
+const systemConfigRepository = require('../repositories/system-config.repository');
 const { successResponse } = require('../utils/response.util');
 const { HTTP_STATUS } = require('../config/constants');
 const { asyncHandler } = require('../middlewares/error.middleware');
@@ -29,24 +30,9 @@ class SystemController {
    * Lấy cấu hình hệ thống
    */
   async getConfig(req, res) {
-    // TODO: Implement - Load from database or config file
+    const config = await systemConfigRepository.getMergedConfig();
 
-    return successResponse(
-      res,
-      {
-        company_name: 'Công ty BĐS ABC',
-        company_address: '',
-        company_phone: '',
-        company_email: '',
-        working_hours: { start: '08:00', end: '17:30' },
-        appointment_duration_default: 60,
-        notification_settings: {
-          email_enabled: false,
-          sms_enabled: false,
-        },
-      },
-      'System config retrieved successfully'
-    );
+    return successResponse(res, config, 'System config retrieved successfully');
   }
 
   /**
@@ -54,9 +40,47 @@ class SystemController {
    * Cập nhật cấu hình hệ thống
    */
   async updateConfig(req, res) {
-    // TODO: Implement - Save to database
+    const updateData = req.body;
+    const updatedBy = req.user.staff_id; // From JWT
 
-    return successResponse(res, req.body, 'System config updated successfully');
+    // Extract and update company_info
+    const companyInfo = {
+      company_name: updateData.company_name,
+      company_address: updateData.company_address,
+      company_phone: updateData.company_phone,
+      company_email: updateData.company_email,
+    };
+
+    // Extract and update business_config
+    const businessConfig = {
+      working_hours: updateData.working_hours,
+      appointment_duration_default: updateData.appointment_duration_default,
+    };
+
+    // Update configurations
+    await systemConfigRepository.update('company_info', companyInfo, updatedBy);
+    await systemConfigRepository.update(
+      'business_config',
+      businessConfig,
+      updatedBy
+    );
+
+    if (updateData.notification_settings) {
+      await systemConfigRepository.update(
+        'notification_settings',
+        updateData.notification_settings,
+        updatedBy
+      );
+    }
+
+    // Get updated config
+    const updatedConfig = await systemConfigRepository.getMergedConfig();
+
+    return successResponse(
+      res,
+      updatedConfig,
+      'System config updated successfully'
+    );
   }
 
   /**

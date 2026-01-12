@@ -129,8 +129,14 @@ class AuthService {
    * Update profile
    */
   async updateProfile(accountId, updateData) {
-    const { full_name, email, phone_number, address, assigned_area } =
-      updateData;
+    const {
+      full_name,
+      email,
+      phone_number,
+      address,
+      assigned_area,
+      preferences,
+    } = updateData;
 
     // Get current staff profile
     const staff = await staffRepository.findByAccountId(accountId);
@@ -153,6 +159,7 @@ class AuthService {
       phone_number,
       address,
       assigned_area,
+      preferences,
     };
 
     const updatedStaff = await staffRepository.update(staff.id, staffData);
