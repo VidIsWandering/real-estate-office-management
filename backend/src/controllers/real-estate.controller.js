@@ -67,8 +67,8 @@ class RealEstateController {
     const media_files = formatUploadedFiles(req.files?.media_files)
     const legal_docs = formatUploadedFiles(req.files?.legal_docs)
 
-    const data = { ...req.body, media_files, legal_docs, staff_id: req.user.staff_id }
-    const result = await realEstateService.updateRealEstateById(id, data)
+    const data = { ...req.body, media_files, legal_docs }
+    const result = await realEstateService.updateRealEstateById(id, data, req.user.staff_id)
     return successResponse(
       res,
       { ...result },
@@ -77,17 +77,20 @@ class RealEstateController {
   }
 
   /**
-   * PUT /real-estates/:id/legal-check
-   * Legal Officer kiểm tra pháp lý
-   */
+ * PUT /real-estates/:id/legal-check
+ * Legal Officer kiểm tra pháp lý
+ */
   async legalCheck(req, res) {
-    // TODO: Implement - Update status to LISTED if approved
     const { id } = req.params;
     const { is_approved, note } = req.body;
 
+    const updatedRealEstate = is_approved
+      ? await realEstateService.legalCheck(Number(id), req.user.id, note)
+      : await realEstateService.updateStatus(Number(id), 'pending_legal_check', req.user.id, note);
+
     return successResponse(
       res,
-      { id, is_approved, note, status: is_approved ? 'listed' : 'pending' },
+      { id: updatedRealEstate.id, status: updatedRealEstate.status, note },
       is_approved ? 'Legal check approved' : 'Legal check requires attention'
     );
   }
@@ -96,13 +99,14 @@ class RealEstateController {
    * PATCH /real-estates/:id/status
    */
   async updateStatus(req, res) {
-    // TODO: Implement
     const { id } = req.params;
     const { status, reason } = req.body;
 
+    const updatedRealEstate = await realEstateService.updateStatus(Number(id), status, req.user.id, reason);
+
     return successResponse(
       res,
-      { id, status, reason },
+      { id: updatedRealEstate.id, status: updatedRealEstate.status, reason },
       'Real estate status updated successfully'
     );
   }
@@ -111,14 +115,17 @@ class RealEstateController {
    * GET /real-estates/:id/price-history
    */
   async getPriceHistory(req, res) {
-    // TODO: Implement
     const { id } = req.params;
+
+    const history = await realEstateService.getPriceHistory(Number(id));
+
     return successResponse(
       res,
-      { real_estate_id: id, history: [] },
+      { real_estate_id: id, history },
       'Price history retrieved successfully'
     );
   }
+
 }
 
 const controller = new RealEstateController();

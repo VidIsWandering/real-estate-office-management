@@ -55,28 +55,97 @@ class RealEstateService {
     }
   }
 
-  async updateRealEstateById(realEstateId, updateData) {
+  async updateRealEstateById(realEstateId, updateData, staffId) {
+    // 1️⃣ Lấy bản ghi hiện tại
+    const existingRealEstate = await realEstateRepository.findById(realEstateId);
+    if (!existingRealEstate) throw new Error("Real estate not found");
 
-    const existingRealEstate = await realEstateRepository.findByLocation(updateData.location)
-    const isIncluded = existingRealEstate.find(item => {
-      console.log(item.id)
-      return item.id = realEstateId
-    }) ? true : false;
-    console.log(isIncluded)
-    if (existingRealEstate.length > 0 && !isIncluded) throw new Error("A real estate property already exists at this location")
-    const media_files = await fileService.createManyFiles(updateData.media_files)
-    const legal_docs = await fileService.createManyFiles(updateData.legal_docs)
+    // 2️⃣ Kiểm tra location để tránh trùng
+    if (updateData.location) {
+      const otherRealEstates = await realEstateRepository.findByLocation(updateData.location);
+      const isIncluded = otherRealEstates.some(item => item.id === realEstateId);
+      if (otherRealEstates.length > 0 && !isIncluded) {
+        throw new Error("A real estate property already exists at this location");
+      }
+    }
 
-    const mediaFileIds = media_files.items.map(item => item.id)
-    const legalDocIds = legal_docs.items.map(item => item.id)
+    // 3️⃣ Upload media files và legal docs
+    const media_files = updateData.media_files
+      ? (await fileService.createManyFiles(updateData.media_files)).items.map(item => item.id)
+      : null;
 
-    await realEstateRepository.update(realEstateId, { ...updateData, media_files: mediaFileIds.length > 0 ? mediaFileIds : null, legal_docs: legalDocIds.length > 0 ? legalDocIds : null })
+    const legal_docs = updateData.legal_docs
+      ? (await fileService.createManyFiles(updateData.legal_docs)).items.map(item => item.id)
+      : null;
 
-    const res = await this.getRealEstateById(realEstateId)
+    // 4️⃣ Cập nhật bản ghi
+    const updatedRealEstate = await realEstateRepository.update(realEstateId, {
+      ...updateData,
+      media_files: media_files?.length > 0 ? media_files : null,
+      legal_docs: legal_docs?.length > 0 ? legal_docs : null
+    });
+
+    // 5️⃣ Nếu price thay đổi, lưu lịch sử giá
+    if (updateData.price && updateData.price !== existingRealEstate.price) {
+      await realEstateRepository.addPriceHistory({
+        real_estate_id: realEstateId,
+        price: updateData.price,
+        changed_by: staffId
+      });
+    }
+
+    // 6️⃣ Trả về thông tin full, kèm media, legal docs
+    return await this.getRealEstateById(realEstateId);
+  }
 
 
-    return res
+  async legalCheck(realEstateId, staffId, note) {
+    const realEstate = await realEstateRepository.findById(realEstateId);
+    if (!realEstate) throw new Error('Real estate not found');
 
+    const oldStatus = realEstate.status;
+
+    // Cập nhật status sang 'listed'
+    const updatedRealEstate = await realEstateRepository.updateStatus(realEstateId, 'listed');
+
+    // Lưu lịch sử status
+    await realEstateRepository.addStatusHistory({
+      real_estate_id: realEstateId,
+      old_status: oldStatus,
+      new_status: 'listed',
+      reason: note,
+      changed_by: staffId,
+    });
+
+    return updatedRealEstate;
+  }
+
+  // --- 2. Update status manually
+  async updateStatus(realEstateId, status, staffId, reason) {
+    const realEstate = await realEstateRepository.findById(realEstateId);
+    if (!realEstate) throw new Error('Real estate not found');
+
+    const oldStatus = realEstate.status;
+    const updatedRealEstate = await realEstateRepository.updateStatus(realEstateId, status);
+
+    // Lưu lịch sử status
+    await realEstateRepository.addStatusHistory({
+      real_estate_id: realEstateId,
+      old_status: oldStatus,
+      new_status: status,
+      reason,
+      changed_by: staffId,
+    });
+
+    return updatedRealEstate;
+  }
+
+  // --- 3. Get price history
+  async getPriceHistory(realEstateId) {
+    const realEstate = await realEstateRepository.findById(realEstateId);
+    if (!realEstate) throw new Error('Real estate not found');
+
+    return await realEstateRepository.getPriceHistory(realEstateId);
   }
 }
 
