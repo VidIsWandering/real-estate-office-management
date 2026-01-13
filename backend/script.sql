@@ -398,6 +398,63 @@ CREATE INDEX idx_system_config_updated_by ON system_config(updated_by);
 CREATE INDEX idx_system_config_updated_at ON system_config(updated_at);
 
 -- ============================================================================
+-- 11. CONFIG_CATALOG - Configurable catalogs (property types, areas, sources, contract types)
+-- ============================================================================
+CREATE TYPE catalog_type_enum AS ENUM ('property_type', 'area', 'lead_source', 'contract_type');
+
+CREATE TABLE config_catalog (
+    id BIGSERIAL PRIMARY KEY,
+    type catalog_type_enum NOT NULL,
+    value VARCHAR(100) NOT NULL,
+    display_order INT DEFAULT 0,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_by BIGINT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_by BIGINT,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    CONSTRAINT fk_catalog_created_by
+        FOREIGN KEY (created_by)
+        REFERENCES staff(id)
+        ON DELETE SET NULL,
+    CONSTRAINT fk_catalog_updated_by
+        FOREIGN KEY (updated_by)
+        REFERENCES staff(id)
+        ON DELETE SET NULL,
+    CONSTRAINT uq_catalog_type_value UNIQUE (type, value)
+);
+
+CREATE INDEX idx_catalog_type ON config_catalog(type);
+CREATE INDEX idx_catalog_active ON config_catalog(is_active);
+CREATE INDEX idx_catalog_order ON config_catalog(type, display_order);
+
+-- ============================================================================
+-- 12. ROLE_PERMISSION - Permission matrix for roles (agent, legal_officer, accountant)
+-- ============================================================================
+CREATE TYPE resource_enum AS ENUM ('transactions', 'contracts', 'payments', 'properties', 'partners', 'staff');
+CREATE TYPE permission_enum AS ENUM ('view', 'add', 'edit', 'delete');
+
+CREATE TABLE role_permission (
+    id BIGSERIAL PRIMARY KEY,
+    position staff_position_enum NOT NULL,
+    resource resource_enum NOT NULL,
+    permission permission_enum NOT NULL,
+    is_granted BOOLEAN DEFAULT FALSE,
+    updated_by BIGINT,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    CONSTRAINT fk_permission_updated_by
+        FOREIGN KEY (updated_by)
+        REFERENCES staff(id)
+        ON DELETE SET NULL,
+    CONSTRAINT uq_role_resource_permission UNIQUE (position, resource, permission)
+);
+
+CREATE INDEX idx_permission_position ON role_permission(position);
+CREATE INDEX idx_permission_resource ON role_permission(resource);
+CREATE INDEX idx_permission_position_resource ON role_permission(position, resource);
+
+-- ============================================================================
 -- Insert sample data
 -- ============================================================================
 
@@ -423,6 +480,63 @@ INSERT INTO term (name, content) VALUES
     ('Thanh toán lần 1', 'Thanh toán 30% khi ký hợp đồng'),
     ('Thanh toán lần 2', 'Thanh toán 40% khi bàn giao'),
     ('Thanh toán lần 3', 'Thanh toán 30% sau 30 ngày bàn giao');
+
+-- Sample catalog data
+INSERT INTO config_catalog (type, value, display_order) VALUES
+    -- Property types
+    ('property_type', 'Apartment', 1),
+    ('property_type', 'House', 2),
+    ('property_type', 'Land', 3),
+    ('property_type', 'Commercial', 4),
+    -- Areas
+    ('area', 'Downtown', 1),
+    ('area', 'Riverside', 2),
+    ('area', 'Westside', 3),
+    ('area', 'North Valley', 4),
+    -- Lead sources
+    ('lead_source', 'Website', 1),
+    ('lead_source', 'Facebook', 2),
+    ('lead_source', 'Referral', 3),
+    ('lead_source', 'Walk-in', 4),
+    -- Contract types
+    ('contract_type', 'Deposit agreement', 1),
+    ('contract_type', 'Sale & purchase agreement', 2),
+    ('contract_type', 'Lease agreement', 3);
+
+-- Sample role permissions (default: agents have view-only on most resources)
+INSERT INTO role_permission (position, resource, permission, is_granted) VALUES
+    -- Agent permissions (view most things, full access to properties/partners)
+    ('agent', 'transactions', 'view', true),
+    ('agent', 'transactions', 'add', false),
+    ('agent', 'contracts', 'view', true),
+    ('agent', 'contracts', 'add', false),
+    ('agent', 'payments', 'view', true),
+    ('agent', 'properties', 'view', true),
+    ('agent', 'properties', 'add', true),
+    ('agent', 'properties', 'edit', true),
+    ('agent', 'partners', 'view', true),
+    ('agent', 'partners', 'add', true),
+    ('agent', 'partners', 'edit', true),
+    ('agent', 'staff', 'view', true),
+    -- Legal officer permissions (contracts focused)
+    ('legal_officer', 'transactions', 'view', true),
+    ('legal_officer', 'contracts', 'view', true),
+    ('legal_officer', 'contracts', 'add', true),
+    ('legal_officer', 'contracts', 'edit', true),
+    ('legal_officer', 'payments', 'view', true),
+    ('legal_officer', 'properties', 'view', true),
+    ('legal_officer', 'properties', 'edit', true),
+    ('legal_officer', 'partners', 'view', true),
+    ('legal_officer', 'staff', 'view', true),
+    -- Accountant permissions (payments focused)
+    ('accountant', 'transactions', 'view', true),
+    ('accountant', 'contracts', 'view', true),
+    ('accountant', 'payments', 'view', true),
+    ('accountant', 'payments', 'add', true),
+    ('accountant', 'payments', 'edit', true),
+    ('accountant', 'properties', 'view', true),
+    ('accountant', 'partners', 'view', true),
+    ('accountant', 'staff', 'view', true);
 
 -- ============================================================================
 -- Comments

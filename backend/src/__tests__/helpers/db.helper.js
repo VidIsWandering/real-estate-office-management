@@ -66,6 +66,8 @@ const cleanDatabase = async () => {
   await db.query('TRUNCATE TABLE staff CASCADE');
   await db.query('TRUNCATE TABLE account CASCADE');
   await db.query('TRUNCATE TABLE system_config CASCADE');
+  await db.query('TRUNCATE TABLE config_catalog CASCADE');
+  await db.query('TRUNCATE TABLE role_permission CASCADE');
 
   // Re-enable FK constraints
   await db.query('SET session_replication_role = DEFAULT');
@@ -73,6 +75,8 @@ const cleanDatabase = async () => {
   // Reset sequences
   await db.query("SELECT setval('account_id_seq', 1, false)");
   await db.query("SELECT setval('staff_id_seq', 1, false)");
+  await db.query("SELECT setval('config_catalog_id_seq', 1, false)");
+  await db.query("SELECT setval('role_permission_id_seq', 1, false)");
 };
 
 /**
@@ -124,6 +128,51 @@ const seedTestData = async () => {
     ('business_config', '{"working_hours": {"start": "08:00", "end": "17:30"}, "appointment_duration_default": 60}'::jsonb, 'Test business config'),
     ('notification_settings', '{"email_enabled": true, "sms_enabled": false}'::jsonb, 'Test notification settings')
     ON CONFLICT (key) DO NOTHING
+  `);
+
+  // Seed config catalogs
+  await db.query(`
+    INSERT INTO config_catalog (type, value, display_order, is_active, created_by) VALUES
+    ('property_type', 'Căn hộ chung cư', 1, true, 1),
+    ('property_type', 'Nhà phố', 2, true, 1),
+    ('property_type', 'Biệt thự', 3, true, 1),
+    ('property_type', 'Đất nền', 4, true, 1),
+    ('area', 'Quận 1', 1, true, 1),
+    ('area', 'Quận 2', 2, true, 1),
+    ('area', 'Quận 3', 3, true, 1),
+    ('area', 'Quận 7', 4, true, 1),
+    ('lead_source', 'Website', 1, true, 1),
+    ('lead_source', 'Facebook', 2, true, 1),
+    ('lead_source', 'Giới thiệu', 3, true, 1),
+    ('lead_source', 'Hotline', 4, true, 1),
+    ('contract_type', 'Mua bán', 1, true, 1),
+    ('contract_type', 'Cho thuê', 2, true, 1),
+    ('contract_type', 'Ký gửi', 3, true, 1),
+    ('contract_type', 'Hợp tác', 4, true, 1)
+  `);
+
+  // Seed role permissions (default permissions for each role)
+  await db.query(`
+    INSERT INTO role_permission (position, resource, permission, is_granted, updated_by) VALUES
+    -- Agent permissions
+    ('agent', 'transactions', 'view', true, 1),
+    ('agent', 'transactions', 'add', true, 1),
+    ('agent', 'transactions', 'edit', true, 1),
+    ('agent', 'transactions', 'delete', false, 1),
+    ('agent', 'properties', 'view', true, 1),
+    ('agent', 'properties', 'add', true, 1),
+    ('agent', 'properties', 'edit', true, 1),
+    ('agent', 'properties', 'delete', false, 1),
+    -- Legal Officer permissions
+    ('legal_officer', 'contracts', 'view', true, 1),
+    ('legal_officer', 'contracts', 'add', true, 1),
+    ('legal_officer', 'contracts', 'edit', true, 1),
+    ('legal_officer', 'contracts', 'delete', false, 1),
+    -- Accountant permissions
+    ('accountant', 'payments', 'view', true, 1),
+    ('accountant', 'payments', 'add', true, 1),
+    ('accountant', 'payments', 'edit', true, 1),
+    ('accountant', 'payments', 'delete', false, 1)
   `);
 
   return { adminId, managerId, agentId };

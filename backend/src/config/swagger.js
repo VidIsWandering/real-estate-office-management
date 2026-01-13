@@ -59,6 +59,7 @@ Authorization: Bearer <your_access_token>
     { name: 'Vouchers', description: 'Payment & Receipts' },
     { name: 'Reports', description: 'Reporting & Analytics' },
     { name: 'System', description: 'System Configuration & Logs' },
+    { name: 'Config', description: 'Configuration Management' },
   ],
   components: {
     securitySchemes: {
