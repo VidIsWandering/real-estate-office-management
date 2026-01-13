@@ -9,9 +9,12 @@ const realEstateController = require('../controllers/real-estate.controller');
 const { authenticate, authorize } = require('../middlewares/auth.middleware');
 const { STAFF_ROLES } = require('../config/constants');
 const upload = require('../middlewares/upload.middleware');
-const { getAllRealEstateValidator, createRealEstateValidator, updateRealEstateValidator } = require('../validators/real-estate.validator');
+const {
+  getAllRealEstateValidator,
+  createRealEstateValidator,
+  updateRealEstateValidator,
+} = require('../validators/real-estate.validator');
 const { validate } = require('../middlewares/validate.middleware');
-
 
 // All routes require authentication
 router.use(authenticate);
@@ -21,7 +24,12 @@ router.use(authenticate);
  * @desc    Get all real estates
  * @access  Private
  */
-router.get('/', getAllRealEstateValidator, validate, realEstateController.getAll);
+router.get(
+  '/',
+  getAllRealEstateValidator,
+  validate,
+  realEstateController.getAll
+);
 
 /**
  * @route   GET /api/v1/real-estates/:id
@@ -41,9 +49,10 @@ router.post(
 
   upload.fields([
     { name: 'media_files', maxCount: 10 },
-    { name: 'legal_docs', maxCount: 10 }
+    { name: 'legal_docs', maxCount: 10 },
   ]),
-  createRealEstateValidator, validate,
+  createRealEstateValidator,
+  validate,
 
   realEstateController.create
 );
@@ -59,9 +68,10 @@ router.put(
 
   upload.fields([
     { name: 'media_files', maxCount: 10 },
-    { name: 'legal_docs', maxCount: 10 }
+    { name: 'legal_docs', maxCount: 10 },
   ]),
-  updateRealEstateValidator, validate,
+  updateRealEstateValidator,
+  validate,
   realEstateController.update
 );
 

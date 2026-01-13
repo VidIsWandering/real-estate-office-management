@@ -1,9 +1,9 @@
 function formatUploadedFile(file) {
   return {
-    url: file.path,                 // Cloudinary URL
-    name: file.originalname,        // Tên file gốc
-    type: file.mimetype,            // mime type
-    uploaded_at: new Date(),         // thời điểm upload
+    url: file.path, // Cloudinary URL
+    name: file.originalname, // Tên file gốc
+    type: file.mimetype, // mime type
+    uploaded_at: new Date(), // thời điểm upload
   };
 }
 

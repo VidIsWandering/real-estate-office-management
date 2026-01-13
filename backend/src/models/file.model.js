@@ -4,8 +4,7 @@ class File {
     this.url = data.url;
     this.name = data.name;
     this.type = data.type;
-    this.uploaded_at = data.uploaded_at
-
+    this.uploaded_at = data.uploaded_at;
   }
 
   toJSON() {
@@ -14,9 +13,9 @@ class File {
       url: this.url,
       name: this.name,
       type: this.type,
-      uploaded_at: this.uploaded_at
-    }
+      uploaded_at: this.uploaded_at,
+    };
   }
 }
 
-module.exports = File
+module.exports = File;
