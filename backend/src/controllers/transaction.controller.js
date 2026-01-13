@@ -5,6 +5,7 @@
 const { successResponse } = require('../utils/response.util');
 const { HTTP_STATUS } = require('../config/constants');
 const { asyncHandler } = require('../middlewares/error.middleware');
+const transactionService = require('../services/transaction.service');
 
 class TransactionController {
   /**
@@ -37,9 +38,10 @@ class TransactionController {
    */
   async create(req, res) {
     // TODO: Implement - Check precondition, update real estate status to NEGOTIATING
+    const transaction = await transactionService.create(req.body, req.user);
     return successResponse(
       res,
-      { ...req.body, staff_id: req.user.staff_id, status: 'negotiating' },
+      { ...transaction },
       'Transaction created successfully',
       HTTP_STATUS.CREATED
     );

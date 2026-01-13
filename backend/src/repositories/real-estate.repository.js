@@ -1,5 +1,7 @@
 // import module db của bạn
 const { db } = require('../config/database');
+const RealEstatePriceHistory = require('../models/real-estate-price-history.model');
+const RealEstateStatusHistory = require('../models/real-estate-status-history.model');
 const RealEstate = require('../models/real-estate.model');
 
 class RealEstateRepository {
@@ -235,24 +237,82 @@ class RealEstateRepository {
     return result.rows.length > 0;
   }
 
-  /**
-   * Tìm real estate theo location
-   * @param {string} location
-   * @returns {Promise<RealEstate[]>}
-   */
-  async findByLocation(location) {
-    const sql = `
-      SELECT *
-      FROM real_estate
-      WHERE location ILIKE $1
-      ORDER BY id DESC;
-    `;
+ /**
+ * Tìm real estate theo location
+ * @param {string} location
+ * @returns {Promise<RealEstate[]>}
+ */
+async findByLocation(location) {
+  const sql = `
+    SELECT *
+    FROM real_estate
+    WHERE location ILIKE $1
+    ORDER BY id DESC;
+  `;
+  const values = [`%${location}%`]; // FIX: Thiếu dấu [ ở đây
+  const result = await db.query(sql, values);
+  return result.rows.map((row) => new RealEstate(row));
+}
 
-    const values = [`%${location}%`];
+/**
+ * Cập nhật status real estate
+ */
+async updateStatus(id, status) {
+  const sql = `
+    UPDATE real_estate
+    SET status = $1
+    WHERE id = $2
+    RETURNING *;
+  `;
+  const result = await db.query(sql, [status, id]);
+  if (result.rows.length === 0) return null;
+  return new RealEstate(result.rows[0]);
+}
 
-    const result = await db.query(sql, values);
-    return result.rows.map((row) => new RealEstate(row));
-  }
+/**
+ * Thêm lịch sử status
+ */
+async addStatusHistory({ real_estate_id, old_status, new_status, reason, changed_by }) {
+  const sql = `
+    INSERT INTO real_estate_status_history
+      (real_estate_id, old_status, new_status, reason, changed_by)
+    VALUES ($1, $2, $3, $4, $5)
+    RETURNING *;
+  `;
+  const result = await db.query(sql, [real_estate_id, old_status, new_status, reason || null, changed_by]);
+  return new RealEstateStatusHistory(result.rows[0]);
+}
+
+/**
+ * Thêm một bản ghi lịch sử giá cho bất động sản
+ * @param {Object} param0 
+ * @param {number} param0.real_estate_id - ID bất động sản
+ * @param {number} param0.price - Giá mới
+ * @param {number} param0.changed_by - ID staff thay đổi giá
+ * @returns {Promise<RealEstatePriceHistory>}
+ */
+async addPriceHistory({ real_estate_id, price, changed_by }) {
+  const sql = `
+    INSERT INTO real_estate_price_history
+      (real_estate_id, price, changed_by)
+    VALUES ($1, $2, $3)
+    RETURNING *;
+  `;
+  const result = await db.query(sql, [real_estate_id, price, changed_by]);
+  return new RealEstatePriceHistory(result.rows[0]);
+}
+
+/**
+ * Lấy lịch sử giá
+ */
+async getPriceHistory(real_estate_id) {
+  const sql = `
+    SELECT * FROM real_estate_price_history
+    WHERE real_estate_id = $1
+    ORDER BY changed_at DESC;
+  `;
+  const result = await db.query(sql, [real_estate_id]);
+  return result.rows.map(row => new RealEstatePriceHistory(row));
 }
 
 module.exports = new RealEstateRepository();

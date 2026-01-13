@@ -425,3 +425,48 @@ COMMENT ON TYPE contract_status_enum IS 'Trạng thái hợp đồng: draft, pen
 COMMENT ON TYPE action_type_enum IS 'Loại hành động trong audit log';
 COMMENT ON TYPE contract_type_enum IS 'Loại hợp đồng: deposit (đặt cọc), purchase (mua bán), lease (thuê)';
 COMMENT ON TYPE payment_method_enum IS 'Phương thức thanh toán: cash (tiền mặt), bank_transfer (chuyển khoản)';
+
+
+-- ============================================================================
+-- HWTHANG add: Lịch sử thay đổi trạng thái và giá của bất động sản
+-- ============================================================================
+
+-- Lưu lại **lịch sử thay đổi trạng thái** của bất động sản.
+-- Mỗi khi status của real_estate được cập nhật (ví dụ: từ 'pending_legal_check' → 'listed'),
+-- một record sẽ được thêm vào bảng này, ghi lại:
+--   - real_estate_id: bất động sản nào
+--   - old_status: trạng thái cũ trước khi thay đổi
+--   - new_status: trạng thái mới
+--   - reason: lý do thay đổi (nếu có)
+--   - changed_by: nhân viên hoặc admin thực hiện thay đổi
+--   - changed_at: thời điểm thay đổi
+CREATE TABLE real_estate_status_history (
+    id BIGSERIAL PRIMARY KEY,
+    real_estate_id BIGINT NOT NULL REFERENCES real_estate(id) ON DELETE CASCADE,
+    old_status real_estate_status_enum NOT NULL,
+    new_status real_estate_status_enum NOT NULL,
+    reason TEXT,
+    changed_by BIGINT NOT NULL, -- staff_id hoặc admin_id
+    changed_at TIMESTAMP DEFAULT now()
+);
+
+-- Lưu lại **lịch sử thay đổi giá** của bất động sản.
+-- Mỗi khi giá của real_estate được cập nhật, một record được thêm vào bảng này:
+--   - real_estate_id: bất động sản nào
+--   - price: giá mới
+--   - changed_at: thời điểm thay đổi
+--   - changed_by: nhân viên thực hiện cập nhật
+CREATE TABLE real_estate_price_history (
+    id BIGSERIAL PRIMARY KEY,
+    real_estate_id BIGINT NOT NULL REFERENCES real_estate(id) ON DELETE CASCADE,
+    price NUMERIC(15,2) NOT NULL CHECK (price > 0),
+    changed_at TIMESTAMP DEFAULT now(),
+    changed_by BIGINT NOT NULL -- staff_id
+);
+
+-- Index giúp **tìm nhanh tất cả các record lịch sử giá** của một bất động sản cụ thể.
+-- Khi gọi getPriceHistory(real_estate_id), PostgreSQL sẽ sử dụng index này để query
+-- mà không cần quét toàn bộ bảng, tăng hiệu suất đáng kể khi bảng có nhiều hàng.
+CREATE INDEX idx_price_history_real_estate 
+    ON real_estate_price_history(real_estate_id);
+
