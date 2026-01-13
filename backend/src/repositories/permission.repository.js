@@ -6,7 +6,8 @@ const { db } = require('../config/database');
 
 class PermissionRepository {
   /**
-   * Get all permissions
+   * Get all role permissions from database
+   * @returns {Promise<Array>} Array of all permissions sorted by position, resource, permission
    */
   async findAll() {
     const sql = `
@@ -25,7 +26,9 @@ class PermissionRepository {
   }
 
   /**
-   * Get permissions by position (role)
+   * Get all permissions for a specific position (role)
+   * @param {string} position - Position/role: agent, legal_officer, accountant
+   * @returns {Promise<Array>} Array of permissions for the position
    */
   async findByPosition(position) {
     const sql = `
@@ -45,7 +48,11 @@ class PermissionRepository {
   }
 
   /**
-   * Check if permission exists
+   * Find a specific permission by position, resource, and permission type
+   * @param {string} position - Position/role
+   * @param {string} resource - Resource name (transactions, contracts, etc.)
+   * @param {string} permission - Permission type (view, add, edit, delete)
+   * @returns {Promise<Object|null>} Permission record or null if not found
    */
   async findByPositionResourcePermission(position, resource, permission) {
     const sql = `
@@ -64,7 +71,13 @@ class PermissionRepository {
   }
 
   /**
-   * Upsert permission (insert or update)
+   * Insert or update a single permission (upsert)
+   * @param {string} position - Position/role
+   * @param {string} resource - Resource name
+   * @param {string} permission - Permission type
+   * @param {boolean} isGranted - Whether permission is granted
+   * @param {number} updatedBy - Staff ID of updater
+   * @returns {Promise<Object>} Upserted permission record
    */
   async upsert(position, resource, permission, isGranted, updatedBy) {
     const sql = `
@@ -88,7 +101,11 @@ class PermissionRepository {
   }
 
   /**
-   * Bulk upsert permissions
+   * Bulk upsert multiple permissions in a transaction
+   * @param {Array<{position, resource, permission, is_granted}>} permissions - Array of permission objects
+   * @param {number} updatedBy - Staff ID of updater
+   * @returns {Promise<Array>} Array of upserted permission records
+   * @throws {Error} If transaction fails (automatically rolls back)
    */
   async bulkUpsert(permissions, updatedBy) {
     const client = await db.pool.connect();

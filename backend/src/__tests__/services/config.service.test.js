@@ -106,6 +106,7 @@ describe('Config Service', () => {
         id: 5,
         type: 'area',
         value: 'Quận 1',
+        is_active: true,
       });
       catalogRepository.existsByTypeAndValue.mockResolvedValue(false);
       catalogRepository.update.mockResolvedValue(mockCatalog);
@@ -139,6 +140,7 @@ describe('Config Service', () => {
         id: 5,
         type: 'area',
         value: 'Old',
+        is_active: true,
       });
 
       await expect(configService.updateCatalog(5, '', 1)).rejects.toThrow(
@@ -151,6 +153,7 @@ describe('Config Service', () => {
         id: 5,
         type: 'area',
         value: 'Old',
+        is_active: true,
       });
       catalogRepository.existsByTypeAndValue.mockResolvedValue(true);
 
@@ -166,6 +169,7 @@ describe('Config Service', () => {
         id: 5,
         type: 'area',
         value: 'Quận 1',
+        is_active: true,
       });
       catalogRepository.delete.mockResolvedValue(true);
 

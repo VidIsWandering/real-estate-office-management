@@ -4,10 +4,12 @@
 
 const { db } = require('../config/database');
 const { NotFoundError, ConflictError } = require('../utils/error.util');
+
 class CatalogRepository {
   /**
-   * Get all catalogs by type
-   * @param {string} type - property_type, area, lead_source, contract_type
+   * Get all active catalogs by type
+   * @param {string} type - Catalog type: property_type, area, lead_source, contract_type
+   * @returns {Promise<Array>} Array of catalog items sorted by display_order
    */
   async findByType(type) {
     const sql = `
@@ -21,7 +23,9 @@ class CatalogRepository {
   }
 
   /**
-   * Get catalog by ID
+   * Get catalog item by ID (includes inactive items)
+   * @param {number} id - Catalog item ID
+   * @returns {Promise<Object|null>} Catalog item or null if not found
    */
   async findById(id) {
     const sql = `
@@ -34,7 +38,11 @@ class CatalogRepository {
   }
 
   /**
-   * Check if value exists for type
+   * Check if a catalog value already exists for a given type (case-insensitive)
+   * @param {string} type - Catalog type
+   * @param {string} value - Value to check
+   * @param {number|null} excludeId - Optional ID to exclude from check (for updates)
+   * @returns {Promise<boolean>} True if value exists, false otherwise
    */
   async existsByTypeAndValue(type, value, excludeId = null) {
     let sql = `
@@ -54,7 +62,12 @@ class CatalogRepository {
   }
 
   /**
-   * Create new catalog item
+   * Create a new catalog item
+   * @param {string} type - Catalog type
+   * @param {string} value - Catalog value
+   * @param {number} createdBy - Staff ID of creator
+   * @returns {Promise<Object>} Created catalog item
+   * @throws {ConflictError} If value already exists for the type
    */
   async create(type, value, createdBy) {
     try {
@@ -75,7 +88,13 @@ class CatalogRepository {
   }
 
   /**
-   * Update catalog item
+   * Update an existing active catalog item
+   * @param {number} id - Catalog item ID
+   * @param {string} value - New value
+   * @param {number} updatedBy - Staff ID of updater
+   * @returns {Promise<Object>} Updated catalog item
+   * @throws {NotFoundError} If catalog item not found or inactive
+   * @throws {ConflictError} If new value already exists
    */
   async update(id, value, updatedBy) {
     try {
@@ -105,7 +124,11 @@ class CatalogRepository {
   }
 
   /**
-   * Soft delete (set is_active = false)
+   * Soft delete a catalog item (sets is_active = false)
+   * @param {number} id - Catalog item ID
+   * @param {number} updatedBy - Staff ID of deleter
+   * @returns {Promise<boolean>} True if deleted successfully
+   * @throws {NotFoundError} If catalog item not found or already inactive
    */
   async delete(id, updatedBy) {
     const sql = `
@@ -127,7 +150,10 @@ class CatalogRepository {
   }
 
   /**
-   * Reorder catalog items
+   * Update display order for multiple catalog items (transactional)
+   * @param {Array<{id: number, display_order: number}>} items - Array of items with id and display_order
+   * @returns {Promise<boolean>} True if reorder successful
+   * @throws {Error} If transaction fails (automatically rolls back)
    */
   async updateOrder(items) {
     const client = await db.pool.connect();

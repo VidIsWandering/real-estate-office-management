@@ -10,7 +10,10 @@ const { asyncHandler } = require('../middlewares/error.middleware');
 class ConfigController {
   /**
    * GET /config/catalogs/:type
-   * Get catalogs by type
+   * Get all active catalogs for a specific type
+   * @param {Object} req - Express request object
+   * @param {Object} res - Express response object
+   * @returns {Promise<Object>} Success response with catalog items
    */
   async getCatalogsByType(req, res) {
     const { type } = req.params;
@@ -21,7 +24,10 @@ class ConfigController {
 
   /**
    * POST /config/catalogs/:type
-   * Create catalog item
+   * Create a new catalog item
+   * @param {Object} req - Express request object
+   * @param {Object} res - Express response object
+   * @returns {Promise<Object>} Success response with created catalog (201 status)
    */
   async createCatalog(req, res) {
     const { type } = req.params;
@@ -40,7 +46,10 @@ class ConfigController {
 
   /**
    * PUT /config/catalogs/:type/:id
-   * Update catalog item
+   * Update an existing catalog item
+   * @param {Object} req - Express request object
+   * @param {Object} res - Express response object
+   * @returns {Promise<Object>} Success response with updated catalog
    */
   async updateCatalog(req, res) {
     const { id } = req.params;
@@ -58,7 +67,10 @@ class ConfigController {
 
   /**
    * DELETE /config/catalogs/:type/:id
-   * Delete catalog item
+   * Soft delete a catalog item
+   * @param {Object} req - Express request object
+   * @param {Object} res - Express response object
+   * @returns {Promise<Object>} Success response with deleted item ID
    */
   async deleteCatalog(req, res) {
     const { id } = req.params;
@@ -71,7 +83,10 @@ class ConfigController {
 
   /**
    * GET /config/permissions
-   * Get all permissions as matrix
+   * Get all role permissions organized as a matrix
+   * @param {Object} req - Express request object
+   * @param {Object} res - Express response object
+   * @returns {Promise<Object>} Success response with permission matrix
    */
   async getAllPermissions(req, res) {
     const permissions = await configService.getAllPermissions();
@@ -85,7 +100,10 @@ class ConfigController {
 
   /**
    * GET /config/permissions/:position
-   * Get permissions by position
+   * Get permissions for a specific position/role
+   * @param {Object} req - Express request object
+   * @param {Object} res - Express response object
+   * @returns {Promise<Object>} Success response with position permissions
    */
   async getPermissionsByPosition(req, res) {
     const { position } = req.params;
@@ -100,7 +118,10 @@ class ConfigController {
 
   /**
    * PUT /config/permissions
-   * Update permissions (bulk)
+   * Bulk update role permissions
+   * @param {Object} req - Express request object
+   * @param {Object} res - Express response object
+   * @returns {Promise<Object>} Success response with updated permissions
    */
   async updatePermissions(req, res) {
     const permissionsData = req.body;
