@@ -127,20 +127,19 @@ class AuthService {
 
   async updateProfile(accountId, newProfile) {
     try {
-      const currentStaff = await staffRepository.findByAccountId(accountId)
+      const currentStaff = await staffRepository.findByAccountId(accountId);
       if (!currentStaff) {
         throw new Error('Staff profile not found');
       }
-      await staffRepository.update(currentStaff.id, newProfile)
+      await staffRepository.update(currentStaff.id, newProfile);
 
-      const updatedProfile = this.getProfile(accountId)
+      const updatedProfile = this.getProfile(accountId);
 
-      return updatedProfile
+      return updatedProfile;
     } catch (error) {
-      console.log(error)
+      console.log(error);
       throw new Error('ERROR: Update profile');
     }
-
   }
 
   /**

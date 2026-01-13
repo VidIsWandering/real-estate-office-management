@@ -16,13 +16,17 @@ class RealEstateController {
     // TODO: Implement với realEstateService.getAll(req.query)
     const query = { limit: 10, page: 1, ...req.query };
 
-    const result = await realEstateService.getRealEstates(query)
+    const result = await realEstateService.getRealEstates(query);
 
     return successResponse(
       res,
       {
         items: result,
-        pagination: { page: Number(query.page), limit: Number(query.limit), total: 0 },
+        pagination: {
+          page: Number(query.page),
+          limit: Number(query.limit),
+          total: 0,
+        },
       },
       'Real estate list retrieved successfully'
     );
@@ -34,8 +38,12 @@ class RealEstateController {
   async getById(req, res) {
     // TODO: Implement
     const { id } = req.params;
-    const result = await realEstateService.getRealEstateById(id)
-    return successResponse(res, { ...result }, 'Real estate retrieved successfully');
+    const result = await realEstateService.getRealEstateById(id);
+    return successResponse(
+      res,
+      { ...result },
+      'Real estate retrieved successfully'
+    );
   }
 
   /**
@@ -43,12 +51,17 @@ class RealEstateController {
    */
   async create(req, res) {
     // TODO: Implement - Handle file uploads via req.files
-    const media_files = formatUploadedFiles(req.files?.media_files)
-    const legal_docs = formatUploadedFiles(req.files?.legal_docs)
+    const media_files = formatUploadedFiles(req.files?.media_files);
+    const legal_docs = formatUploadedFiles(req.files?.legal_docs);
 
-    const data = { ...req.body, media_files, legal_docs, staff_id: req.user.staff_id }
+    const data = {
+      ...req.body,
+      media_files,
+      legal_docs,
+      staff_id: req.user.staff_id,
+    };
 
-    const result = await realEstateService.create(data)
+    const result = await realEstateService.create(data);
 
     return successResponse(
       res,
@@ -64,11 +77,16 @@ class RealEstateController {
   async update(req, res) {
     // TODO: Implement - Track price history if price changes
     const { id } = req.params;
-    const media_files = formatUploadedFiles(req.files?.media_files)
-    const legal_docs = formatUploadedFiles(req.files?.legal_docs)
+    const media_files = formatUploadedFiles(req.files?.media_files);
+    const legal_docs = formatUploadedFiles(req.files?.legal_docs);
 
-    const data = { ...req.body, media_files, legal_docs, staff_id: req.user.staff_id }
-    const result = await realEstateService.updateRealEstateById(id, data)
+    const data = {
+      ...req.body,
+      media_files,
+      legal_docs,
+      staff_id: req.user.staff_id,
+    };
+    const result = await realEstateService.updateRealEstateById(id, data);
     return successResponse(
       res,
       { ...result },

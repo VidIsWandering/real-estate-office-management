@@ -35,7 +35,7 @@ class ClientRepository {
       data.type,
       data.referral_src,
       data.requirement,
-      data.staff_id
+      data.staff_id,
     ];
 
     const result = await db.query(sql, values);
@@ -46,57 +46,59 @@ class ClientRepository {
    * Lấy danh sách client + filter + pagination
    * @param {Object} query
    */
-async findAll(query) {
-  const {
-    page = 1,
-    limit = 10,
-    full_name,
-    email,
-    phone_number,
-    address,
-    type,
-    staff_id, // 🔹 Thêm staff_id
-  } = query;
+  async findAll(query) {
+    const {
+      page = 1,
+      limit = 10,
+      full_name,
+      email,
+      phone_number,
+      address,
+      type,
+      staff_id, // 🔹 Thêm staff_id
+    } = query;
 
-  const conditions = [];
-  const values = [];
+    const conditions = [];
+    const values = [];
 
-  if (full_name) {
-    values.push(`%${full_name}%`);
-    conditions.push(`full_name ILIKE $${values.length}`);
-  }
+    if (full_name) {
+      values.push(`%${full_name}%`);
+      conditions.push(`full_name ILIKE $${values.length}`);
+    }
 
-  if (email) {
-    values.push(`%${email}%`);
-    conditions.push(`email ILIKE $${values.length}`);
-  }
+    if (email) {
+      values.push(`%${email}%`);
+      conditions.push(`email ILIKE $${values.length}`);
+    }
 
-  if (phone_number) {
-    values.push(`%${phone_number}%`);
-    conditions.push(`phone_number ILIKE $${values.length}`);
-  }
+    if (phone_number) {
+      values.push(`%${phone_number}%`);
+      conditions.push(`phone_number ILIKE $${values.length}`);
+    }
 
-  if (address) {
-    values.push(`%${address}%`);
-    conditions.push(`address ILIKE $${values.length}`);
-  }
+    if (address) {
+      values.push(`%${address}%`);
+      conditions.push(`address ILIKE $${values.length}`);
+    }
 
-  if (type) {
-    values.push(type);
-    conditions.push(`type = $${values.length}`);
-  }
+    if (type) {
+      values.push(type);
+      conditions.push(`type = $${values.length}`);
+    }
 
-  if (staff_id) { // 🔹 Filter staff_id
-    values.push(staff_id);
-    conditions.push(`staff_id = $${values.length}`);
-  }
+    if (staff_id) {
+      // 🔹 Filter staff_id
+      values.push(staff_id);
+      conditions.push(`staff_id = $${values.length}`);
+    }
 
-  const whereSQL = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+    const whereSQL =
+      conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
 
-  const offset = (page - 1) * limit;
+    const offset = (page - 1) * limit;
 
-  // 🔢 Query data
-  const dataSQL = `
+    // 🔢 Query data
+    const dataSQL = `
     SELECT *
     FROM client
     ${whereSQL}
@@ -105,29 +107,26 @@ async findAll(query) {
     OFFSET $${values.length + 2}
   `;
 
-  // 🔢 Query total
-  const countSQL = `
+    // 🔢 Query total
+    const countSQL = `
     SELECT COUNT(*) 
     FROM client
     ${whereSQL}
   `;
 
-  const dataResult = await db.query(dataSQL, [...values, limit, offset]);
-  const countResult = await db.query(countSQL, values);
+    const dataResult = await db.query(dataSQL, [...values, limit, offset]);
+    const countResult = await db.query(countSQL, values);
 
-  return {
-    items: dataResult.rows.map(row => new Client(row)),
-    pagination: {
-      page: Number(page),
-      limit: Number(limit),
-      total: Number(countResult.rows[0].count),
-      totalPages: Math.ceil(countResult.rows[0].count / limit),
-    },
-  };
-}
-
-
-
+    return {
+      items: dataResult.rows.map((row) => new Client(row)),
+      pagination: {
+        page: Number(page),
+        limit: Number(limit),
+        total: Number(countResult.rows[0].count),
+        totalPages: Math.ceil(countResult.rows[0].count / limit),
+      },
+    };
+  }
 
   /**
    * Tìm client theo id
@@ -170,7 +169,7 @@ async findAll(query) {
       updateData.referral_src,
       updateData.requirement,
       updateData.staff_id,
-      id
+      id,
     ];
 
     const result = await db.query(sql, values);
@@ -198,7 +197,7 @@ async findAll(query) {
     ORDER BY id DESC
   `;
     const result = await db.query(sql, [staffId]);
-    return result.rows.map(row => new Client(row));
+    return result.rows.map((row) => new Client(row));
   }
 
   /**
@@ -228,7 +227,6 @@ async findAll(query) {
     if (result.rows.length === 0) return null;
     return new Client(result.rows[0]);
   }
-
 }
 
 module.exports = new ClientRepository();

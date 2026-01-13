@@ -1,5 +1,5 @@
-const { db } = require("../config/database");
-const File = require("../models/file.model");
+const { db } = require('../config/database');
+const File = require('../models/file.model');
 
 class FileRepository {
   /**
@@ -37,7 +37,7 @@ class FileRepository {
     `;
 
     const result = await db.query(sql);
-    return result.rows.map(row => new File(row));
+    return result.rows.map((row) => new File(row));
   }
 
   /**
@@ -76,13 +76,7 @@ class FileRepository {
       RETURNING *;
     `;
 
-    const values = [
-      data.url,
-      data.name,
-      data.type,
-      data.uploaded_at,
-      id,
-    ];
+    const values = [data.url, data.name, data.type, data.uploaded_at, id];
 
     const result = await db.query(sql, values);
     if (result.rows.length === 0) return null;

@@ -1,7 +1,8 @@
 /**
- * Staff Controller - Quản lý nhân viên
+ * Staff Controller - Handles HTTP requests for staff management
  */
 
+const staffService = require('../services/staff.service');
 const { successResponse } = require('../utils/response.util');
 const { HTTP_STATUS } = require('../config/constants');
 const { asyncHandler } = require('../middlewares/error.middleware');
@@ -9,43 +10,35 @@ const { asyncHandler } = require('../middlewares/error.middleware');
 class StaffController {
   /**
    * GET /staff
-   * Lấy danh sách nhân viên
+   * Get list of staff with pagination and filters
    */
   async getAll(req, res) {
-    // TODO: Implement với staffService.getAll(req.query)
-    const { page = 1, limit = 10 } = req.query;
+    const result = await staffService.getAll(req.query);
 
-    return successResponse(
-      res,
-      {
-        items: [],
-        pagination: { page: Number(page), limit: Number(limit), total: 0 },
-      },
-      'Staff list retrieved successfully'
-    );
+    return successResponse(res, result, 'Staff list retrieved successfully');
   }
 
   /**
    * GET /staff/:id
-   * Lấy thông tin chi tiết nhân viên
+   * Get staff details by ID
    */
   async getById(req, res) {
-    // TODO: Implement với staffService.getById(req.params.id)
     const { id } = req.params;
+    const staff = await staffService.getById(id);
 
-    return successResponse(res, { id }, 'Staff retrieved successfully');
+    return successResponse(res, staff, 'Staff retrieved successfully');
   }
 
   /**
    * POST /staff
-   * Tạo nhân viên mới
+   * Create new staff member
    */
   async create(req, res) {
-    // TODO: Implement với staffService.create(req.body)
+    const staff = await staffService.create(req.body);
 
     return successResponse(
       res,
-      { ...req.body },
+      staff,
       'Staff created successfully',
       HTTP_STATUS.CREATED
     );
@@ -53,48 +46,54 @@ class StaffController {
 
   /**
    * PUT /staff/:id
-   * Cập nhật thông tin nhân viên
+   * Update staff information
    */
   async update(req, res) {
-    // TODO: Implement với staffService.update(req.params.id, req.body)
     const { id } = req.params;
+    const staff = await staffService.update(id, req.body);
 
-    return successResponse(
-      res,
-      { id, ...req.body },
-      'Staff updated successfully'
-    );
+    return successResponse(res, staff, 'Staff updated successfully');
   }
 
   /**
    * PATCH /staff/:id/status
-   * Kích hoạt/vô hiệu hóa nhân viên
+   * Update staff status (working/off_duty)
    */
   async updateStatus(req, res) {
-    // TODO: Implement với staffService.updateStatus(req.params.id, req.body.status)
     const { id } = req.params;
     const { status } = req.body;
 
-    return successResponse(
-      res,
-      { id, status },
-      'Staff status updated successfully'
-    );
+    const staff = await staffService.updateStatus(id, status);
+
+    return successResponse(res, staff, 'Staff status updated successfully');
   }
 
   /**
    * PUT /staff/:id/permissions
-   * Cập nhật quyền hạn nhân viên
+   * Update staff position/permissions
    */
   async updatePermissions(req, res) {
-    // TODO: Implement với staffService.updatePermissions(req.params.id, req.body)
     const { id } = req.params;
+    const { position } = req.body;
+
+    const staff = await staffService.updatePermissions(id, position);
 
     return successResponse(
       res,
-      { id, ...req.body },
+      staff,
       'Staff permissions updated successfully'
     );
+  }
+
+  /**
+   * DELETE /staff/:id
+   * Delete staff (soft delete by setting status to off_duty)
+   */
+  async delete(req, res) {
+    const { id } = req.params;
+    const result = await staffService.delete(id);
+
+    return successResponse(res, result, 'Staff deleted successfully');
   }
 }
 
@@ -109,4 +108,5 @@ module.exports = {
   updatePermissions: asyncHandler((req, res) =>
     controller.updatePermissions(req, res)
   ),
+  delete: asyncHandler((req, res) => controller.delete(req, res)),
 };

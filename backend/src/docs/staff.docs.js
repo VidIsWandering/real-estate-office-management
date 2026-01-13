@@ -20,9 +20,10 @@
  *           type: integer
  *           default: 10
  *       - in: query
- *         name: role
+ *         name: position
  *         schema:
- *           $ref: '#/components/schemas/StaffRole'
+ *           type: string
+ *           enum: [agent, legal_officer, accountant, manager]
  *       - in: query
  *         name: status
  *         schema:
@@ -68,7 +69,7 @@
  *               - username
  *               - password
  *               - full_name
- *               - role
+ *               - position
  *             properties:
  *               username:
  *                 type: string
@@ -89,8 +90,9 @@
  *               assigned_area:
  *                 type: string
  *                 description: Khu vực phụ trách (cho Agent)
- *               role:
- *                 $ref: '#/components/schemas/StaffRole'
+ *               position:
+ *                 type: string
+ *                 enum: [agent, legal_officer, accountant, manager]
  *     responses:
  *       201:
  *         description: Staff created successfully
@@ -168,8 +170,9 @@
  *                 type: string
  *               assigned_area:
  *                 type: string
- *               role:
- *                 $ref: '#/components/schemas/StaffRole'
+ *               position:
+ *                 type: string
+ *                 enum: [agent, legal_officer, accountant, manager]
  *     responses:
  *       200:
  *         description: Staff updated successfully
@@ -177,6 +180,47 @@
  *         $ref: '#/components/responses/ForbiddenError'
  *       404:
  *         $ref: '#/components/responses/NotFoundError'
+ *
+ *   delete:
+ *     summary: Delete staff member
+ *     description: |
+ *       Xóa nhân viên (soft delete - set status thành off_duty).
+ *       **Chỉ Manager/Admin có quyền.**
+ *     tags: [Staff]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Staff deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Staff deleted successfully
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     message:
+ *                       type: string
+ *                       example: Staff deleted successfully
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       403:
+ *         $ref: '#/components/responses/ForbiddenError'
+ *       404:
+ *         $ref: '#/components/responses/NotFoundError'
+ *       500:
+ *         description: Internal server error
  *
  * /staff/{id}/status:
  *   patch:
@@ -229,14 +273,12 @@
  *         application/json:
  *           schema:
  *             type: object
+ *             required:
+ *               - position
  *             properties:
- *               role:
- *                 $ref: '#/components/schemas/StaffRole'
- *               permissions:
- *                 type: array
- *                 items:
- *                   type: string
- *                 description: Danh sách quyền cụ thể (optional, cho future use)
+ *               position:
+ *                 type: string
+ *                 enum: [agent, legal_officer, accountant, manager]
  *     responses:
  *       200:
  *         description: Permissions updated successfully

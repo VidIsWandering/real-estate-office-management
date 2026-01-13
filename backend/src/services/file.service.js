@@ -1,5 +1,4 @@
-const fileRepository = require("../repositories/file.repository");
-
+const fileRepository = require('../repositories/file.repository');
 
 class FileService {
   /**
@@ -28,7 +27,7 @@ class FileService {
       const files = await fileRepository.findAll();
 
       return {
-        items: files.map(file => file.toJSON()),
+        items: files.map((file) => file.toJSON()),
       };
     } catch (error) {
       throw new Error('ERROR: FileService - getAllFiles');

@@ -3,10 +3,10 @@
  */
 
 const STAFF_ROLES = {
-  ADMIN: 'admin',
   MANAGER: 'manager',
+  LEGAL_OFFICER: 'legal_officer',
   AGENT: 'agent',
-  STAFF: 'staff',
+  ACCOUNTANT: 'accountant',
 };
 
 const STAFF_STATUS = {

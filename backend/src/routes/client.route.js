@@ -10,7 +10,6 @@ const { authenticate } = require('../middlewares/auth.middleware');
 const { createValidator } = require('../validators/client.validator');
 const { validate } = require('../middlewares/validate.middleware');
 
-
 // All routes require authentication
 router.use(authenticate);
 

@@ -54,7 +54,7 @@ class RealEstateRepository {
       status,
       direction,
       staff_id,
-      owner_id
+      owner_id,
     } = query;
 
     const conditions = [];
@@ -126,9 +126,9 @@ class RealEstateRepository {
       conditions.push(`staff_id = $${values.length}`);
     }
 
-
     // 🔹 Build WHERE clause
-    const whereSQL = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+    const whereSQL =
+      conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
 
     // 🔹 Pagination
     const offset = (page - 1) * limit;
@@ -154,7 +154,7 @@ class RealEstateRepository {
     const countResult = await db.query(countSQL, values);
 
     return {
-      items: dataResult.rows.map(row => new RealEstate(row)),
+      items: dataResult.rows.map((row) => new RealEstate(row)),
       pagination: {
         page: Number(page),
         limit: Number(limit),
@@ -163,7 +163,6 @@ class RealEstateRepository {
       },
     };
   }
-
 
   /**
    * Lấy bản ghi theo id
@@ -237,10 +236,10 @@ class RealEstateRepository {
   }
 
   /**
- * Tìm real estate theo location
- * @param {string} location
- * @returns {Promise<RealEstate[]>}
- */
+   * Tìm real estate theo location
+   * @param {string} location
+   * @returns {Promise<RealEstate[]>}
+   */
   async findByLocation(location) {
     const sql = `
       SELECT *
@@ -252,9 +251,8 @@ class RealEstateRepository {
     const values = [`%${location}%`];
 
     const result = await db.query(sql, values);
-    return result.rows.map(row => new RealEstate(row));
+    return result.rows.map((row) => new RealEstate(row));
   }
-
 }
 
 module.exports = new RealEstateRepository();

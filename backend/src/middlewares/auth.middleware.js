@@ -34,7 +34,7 @@ const authenticate = (req, res, next) => {
       position: decoded.position,
     };
 
-    console.log(req.user)
+    console.log(req.user);
 
     next();
   } catch (error) {
@@ -56,7 +56,7 @@ const authorize = (allowedRoles = []) => {
       return next();
     }
 
-    console.log(req.user.position)
+    console.log(req.user.position);
     if (!allowedRoles.includes(req.user.position)) {
       return forbiddenResponse(
         res,

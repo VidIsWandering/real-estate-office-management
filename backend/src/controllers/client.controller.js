@@ -19,20 +19,19 @@ class ClientController {
     return successResponse(
       res,
       {
-        items: result.items.map(c => c.toJSON()),
+        items: result.items.map((c) => c.toJSON()),
         pagination: result.pagination,
       },
       'Client list retrieved successfully'
     );
   }
 
-
   /**
    * GET /clients/:id
    */
   async getById(req, res) {
     const { id } = req.params;
-    const result = await clientService.getById(id)
+    const result = await clientService.getById(id);
     return successResponse(res, { ...result }, 'Client retrieved successfully');
   }
 
@@ -42,9 +41,9 @@ class ClientController {
   async create(req, res) {
     const rawClientData = req.body;
 
-    const clientData = { ...rawClientData, staff_id: req.user.staff_id }
+    const clientData = { ...rawClientData, staff_id: req.user.staff_id };
 
-    const result = await clientService.create(clientData)
+    const result = await clientService.create(clientData);
     return successResponse(
       res,
       { ...result },
@@ -60,12 +59,8 @@ class ClientController {
     // TODO: Implement
     const { id } = req.params;
     const updateData = req.body;
-    const result = await clientService.update(id, updateData)
-    return successResponse(
-      res,
-      { ...result },
-      'Client updated successfully'
-    );
+    const result = await clientService.update(id, updateData);
+    return successResponse(res, { ...result }, 'Client updated successfully');
   }
 
   /**
@@ -74,8 +69,12 @@ class ClientController {
   async delete(req, res) {
     // TODO: Implement (soft delete)
     const { id } = req.params;
-    const result = await clientService.delete(id)
-    return successResponse(res, { deleted: result }, 'Client deleted successfully');
+    const result = await clientService.delete(id);
+    return successResponse(
+      res,
+      { deleted: result },
+      'Client deleted successfully'
+    );
   }
 
   /**
@@ -84,9 +83,9 @@ class ClientController {
   async getNotes(req, res) {
     // TODO: Implement
     const { id } = req.params;
-    const { from, to } = req.query
-    const query = { client_id: id, from, to }
-    const result = await clientNoteRepository.findAll(query)
+    const { from, to } = req.query;
+    const query = { client_id: id, from, to };
+    const result = await clientNoteRepository.findAll(query);
     return successResponse(
       res,
       { client_id: id, notes: result },
@@ -101,8 +100,8 @@ class ClientController {
     // TODO: Implement
     const { id } = req.params;
     const { content } = req.body;
-    const data = { client_id: id, staff_id: req.user.staff_id, content }
-    const result = await clientService.addNote(data)
+    const data = { client_id: id, staff_id: req.user.staff_id, content };
+    const result = await clientService.addNote(data);
     return successResponse(
       res,
       { ...result },

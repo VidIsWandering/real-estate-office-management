@@ -1,6 +1,5 @@
-
-const { db } = require("../config/database");
-const ClientNote = require("../models/client-note.model");
+const { db } = require('../config/database');
+const ClientNote = require('../models/client-note.model');
 
 class ClientNoteRepository {
   /**
@@ -47,7 +46,8 @@ class ClientNoteRepository {
       conditions.push(`created_at <= $${values.length}`);
     }
 
-    const whereSQL = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+    const whereSQL =
+      conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
 
     const sql = `
       SELECT *
@@ -58,7 +58,7 @@ class ClientNoteRepository {
 
     const result = await db.query(sql, values);
     return {
-      items: result.rows.map(row => new ClientNote(row)),
+      items: result.rows.map((row) => new ClientNote(row)),
       total: result.rows.length,
     };
   }
