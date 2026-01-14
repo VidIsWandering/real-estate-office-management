@@ -10,6 +10,7 @@ const {
   generateRefreshToken,
 } = require('../utils/jwt.util');
 const { STAFF_ROLES } = require('../config/constants');
+const { ValidationError, NotFoundError } = require('../utils/error.util');
 
 class AuthService {
   /**
@@ -22,14 +23,14 @@ class AuthService {
     // Check username đã tồn tại chưa
     const existingAccount = await accountRepository.findByUsername(username);
     if (existingAccount) {
-      throw new Error('Username already exists');
+      throw new ValidationError('Username already exists');
     }
 
     // Check email đã tồn tại chưa (nếu có)
     if (email) {
       const emailExists = await staffRepository.existsByEmail(email);
       if (emailExists) {
-        throw new Error('Email already exists');
+        throw new ValidationError('Email already exists');
       }
     }
 
@@ -64,24 +65,24 @@ class AuthService {
     // Find account
     const account = await accountRepository.findByUsername(username);
     if (!account) {
-      throw new Error('Invalid username or password');
+      throw new ValidationError('Invalid username or password');
     }
 
     // Compare password
     const isPasswordValid = await comparePassword(password, account.password);
     if (!isPasswordValid) {
-      throw new Error('Invalid username or password');
+      throw new ValidationError('Invalid username or password');
     }
 
     // Get staff info
     const staff = await staffRepository.findByAccountId(account.id);
     if (!staff) {
-      throw new Error('Staff profile not found');
+      throw new NotFoundError('Staff profile not found');
     }
 
     // Check staff status
     if (staff.status !== 'working') {
-      throw new Error('Account is not active');
+      throw new ValidationError('Account is not active');
     }
 
     // Generate tokens
@@ -199,6 +200,31 @@ class AuthService {
     await accountRepository.updatePassword(accountId, hashedPassword);
 
     return { message: 'Password changed successfully' };
+  }
+
+  /**
+   * Upload avatar
+   * @param {number} accountId - Account ID
+   * @param {string} avatarPath - Path to uploaded avatar file
+   * @returns {Promise<Object>} Updated staff profile
+   */
+  async uploadAvatar(accountId, avatarPath) {
+    // Get staff profile
+    const staff = await staffRepository.findByAccountId(accountId);
+    if (!staff) {
+      throw new NotFoundError('Staff profile not found');
+    }
+
+    // Update avatar path (relative path for serving)
+    const avatarUrl = `/uploads/avatars/${avatarPath.split('/').pop()}`;
+    const updatedStaff = await staffRepository.update(staff.id, {
+      avatar: avatarUrl,
+    });
+
+    return {
+      avatar: avatarUrl,
+      staff: updatedStaff.toJSON(),
+    };
   }
 
   /**

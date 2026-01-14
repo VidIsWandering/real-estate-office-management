@@ -294,4 +294,333 @@
  *         description: Invalid or expired refresh token
  */
 
+/**
+ * @swagger
+ * /auth/profile/avatar:
+ *   post:
+ *     summary: Upload profile avatar
+ *     description: Upload avatar image for current user profile
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - avatar
+ *             properties:
+ *               avatar:
+ *                 type: string
+ *                 format: binary
+ *                 description: Image file (JPEG, PNG, GIF, WebP, max 5MB)
+ *     responses:
+ *       200:
+ *         description: Avatar uploaded successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Avatar uploaded successfully
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     avatar:
+ *                       type: string
+ *                       example: /uploads/avatars/1-1768320171558.jpg
+ *                     staff:
+ *                       $ref: '#/components/schemas/Staff'
+ *       400:
+ *         description: No file uploaded or invalid file type
+ *       401:
+ *         description: Unauthorized
+ */
+
+/**
+ * @swagger
+ * /auth/sessions:
+ *   get:
+ *     summary: Get all active sessions
+ *     description: Get all active login sessions for current user
+ *     tags: [Security]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Sessions retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Sessions retrieved successfully
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                       ip_address:
+ *                         type: string
+ *                       user_agent:
+ *                         type: string
+ *                       device_info:
+ *                         type: object
+ *                       last_activity:
+ *                         type: string
+ *                         format: date-time
+ *                       expires_at:
+ *                         type: string
+ *                         format: date-time
+ *                       is_current:
+ *                         type: boolean
+ *                       created_at:
+ *                         type: string
+ *                         format: date-time
+ *       401:
+ *         description: Unauthorized
+ */
+
+/**
+ * @swagger
+ * /auth/sessions/{id}:
+ *   delete:
+ *     summary: Revoke a specific session
+ *     description: Logout from a specific session
+ *     tags: [Security]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Session ID
+ *     responses:
+ *       200:
+ *         description: Session revoked successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Session revoked successfully
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     revoked:
+ *                       type: boolean
+ *                       example: true
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Session not found
+ */
+
+/**
+ * @swagger
+ * /auth/sessions/revoke-all:
+ *   post:
+ *     summary: Revoke all sessions except current
+ *     description: Logout from all other sessions
+ *     tags: [Security]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               current_session_id:
+ *                 type: integer
+ *                 description: Current session ID to keep active (optional)
+ *     responses:
+ *       200:
+ *         description: All sessions revoked successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: All sessions revoked successfully
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     revoked_count:
+ *                       type: integer
+ *                       example: 3
+ *       401:
+ *         description: Unauthorized
+ */
+
+/**
+ * @swagger
+ * /auth/login-history:
+ *   get:
+ *     summary: Get login history
+ *     description: Get login/logout history for current user
+ *     tags: [Security]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 100
+ *           default: 50
+ *         description: Number of records to return
+ *     responses:
+ *       200:
+ *         description: Login history retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Login history retrieved successfully
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                       action_type:
+ *                         type: string
+ *                         enum: [LOGIN, LOGOUT, LOGIN_FAILED]
+ *                       ip_address:
+ *                         type: string
+ *                       user_agent:
+ *                         type: string
+ *                       status:
+ *                         type: string
+ *                       created_at:
+ *                         type: string
+ *                         format: date-time
+ *       401:
+ *         description: Unauthorized
+ */
+
+/**
+ * @swagger
+ * /auth/2fa/enable:
+ *   post:
+ *     summary: Enable 2FA (placeholder)
+ *     description: Enable two-factor authentication (not fully implemented)
+ *     tags: [Security]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       501:
+ *         description: 2FA feature not yet implemented
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: 2FA feature not yet implemented - requires OTP library (speakeasy or otplib)
+ */
+
+/**
+ * @swagger
+ * /auth/2fa/disable:
+ *   post:
+ *     summary: Disable 2FA (placeholder)
+ *     description: Disable two-factor authentication (not fully implemented)
+ *     tags: [Security]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       501:
+ *         description: 2FA feature not yet implemented
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: 2FA feature not yet implemented - requires OTP library (speakeasy or otplib)
+ */
+
+/**
+ * @swagger
+ * /auth/2fa/verify:
+ *   post:
+ *     summary: Verify 2FA token (placeholder)
+ *     description: Verify two-factor authentication token (not fully implemented)
+ *     tags: [Security]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - token
+ *             properties:
+ *               token:
+ *                 type: string
+ *                 minLength: 6
+ *                 maxLength: 6
+ *                 example: "123456"
+ *     responses:
+ *       501:
+ *         description: 2FA feature not yet implemented
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: 2FA feature not yet implemented - requires OTP library (speakeasy or otplib)
+ */
+
 module.exports = {};

@@ -56,10 +56,10 @@ describe('Auth API Integration Tests', () => {
           username: 'testadmin',
           password: 'wrongpassword',
         })
-        .expect(500); // Service throws error, caught by error middleware
+        .expect(400); // ValidationError returns 400
 
-      // Error middleware returns error object, not standardized response
-      expect(response.body).toBeDefined();
+      expect(response.body.success).toBe(false);
+      expect(response.body.message).toContain('Invalid username or password');
     });
 
     it('should return 400 with missing fields', async () => {

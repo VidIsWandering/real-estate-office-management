@@ -49,6 +49,16 @@ class AuthController {
     return successResponse(res, result, 'Password changed successfully');
   }
 
+  async uploadAvatar(req, res) {
+    if (!req.file) {
+      throw new Error('No file uploaded');
+    }
+
+    const result = await authService.uploadAvatar(req.user.id, req.file.path);
+
+    return successResponse(res, result, 'Avatar uploaded successfully');
+  }
+
   async refreshToken(req, res) {
     const { refresh_token } = req.body;
     const result = await authService.refreshToken(refresh_token);
@@ -64,6 +74,7 @@ module.exports = {
   login: asyncHandler((req, res) => controller.login(req, res)),
   getProfile: asyncHandler((req, res) => controller.getProfile(req, res)),
   updateProfile: asyncHandler((req, res) => controller.updateProfile(req, res)),
+  uploadAvatar: asyncHandler((req, res) => controller.uploadAvatar(req, res)),
   changePassword: asyncHandler((req, res) =>
     controller.changePassword(req, res)
   ),
