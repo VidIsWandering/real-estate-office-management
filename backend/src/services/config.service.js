@@ -4,11 +4,7 @@
 
 const catalogRepository = require('../repositories/catalog.repository');
 const permissionRepository = require('../repositories/permission.repository');
-const {
-  ValidationError,
-  ConflictError,
-  NotFoundError,
-} = require('../utils/error.util');
+const { ValidationError, NotFoundError } = require('../utils/error.util');
 
 // Valid catalog types
 const VALID_CATALOG_TYPES = [

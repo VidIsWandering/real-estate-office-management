@@ -156,7 +156,7 @@ class CatalogRepository {
    * @throws {Error} If transaction fails (automatically rolls back)
    */
   async updateOrder(items) {
-    const client = await db.pool.connect();
+    const client = await db.connect();
     try {
       await client.query('BEGIN');
 

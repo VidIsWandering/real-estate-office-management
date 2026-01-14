@@ -108,7 +108,7 @@ class PermissionRepository {
    * @throws {Error} If transaction fails (automatically rolls back)
    */
   async bulkUpsert(permissions, updatedBy) {
-    const client = await db.pool.connect();
+    const client = await db.connect();
     try {
       await client.query('BEGIN');
 

@@ -94,7 +94,7 @@ class SecurityService {
    * @param {number} accountId - Account ID
    * @returns {Promise<Object>} 2FA setup data
    */
-  async enable2FA(accountId) {
+  async enable2FA(/* accountId */) {
     // TODO: Implement 2FA with OTP library (speakeasy, otplib)
     // 1. Generate secret
     // 2. Generate QR code
@@ -109,7 +109,7 @@ class SecurityService {
    * @param {number} accountId - Account ID
    * @returns {Promise<Object>} Success message
    */
-  async disable2FA(accountId) {
+  async disable2FA(/* accountId */) {
     // TODO: Implement 2FA disable
     // 1. Verify current password or OTP
     // 2. Remove 2FA secret from account
@@ -124,7 +124,7 @@ class SecurityService {
    * @param {string} token - OTP token
    * @returns {Promise<boolean>} Verification result
    */
-  async verify2FA(accountId, token) {
+  async verify2FA(/* accountId, token */) {
     // TODO: Implement 2FA verification
     // 1. Get 2FA secret from account
     // 2. Verify token against secret

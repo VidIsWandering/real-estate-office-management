@@ -19,7 +19,7 @@ const notFoundHandler = (req, res, next) => {
 /**
  * Global Error Handler
  */
-const errorHandler = (err, req, res, next) => {
+const errorHandler = (err, req, res) => {
   // Log error
   logger.error('Error:', {
     message: err.message,
