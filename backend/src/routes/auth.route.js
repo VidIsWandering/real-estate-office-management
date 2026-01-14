@@ -10,10 +10,6 @@ const securityController = require('../controllers/security.controller');
 const { authenticate } = require('../middlewares/auth.middleware');
 const { validate } = require('../middlewares/validate.middleware');
 const {
-  uploadAvatar,
-  handleUploadError,
-} = require('../middlewares/upload.middleware');
-const {
   registerValidator,
   loginValidator,
   updateProfileValidator,
@@ -58,19 +54,6 @@ router.put(
   updateProfileValidator,
   validate,
   authController.updateProfile
-);
-
-/**
- * @route   POST /api/auth/profile/avatar
- * @desc    Upload profile avatar
- * @access  Private
- */
-router.post(
-  '/profile/avatar',
-  authenticate,
-  uploadAvatar,
-  handleUploadError,
-  authController.uploadAvatar
 );
 
 /**

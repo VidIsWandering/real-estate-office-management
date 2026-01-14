@@ -296,56 +296,6 @@
 
 /**
  * @swagger
- * /auth/profile/avatar:
- *   post:
- *     summary: Upload profile avatar
- *     description: Upload avatar image for current user profile
- *     tags: [Auth]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         multipart/form-data:
- *           schema:
- *             type: object
- *             required:
- *               - avatar
- *             properties:
- *               avatar:
- *                 type: string
- *                 format: binary
- *                 description: Image file (JPEG, PNG, GIF, WebP, max 5MB)
- *     responses:
- *       200:
- *         description: Avatar uploaded successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 message:
- *                   type: string
- *                   example: Avatar uploaded successfully
- *                 data:
- *                   type: object
- *                   properties:
- *                     avatar:
- *                       type: string
- *                       example: /uploads/avatars/1-1768320171558.jpg
- *                     staff:
- *                       $ref: '#/components/schemas/Staff'
- *       400:
- *         description: No file uploaded or invalid file type
- *       401:
- *         description: Unauthorized
- */
-
-/**
- * @swagger
  * /auth/sessions:
  *   get:
  *     summary: Get all active sessions

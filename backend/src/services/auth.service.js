@@ -203,31 +203,6 @@ class AuthService {
   }
 
   /**
-   * Upload avatar
-   * @param {number} accountId - Account ID
-   * @param {string} avatarPath - Path to uploaded avatar file
-   * @returns {Promise<Object>} Updated staff profile
-   */
-  async uploadAvatar(accountId, avatarPath) {
-    // Get staff profile
-    const staff = await staffRepository.findByAccountId(accountId);
-    if (!staff) {
-      throw new NotFoundError('Staff profile not found');
-    }
-
-    // Update avatar path (relative path for serving)
-    const avatarUrl = `/uploads/avatars/${avatarPath.split('/').pop()}`;
-    const updatedStaff = await staffRepository.update(staff.id, {
-      avatar: avatarUrl,
-    });
-
-    return {
-      avatar: avatarUrl,
-      staff: updatedStaff.toJSON(),
-    };
-  }
-
-  /**
    * Refresh token (optional - có thể implement sau)
    */
   async refreshToken() {

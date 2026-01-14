@@ -112,27 +112,23 @@ notification_settings.sms_enabled    → sms
 
 **Frontend Requirements:**
 
-- Personal information (name, email, phone, position)
-- Profile photo upload
+- Personal information (name, email, phone, role, status)
+- Edit form for updating profile
 - Change password
 
 **Backend APIs:**
 
 - ✅ `GET /auth/profile` - Lấy thông tin profile
-- ✅ `PUT /auth/profile` - Cập nhật profile (name, email, phone, etc.)
-- ✅ `POST /auth/profile/avatar` - Upload avatar (multer, 5MB max)
+- ✅ `PUT /auth/profile` - Cập nhật profile (name, email, phone, address)
 - ✅ `PUT /auth/change-password` - Đổi mật khẩu
 
 **Implementation Details:**
 
-- Avatar Upload: Multer middleware, JPEG/PNG/GIF/WebP, max 5MB
-- Filename: `{accountId}-{timestamp}.{ext}`
-- Storage: `backend/uploads/avatars/`
-- Validation: File type, size limit, authentication
+- Profile fields: full_name, email, phone_number, address, assigned_area
+- Password validation: min 6 chars, requires current password
+- Email uniqueness check
 
-**Status**: ✅ **Đầy đủ** - 4/4 endpoints hoàn thành
-
-**Documentation**: [account-tab-api.md](./account-tab-api.md)
+**Status**: ✅ **Đầy đủ** - 3/3 endpoints hoàn thành
 
 ---
 
@@ -196,7 +192,7 @@ notification_settings.sms_enabled    → sms
 | **Config**        | ✅       | ✅ 7/7 endpoints                        | **Hoàn thành** | 29 tests ✅       |
 | **Office**        | ✅       | ✅ 2/2 endpoints                        | **Hoàn thành** | Via system ✅     |
 | **Notifications** | ✅       | ✅ 2/2 endpoints                        | **Hoàn thành** | Via system ✅     |
-| **Account**       | ✅       | ✅ 4/4 endpoints                        | **Hoàn thành** | 12 tests ✅       |
+| **Account**       | ✅       | ✅ 3/3 endpoints                        | **Hoàn thành** | 12 tests ✅       |
 | **Security**      | ✅       | ✅ 4/7 production<br>⚠️ 3/7 placeholder | **Hoàn thành** | 0 tests (pending) |
 | **Integrations**  | ✅       | ❌ Skipped                              | **Bỏ qua**     | N/A               |
 

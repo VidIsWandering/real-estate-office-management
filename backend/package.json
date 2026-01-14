@@ -12,6 +12,7 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write \"src/**/*.{js,json}\"",
     "check:format": "prettier --check \"src/**/*.{js,json}\"",
+    "db:migrate": "node scripts/run-migrations.js",
     "db:reset": "docker-compose down -v && docker-compose up -d db",
     "docker:dev": "docker-compose up -d db backend",
     "docker:down": "docker-compose down",
