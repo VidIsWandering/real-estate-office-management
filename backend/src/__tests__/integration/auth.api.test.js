@@ -35,7 +35,7 @@ describe('Auth API Integration Tests', () => {
         .post('/api/v1/auth/login')
         .send({
           username: 'testadmin',
-          password: 'password123',
+          password: 'Password123',
         })
         .expect(200);
 
@@ -83,10 +83,12 @@ describe('Auth API Integration Tests', () => {
         .expect(200);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.data).toHaveProperty('account');
-      expect(response.body.data).toHaveProperty('staff');
-      expect(response.body.data.staff).toHaveProperty('preferences');
-      expect(response.body.data.staff.preferences).toEqual({
+      expect(response.body.data).toHaveProperty('id');
+      expect(response.body.data).toHaveProperty('username');
+      expect(response.body.data).toHaveProperty('full_name');
+      expect(response.body.data).toHaveProperty('position');
+      expect(response.body.data).toHaveProperty('preferences');
+      expect(response.body.data.preferences).toEqual({
         email: true,
         sms: false,
         push: true,
@@ -116,9 +118,9 @@ describe('Auth API Integration Tests', () => {
         .expect(200);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.data.staff.full_name).toBe('Updated Admin Name');
-      expect(response.body.data.staff.email).toBe('updated.admin@test.com');
-      expect(response.body.data.staff.phone_number).toBe('0987654321');
+      expect(response.body.data.full_name).toBe('Updated Admin Name');
+      expect(response.body.data.email).toBe('updated.admin@test.com');
+      expect(response.body.data.phone_number).toBe('0987654321');
     });
 
     it('should update preferences successfully', async () => {
@@ -135,7 +137,7 @@ describe('Auth API Integration Tests', () => {
         .expect(200);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.data.staff.preferences).toEqual({
+      expect(response.body.data.preferences).toEqual({
         email: false,
         sms: true,
         push: false,
@@ -173,7 +175,7 @@ describe('Auth API Integration Tests', () => {
         .put('/api/v1/auth/change-password')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
-          old_password: 'password123',
+          current_password: 'Password123',
           new_password: 'newpassword456',
           confirm_password: 'newpassword456',
         })
@@ -199,13 +201,13 @@ describe('Auth API Integration Tests', () => {
         .put('/api/v1/auth/change-password')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
-          old_password: 'wrongpassword',
+          current_password: 'wrongpassword',
           new_password: 'newpassword456',
           confirm_password: 'newpassword456',
         })
-        .expect(500); // Service throws error, caught by error middleware
+        .expect(400); // Service throws ValidationError, handled by middleware
 
-      // Error middleware returns error object, not standardized response
+      // Error middleware returns error response
       expect(response.body).toBeDefined();
     });
 
@@ -214,7 +216,7 @@ describe('Auth API Integration Tests', () => {
         .put('/api/v1/auth/change-password')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
-          old_password: 'password123',
+          current_password: 'Password123',
           new_password: 'newpassword456',
           confirm_password: 'differentpassword',
         })
