@@ -11,11 +11,26 @@ CREATE TABLE account (
     username VARCHAR(50) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     is_active BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX idx_account_username ON account(username);
 CREATE INDEX idx_account_active ON account(is_active);
+
+-- Trigger to auto-update updated_at
+CREATE OR REPLACE FUNCTION update_account_updated_at()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_account_updated_at
+    BEFORE UPDATE ON account
+    FOR EACH ROW
+    EXECUTE FUNCTION update_account_updated_at();
 
 -- ============================================================================
 -- 2. STAFF
@@ -35,6 +50,8 @@ CREATE TABLE staff (
     position staff_position_enum NOT NULL DEFAULT 'agent',
     status staff_status_enum DEFAULT 'working',
     preferences JSONB DEFAULT '{}',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     
     CONSTRAINT fk_staff_account 
         FOREIGN KEY (account_id) 
@@ -379,6 +396,32 @@ CREATE INDEX idx_audit_log_target ON audit_log(target_type, target_id);
 CREATE INDEX idx_audit_log_created ON audit_log(created_at);
 
 -- ============================================================================
+-- 13. LOGIN_SESSION - Active login sessions tracking
+-- ============================================================================
+CREATE TABLE login_session (
+    id SERIAL PRIMARY KEY,
+    account_id BIGINT NOT NULL,
+    token_hash VARCHAR(255) NOT NULL,
+    ip_address INET,
+    user_agent TEXT,
+    device_info JSONB,
+    last_activity TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    expires_at TIMESTAMP NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    
+    CONSTRAINT fk_login_session_account 
+        FOREIGN KEY (account_id) 
+        REFERENCES account(id) 
+        ON DELETE CASCADE
+);
+
+CREATE INDEX idx_login_session_account ON login_session(account_id);
+CREATE INDEX idx_login_session_token ON login_session(token_hash);
+CREATE INDEX idx_login_session_expires ON login_session(expires_at);
+CREATE INDEX idx_login_session_active ON login_session(is_active, expires_at);
+
+-- ============================================================================
 -- 10. SYSTEM_CONFIG - System configuration with JSONB storage
 -- ============================================================================
 CREATE TABLE system_config (
@@ -396,6 +439,24 @@ CREATE TABLE system_config (
 
 CREATE INDEX idx_system_config_updated_by ON system_config(updated_by);
 CREATE INDEX idx_system_config_updated_at ON system_config(updated_at);
+
+-- Insert default system configurations
+INSERT INTO system_config (key, value, description) VALUES
+    ('company_info', '{
+        "company_name": "Real Estate Office",
+        "address": "123 Main St, City",
+        "phone": "0123456789",
+        "email": "info@example.com",
+        "website": "https://example.com",
+        "tax_code": "1234567890"
+    }'::jsonb, 'Company information for Office settings'),
+    
+    ('notification_settings', '{
+        "email": true,
+        "sms": false,
+        "in_app": true,
+        "desktop": false
+    }'::jsonb, 'Notification preferences');
 
 -- ============================================================================
 -- 11. CONFIG_CATALOG - Configurable catalogs (property types, areas, sources, contract types)
@@ -536,7 +597,59 @@ INSERT INTO role_permission (position, resource, permission, is_granted) VALUES
     ('accountant', 'payments', 'edit', true),
     ('accountant', 'properties', 'view', true),
     ('accountant', 'partners', 'view', true),
-    ('accountant', 'staff', 'view', true);
+    ('accountant', 'staff', 'view', true),
+    
+    -- Manager permissions (full access to most resources)
+    ('manager', 'transactions', 'view', true),
+    ('manager', 'transactions', 'add', true),
+    ('manager', 'transactions', 'edit', true),
+    ('manager', 'transactions', 'delete', true),
+    ('manager', 'contracts', 'view', true),
+    ('manager', 'contracts', 'add', true),
+    ('manager', 'contracts', 'edit', true),
+    ('manager', 'contracts', 'delete', true),
+    ('manager', 'payments', 'view', true),
+    ('manager', 'payments', 'add', true),
+    ('manager', 'payments', 'edit', true),
+    ('manager', 'payments', 'delete', true),
+    ('manager', 'properties', 'view', true),
+    ('manager', 'properties', 'add', true),
+    ('manager', 'properties', 'edit', true),
+    ('manager', 'properties', 'delete', true),
+    ('manager', 'partners', 'view', true),
+    ('manager', 'partners', 'add', true),
+    ('manager', 'partners', 'edit', true),
+    ('manager', 'partners', 'delete', true),
+    ('manager', 'staff', 'view', true),
+    ('manager', 'staff', 'add', true),
+    ('manager', 'staff', 'edit', true),
+    ('manager', 'staff', 'delete', true),
+    
+    -- Admin permissions (full access to everything)
+    ('admin', 'transactions', 'view', true),
+    ('admin', 'transactions', 'add', true),
+    ('admin', 'transactions', 'edit', true),
+    ('admin', 'transactions', 'delete', true),
+    ('admin', 'contracts', 'view', true),
+    ('admin', 'contracts', 'add', true),
+    ('admin', 'contracts', 'edit', true),
+    ('admin', 'contracts', 'delete', true),
+    ('admin', 'payments', 'view', true),
+    ('admin', 'payments', 'add', true),
+    ('admin', 'payments', 'edit', true),
+    ('admin', 'payments', 'delete', true),
+    ('admin', 'properties', 'view', true),
+    ('admin', 'properties', 'add', true),
+    ('admin', 'properties', 'edit', true),
+    ('admin', 'properties', 'delete', true),
+    ('admin', 'partners', 'view', true),
+    ('admin', 'partners', 'add', true),
+    ('admin', 'partners', 'edit', true),
+    ('admin', 'partners', 'delete', true),
+    ('admin', 'staff', 'view', true),
+    ('admin', 'staff', 'add', true),
+    ('admin', 'staff', 'edit', true),
+    ('admin', 'staff', 'delete', true);
 
 -- ============================================================================
 -- Comments
@@ -551,8 +664,12 @@ COMMENT ON TABLE contract IS 'Hợp đồng';
 COMMENT ON TABLE voucher IS 'Chứng từ thu chi';
 COMMENT ON TABLE client_note IS 'Lịch sử liên hệ khách hàng (UC2.2)';
 COMMENT ON TABLE audit_log IS 'Audit logs - ai đã làm gì lúc nào (UC9.3)';
+COMMENT ON TABLE login_session IS 'Active login sessions with refresh tokens';
+COMMENT ON TABLE system_config IS 'System-wide configuration with JSONB storage';
+COMMENT ON TABLE config_catalog IS 'Configurable catalogs for property types, areas, sources, contract types';
+COMMENT ON TABLE role_permission IS 'RBAC permission matrix for different staff positions';
 
-COMMENT ON TYPE staff_position_enum IS 'Vị trí nhân viên: manager (quản lý), agent (môi giới), legal_officer (pháp lý), accountant (kế toán)';
+COMMENT ON TYPE staff_position_enum IS 'Vị trí nhân viên: admin (system admin), manager (quản lý), agent (môi giới), legal_officer (pháp lý), accountant (kế toán)';
 COMMENT ON TYPE client_type_enum IS 'Loại khách hàng: buyer (người mua), seller (người bán), landlord (chủ nhà cho thuê), tenant (người thuê)';
 COMMENT ON TYPE transaction_type_enum IS 'Loại giao dịch BĐS: sale (bán), rent (cho thuê)';
 COMMENT ON TYPE real_estate_status_enum IS 'Trạng thái BĐS: created, pending_legal_check, listed, negotiating, transacted, suspended';

@@ -1,8 +1,29 @@
 # Database Migrations Guide
 
+## ⚠️ Important: When to Use Migrations
+
+### Local Development: Use `script.sql` ✅
+
+- **File:** `backend/script.sql` (complete schema)
+- **Method:** Automatic via Docker Compose
+- **When:** Every time you start fresh containers
+- **Command:** `docker-compose up -d` (no manual steps!)
+- **See:** [LOCAL_DEV_SETUP.md](../../LOCAL_DEV_SETUP.md) for details
+
+### Production (Neon): Use Migrations ✅
+
+- **Files:** `backend/migrations/001-008.sql` (incremental)
+- **Method:** Manual apply or `run-migrations.js` script
+- **When:** Deploying feature/setting branch to production
+- **Purpose:** Update existing database without data loss
+
+---
+
 ## Overview
 
-This directory contains all database migrations for the Real Estate Office Management System. Migrations must be applied in numerical order when deploying to production (Neon database).
+This directory contains **incremental migrations** for production deployment (Neon database). These migrations update an **existing** database from develop branch schema to include Settings page features.
+
+**DO NOT use these migrations for local development!** Local dev uses `script.sql` for complete schema initialization.
 
 ## Migration Files
 
@@ -86,10 +107,15 @@ This directory contains all database migrations for the Real Estate Office Manag
 
 ### add_security_features.sql
 
-**Note:** This is a legacy/duplicate migration. The features are already covered by:
+**Status:** ❌ **DELETED** - Legacy/duplicate file
+**Reason:**
 
-- `001_add_login_session.sql` - for login_session table
-- Audit log fields are in base schema
+- Did not follow naming convention (no number prefix)
+- Conflicted with 001_add_login_session.sql
+- Had incorrect data types (INTEGER vs BIGINT)
+- File has been removed from repository
+
+---
 
 ## How to Apply Migrations
 
