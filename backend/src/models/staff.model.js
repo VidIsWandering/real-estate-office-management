@@ -18,6 +18,8 @@ class Staff {
       sms: false,
       push: true,
     };
+    this.created_at = data.created_at;
+    this.updated_at = data.updated_at;
   }
 
   /**
@@ -35,6 +37,8 @@ class Staff {
       position: this.position,
       status: this.status,
       preferences: this.preferences,
+      created_at: this.created_at,
+      updated_at: this.updated_at,
     };
   }
 }

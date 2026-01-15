@@ -59,6 +59,18 @@ router.get(
 );
 
 /**
+ * @route   GET /api/v1/system/configs
+ * @desc    Get all system configurations as array
+ * @access  Private (Manager/Admin only)
+ */
+router.get(
+  '/system/configs',
+  authenticate,
+  authorize([STAFF_ROLES.MANAGER, STAFF_ROLES.ADMIN]),
+  systemController.getAllConfigs
+);
+
+/**
  * @route   PUT /api/v1/system/config
  * @desc    Update system configuration
  * @access  Private (Admin only)
@@ -70,6 +82,18 @@ router.put(
   ...updateConfigSchema,
   validate,
   systemController.updateConfig
+);
+
+/**
+ * @route   PUT /api/v1/system/configs/:key
+ * @desc    Update individual system configuration
+ * @access  Private (Manager/Admin only)
+ */
+router.put(
+  '/system/configs/:key',
+  authenticate,
+  authorize([STAFF_ROLES.MANAGER, STAFF_ROLES.ADMIN]),
+  systemController.updateSingleConfig
 );
 
 /**

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Pencil, Save, Trash2, X, Loader2, AlertCircle } from "lucide-react";
@@ -27,23 +27,23 @@ export function CatalogList({ title, type, addPlaceholder }: CatalogListProps) {
   const [editingValue, setEditingValue] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  // Load catalogs on mount
-  useEffect(() => {
-    loadCatalogs();
-  }, [type]);
-
-  const loadCatalogs = async () => {
+  const loadCatalogs = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
       const response = await getCatalogsByType(type);
       setCatalogs(response.data);
-    } catch (err: any) {
-      setError(err.message || "Failed to load catalogs");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to load catalogs");
     } finally {
       setLoading(false);
     }
-  };
+  }, [type]);
+
+  // Load catalogs on mount
+  useEffect(() => {
+    loadCatalogs();
+  }, [loadCatalogs]);
 
   const handleAdd = async () => {
     const value = newValue.trim();
@@ -54,8 +54,8 @@ export function CatalogList({ title, type, addPlaceholder }: CatalogListProps) {
       const response = await createCatalog({ type, value });
       setCatalogs([response.data, ...catalogs]);
       setNewValue("");
-    } catch (err: any) {
-      alert(err.message || "Failed to add catalog");
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "Failed to add catalog");
     } finally {
       setSubmitting(false);
     }
@@ -79,13 +79,13 @@ export function CatalogList({ title, type, addPlaceholder }: CatalogListProps) {
 
     try {
       setSubmitting(true);
-      const response = await updateCatalog(editingId, { value });
+      const response = await updateCatalog(type, editingId, { value });
       setCatalogs(
         catalogs.map((c) => (c.id === editingId ? response.data : c))
       );
       handleCancelEdit();
-    } catch (err: any) {
-      alert(err.message || "Failed to update catalog");
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "Failed to update catalog");
     } finally {
       setSubmitting(false);
     }
@@ -97,13 +97,13 @@ export function CatalogList({ title, type, addPlaceholder }: CatalogListProps) {
 
     try {
       setSubmitting(true);
-      await deleteCatalog(catalog.id);
+      await deleteCatalog(type, catalog.id);
       setCatalogs(catalogs.filter((c) => c.id !== catalog.id));
       if (editingId === catalog.id) {
         handleCancelEdit();
       }
-    } catch (err: any) {
-      alert(err.message || "Failed to delete catalog");
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "Failed to delete catalog");
     } finally {
       setSubmitting(false);
     }

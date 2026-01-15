@@ -23,18 +23,20 @@ help:
 	@echo "  make setup        Full setup (install + create .env files)"
 	@echo ""
 	@echo "$(YELLOW)Development:$(NC)"
-	@echo "  make dev          Start backend + database (hot-reload)"
-	@echo "  make dev-full     Start all services (backend + frontend + db)"
-	@echo "  make dev-tools    Start backend + db + Adminer (db GUI)"
+	@echo "  make dev          Start backend + frontend + database (hot-reload)"
 	@echo "  make up           Start all services in background"
 	@echo "  make down         Stop all services"
-	@echo "  make logs         View backend logs"
+	@echo "  make restart      Restart all services (down + up)"
+	@echo "  make rebuild      Rebuild and restart all services"
+	@echo "  make logs         View all service logs"
+	@echo "  make logs-backend View backend logs"
+	@echo "  make logs-frontend View frontend logs"
 	@echo "  make logs-db      View database logs"
 	@echo ""
 	@echo "$(YELLOW)Database:$(NC)"
 	@echo "  make db-reset     Reset database (delete all data + re-init)"
 	@echo "  make db-shell     Open PostgreSQL shell"
-	@echo "  make db-gui       Start Adminer (database web GUI)"
+	@echo "  make adminer      Start Adminer (database web GUI)"
 	@echo ""
 	@echo "$(YELLOW)Testing & Quality:$(NC)"
 	@echo "  make test         Run backend tests"
@@ -79,29 +81,46 @@ setup: install
 # ==============================================================================
 
 dev:
-	@echo "🚀 Starting development environment (backend + database)..."
-	docker-compose up db backend
-
-dev-full:
-	@echo "🚀 Starting full development environment..."
-	docker-compose --profile full up
+	@echo "🚀 Starting development environment (all services)..."
+	docker-compose up
 
 up:
-	@echo "🚀 Starting services in background..."
-	docker-compose up -d db backend
+	@echo "🚀 Starting all services in background..."
+	docker-compose up -d
 	@echo ""
 	@echo "✅ Services started!"
+	@echo "   - Frontend:    http://localhost:3000"
 	@echo "   - Backend API: http://localhost:8081"
 	@echo "   - API Docs:    http://localhost:8081/api-docs"
-	@echo "   - Health:      http://localhost:8081/health"
+	@echo "   - Database:    localhost:5433"
 	@echo ""
+	@echo "💡 Run 'make adminer' to start database GUI"
+	@echo "💡 Run 'make logs' to view logs"
+	@echo ""
+
+restart:
+	@echo "🔄 Restarting services..."
+	docker-compose restart
+	@echo "✅ Services restarted!"
+
+rebuild:
+	@echo "🔨 Rebuilding and restarting services..."
+	docker-compose down
+	docker-compose up -d --build
+	@echo "✅ Services rebuilt and started!"
 
 down:
 	@echo "🛑 Stopping all services..."
 	docker-compose down
 
 logs:
+	docker-compose logs -f
+
+logs-backend:
 	docker-compose logs -f backend
+
+logs-frontend:
+	docker-compose logs -f frontend
 
 logs-db:
 	docker-compose logs -f db
@@ -121,27 +140,27 @@ db-reset:
 	@echo "✅ Database reset complete!"
 
 db-shell:
-	docker-compose exec db psql -U $$POSTGRES_USER -d $$POSTGRES_DB
+	docker-compose exec db psql -U devuser -d se100_dev_db
 
-db-gui:
+adminer:
 	@echo "🗄️  Starting Adminer (Database Web GUI)..."
-	@echo "⚠️  Note: If services are already running, you may need to restart with 'make down' first"
-	docker-compose --profile tools up -d db adminer
+	docker-compose --profile tools up -d adminer
 	@echo ""
 	@echo "✅ Adminer started!"
 	@echo "   - URL: http://localhost:8082"
 	@echo "   - System: PostgreSQL"
 	@echo "   - Server: db"
-	@echo "   - Username: (see docker-compose.yml or .env)"
-	@echo "   - Password: (see docker-compose.yml or .env)"
+	@echo "   - Username: devuser"
+	@echo "   - Password: devpassword"
 	@echo "   - Database: se100_dev_db"
 	@echo ""
 
 dev-with-tools:
-	@echo "🚀 Starting development environment with database GUI..."
-	docker-compose --profile tools up db backend adminer
+	@echo "🚀 Starting development environment with all tools..."
+	docker-compose --profile tools up
 
-dev-tools: dev-with-tools
+# Alias
+db-gui: adminer
 
 # ==============================================================================
 # TESTING & QUALITY

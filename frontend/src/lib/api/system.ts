@@ -9,7 +9,7 @@ import { get, put, getAuthToken } from "./client";
 
 export interface SystemConfig {
   key: string;
-  value: any;
+  value: unknown;
   updated_at: string;
 }
 
@@ -31,7 +31,7 @@ export async function getAllSystemConfigs(): Promise<{
  */
 export async function updateSystemConfig(
   key: string,
-  value: any
+  value: unknown
 ): Promise<{ success: boolean; data: SystemConfig }> {
   const token = getAuthToken();
   return put(`/system/configs/${key}`, { value }, token);

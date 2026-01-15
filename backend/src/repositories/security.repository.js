@@ -198,15 +198,15 @@ class SecurityRepository {
       SELECT 
         id,
         action_type,
-        timestamp,
+        created_at as login_at,
         ip_address,
         user_agent,
         status,
         details
       FROM audit_log
       WHERE actor_id = $1 
-        AND action_type IN ('LOGIN', 'LOGOUT', 'LOGIN_FAILED')
-      ORDER BY timestamp DESC
+        AND action_type IN ('login', 'logout')
+      ORDER BY created_at DESC
       LIMIT $2
     `;
 

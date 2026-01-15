@@ -41,7 +41,7 @@ export async function getCatalogsByType(
   type: Catalog["type"]
 ): Promise<{ success: boolean; data: Catalog[] }> {
   const token = getAuthToken();
-  return get(`/config/catalogs?type=${type}`, token);
+  return get(`/config/catalogs/${type}`, token);
 }
 
 /**
@@ -52,28 +52,30 @@ export async function createCatalog(data: {
   value: string;
 }): Promise<{ success: boolean; data: Catalog }> {
   const token = getAuthToken();
-  return post("/config/catalogs", data, token);
+  return post(`/config/catalogs/${data.type}`, { value: data.value }, token);
 }
 
 /**
  * Update catalog
  */
 export async function updateCatalog(
+  type: Catalog["type"],
   id: number,
   data: { value: string }
 ): Promise<{ success: boolean; data: Catalog }> {
   const token = getAuthToken();
-  return put(`/config/catalogs/${id}`, data, token);
+  return put(`/config/catalogs/${type}/${id}`, data, token);
 }
 
 /**
  * Delete catalog (soft delete)
  */
 export async function deleteCatalog(
+  type: Catalog["type"],
   id: number
 ): Promise<{ success: boolean; message: string }> {
   const token = getAuthToken();
-  return del(`/config/catalogs/${id}`, token);
+  return del(`/config/catalogs/${type}/${id}`, token);
 }
 
 /**
@@ -113,9 +115,9 @@ export async function getPermissionsByPosition(
 /**
  * Update permissions
  */
-export async function updatePermissions(data: {
-  permissions: PermissionMatrix;
-}): Promise<{ success: boolean; data: Permission[] }> {
+export async function updatePermissions(
+  permissions: PermissionMatrix
+): Promise<{ success: boolean; data: Permission[] }> {
   const token = getAuthToken();
-  return put("/config/permissions", data, token);
+  return put("/config/permissions", permissions, token);
 }

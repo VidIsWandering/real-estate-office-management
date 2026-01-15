@@ -32,9 +32,9 @@ const roles: Array<{ key: RoleKey; label: string }> = [
 const forms: Array<{ key: string; label: string }> = [
   { key: "transactions", label: "Transactions" },
   { key: "contracts", label: "Contracts" },
-  { key: "vouchers", label: "Vouchers / Payments" },
+  { key: "payments", label: "Payments" },
   { key: "properties", label: "Properties" },
-  { key: "clients", label: "Clients / Partners" },
+  { key: "partners", label: "Partners" },
   { key: "staff", label: "Staff" },
 ];
 
@@ -57,8 +57,10 @@ export function ConfigTab() {
       setError(null);
       const response = await getAllPermissions();
       setPermissions(response.data);
-    } catch (err: any) {
-      setError(err.message || "Failed to load permissions");
+    } catch (err: unknown) {
+      setError(
+        err instanceof Error ? err.message : "Failed to load permissions"
+      );
     } finally {
       setLoading(false);
     }
@@ -91,11 +93,15 @@ export function ConfigTab() {
       setSaving(true);
       setSaveSuccess(false);
       setError(null);
-      await updatePermissions({ permissions });
+      await updatePermissions(permissions);
+      // Reload from backend to confirm save
+      await loadPermissions();
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
-    } catch (err: any) {
-      setError(err.message || "Failed to save permissions");
+    } catch (err: unknown) {
+      setError(
+        err instanceof Error ? err.message : "Failed to save permissions"
+      );
     } finally {
       setSaving(false);
     }

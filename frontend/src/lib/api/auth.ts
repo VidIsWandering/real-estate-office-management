@@ -17,7 +17,7 @@ export interface UserProfile {
   assigned_area: string | null;
   position: string;
   status: string;
-  preferences: any;
+  preferences: Record<string, unknown> | null;
   created_at: string;
   updated_at: string;
 }
@@ -60,7 +60,7 @@ export async function updateProfile(data: {
   email?: string;
   phone_number?: string;
   address?: string;
-  preferences?: any;
+  preferences?: Record<string, unknown>;
 }): Promise<{ success: boolean; data: UserProfile }> {
   const token = getAuthToken();
   return put("/auth/profile", data, token);
