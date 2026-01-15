@@ -48,8 +48,7 @@ describe('Auth API Integration Tests', () => {
       expect(response.body.data.staff.position).toBe('admin');
     });
 
-    it.skip('should return 400 with invalid credentials', async () => {
-      // TODO: Fix this test - response.body is empty {}
+    it('should return 400 with invalid credentials', async () => {
       const response = await request(app)
         .post('/api/v1/auth/login')
         .send({

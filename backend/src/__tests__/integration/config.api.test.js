@@ -142,8 +142,7 @@ describe('Config API Integration Tests', () => {
       expect(res.body.success).toBe(false);
     });
 
-    it.skip('should reject duplicate value', async () => {
-      // TODO: Fix - response.body is empty {}
+    it('should reject duplicate value', async () => {
       const uniqueValue = 'Duplicate Test ' + Date.now();
 
       // Create first
@@ -202,8 +201,7 @@ describe('Config API Integration Tests', () => {
       expect(res.body.data.value).toBe(newValue);
     });
 
-    it.skip('should reject non-existent catalog', async () => {
-      // TODO: Fix - response.body is empty {}
+    it('should reject non-existent catalog', async () => {
       const res = await request(app)
         .put('/api/v1/config/catalogs/lead_source/99999')
         .set('Authorization', `Bearer ${managerToken}`)
@@ -265,8 +263,7 @@ describe('Config API Integration Tests', () => {
       expect(deleted).toBeUndefined(); // Should not appear in active list
     });
 
-    it.skip('should reject non-existent catalog', async () => {
-      // TODO: Fix - response.body is empty {}
+    it('should reject non-existent catalog', async () => {
       const res = await request(app)
         .delete('/api/v1/config/catalogs/contract_type/99999')
         .set('Authorization', `Bearer ${managerToken}`);
