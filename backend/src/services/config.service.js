@@ -15,7 +15,13 @@ const VALID_CATALOG_TYPES = [
 ];
 
 // Valid positions for permissions
-const VALID_POSITIONS = ['agent', 'legal_officer', 'accountant'];
+const VALID_POSITIONS = [
+  'admin',
+  'manager',
+  'agent',
+  'legal_officer',
+  'accountant',
+];
 
 // Valid resources
 const VALID_RESOURCES = [

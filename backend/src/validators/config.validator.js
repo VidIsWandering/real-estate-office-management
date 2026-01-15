@@ -10,7 +10,13 @@ const VALID_CATALOG_TYPES = [
   'lead_source',
   'contract_type',
 ];
-const VALID_POSITIONS = ['agent', 'legal_officer', 'accountant'];
+const VALID_POSITIONS = [
+  'admin',
+  'manager',
+  'agent',
+  'legal_officer',
+  'accountant',
+];
 const VALID_RESOURCES = [
   'transactions',
   'contracts',
