@@ -83,11 +83,6 @@ const errorHandler = (err, req, res) => {
     response.error = err;
   }
 
-  // Log response for debugging
-  if (statusCode === 400) {
-    logger.info('Error response:', { statusCode, message: response.message });
-  }
-
   return res.status(statusCode).json(response);
 };
 

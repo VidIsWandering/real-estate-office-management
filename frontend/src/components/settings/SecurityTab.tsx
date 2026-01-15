@@ -87,7 +87,10 @@ export function SecurityTab() {
       setShowPasswords({ current: false, new: false, confirm: false });
       setTimeout(() => setPasswordSuccess(false), 3000);
     } catch (err: unknown) {
-      console.error("Change password error:", err);
+      // Log error details for debugging
+      if (process.env.NODE_ENV === "development") {
+        console.error("Change password error:", err);
+      }
 
       if (err instanceof ApiError) {
         // Check if we have a meaningful message
