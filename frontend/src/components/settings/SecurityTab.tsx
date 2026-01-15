@@ -63,7 +63,7 @@ export function SecurityTab() {
 
     if (!passwordRegex.test(passwordData.newPassword)) {
       setPasswordError(
-        "Password must be at least 6 characters and include uppercase, lowercase, and a number"
+        "Password must be at least 6 characters and include uppercase, lowercase, and a number",
       );
       return;
     }
@@ -128,7 +128,7 @@ export function SecurityTab() {
       setLoginHistory(response.data.slice(0, 10)); // Last 10 logins
     } catch (err: unknown) {
       setHistoryError(
-        err instanceof Error ? err.message : "Failed to load login history"
+        err instanceof Error ? err.message : "Failed to load login history",
       );
     } finally {
       setLoadingHistory(false);
@@ -153,7 +153,7 @@ export function SecurityTab() {
       setActiveSessions(response.data);
     } catch (err: unknown) {
       setSessionsError(
-        err instanceof Error ? err.message : "Failed to load active sessions"
+        err instanceof Error ? err.message : "Failed to load active sessions",
       );
     } finally {
       setLoadingSessions(false);
@@ -167,7 +167,7 @@ export function SecurityTab() {
       setRevokingSession(sessionId);
       await revokeSession(sessionId);
       setActiveSessions((sessions) =>
-        sessions.filter((s) => s.id !== sessionId)
+        sessions.filter((s) => s.id !== sessionId),
       );
     } catch (err: unknown) {
       alert(err instanceof Error ? err.message : "Failed to revoke session");
@@ -179,7 +179,7 @@ export function SecurityTab() {
   const handleRevokeAllSessions = async () => {
     if (
       !confirm(
-        "Revoke all other sessions? All other devices will be logged out."
+        "Revoke all other sessions? All other devices will be logged out.",
       )
     )
       return;

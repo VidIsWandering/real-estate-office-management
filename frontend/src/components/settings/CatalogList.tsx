@@ -81,7 +81,7 @@ export function CatalogList({ title, type, addPlaceholder }: CatalogListProps) {
       setSubmitting(true);
       const response = await updateCatalog(type, editingId, { value });
       setCatalogs(
-        catalogs.map((c) => (c.id === editingId ? response.data : c))
+        catalogs.map((c) => (c.id === editingId ? response.data : c)),
       );
       handleCancelEdit();
     } catch (err: unknown) {

@@ -10,7 +10,7 @@ export class ApiError extends Error {
   constructor(
     message: string,
     public status: number,
-    public data?: unknown
+    public data?: unknown,
   ) {
     super(message);
     this.name = "ApiError";
@@ -26,7 +26,7 @@ interface RequestOptions extends RequestInit {
  */
 async function request<T>(
   endpoint: string,
-  options: RequestOptions = {}
+  options: RequestOptions = {},
 ): Promise<T> {
   const { token, ...fetchOptions } = options;
 
@@ -54,7 +54,7 @@ async function request<T>(
       throw new ApiError(
         data?.message || `HTTP ${response.status}: ${response.statusText}`,
         response.status,
-        data
+        data,
       );
     }
 
@@ -65,7 +65,7 @@ async function request<T>(
     }
     throw new ApiError(
       error instanceof Error ? error.message : "Network error",
-      0
+      0,
     );
   }
 }
@@ -83,7 +83,7 @@ export async function get<T>(endpoint: string, token?: string): Promise<T> {
 export async function post<T>(
   endpoint: string,
   body?: unknown,
-  token?: string
+  token?: string,
 ): Promise<T> {
   return request<T>(endpoint, {
     method: "POST",
@@ -98,7 +98,7 @@ export async function post<T>(
 export async function put<T>(
   endpoint: string,
   body?: unknown,
-  token?: string
+  token?: string,
 ): Promise<T> {
   return request<T>(endpoint, {
     method: "PUT",

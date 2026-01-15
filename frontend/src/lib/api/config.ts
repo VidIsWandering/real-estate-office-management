@@ -38,7 +38,7 @@ export interface PermissionMatrix {
  * Get catalogs by type
  */
 export async function getCatalogsByType(
-  type: Catalog["type"]
+  type: Catalog["type"],
 ): Promise<{ success: boolean; data: Catalog[] }> {
   const token = getAuthToken();
   return get(`/config/catalogs/${type}`, token);
@@ -61,7 +61,7 @@ export async function createCatalog(data: {
 export async function updateCatalog(
   type: Catalog["type"],
   id: number,
-  data: { value: string }
+  data: { value: string },
 ): Promise<{ success: boolean; data: Catalog }> {
   const token = getAuthToken();
   return put(`/config/catalogs/${type}/${id}`, data, token);
@@ -72,7 +72,7 @@ export async function updateCatalog(
  */
 export async function deleteCatalog(
   type: Catalog["type"],
-  id: number
+  id: number,
 ): Promise<{ success: boolean; message: string }> {
   const token = getAuthToken();
   return del(`/config/catalogs/${type}/${id}`, token);
@@ -106,7 +106,7 @@ export async function getAllPermissions(): Promise<{
  * Get permissions for specific position
  */
 export async function getPermissionsByPosition(
-  position: string
+  position: string,
 ): Promise<{ success: boolean; data: PermissionMatrix }> {
   const token = getAuthToken();
   return get(`/config/permissions/${position}`, token);
@@ -116,7 +116,7 @@ export async function getPermissionsByPosition(
  * Update permissions
  */
 export async function updatePermissions(
-  permissions: PermissionMatrix
+  permissions: PermissionMatrix,
 ): Promise<{ success: boolean; data: Permission[] }> {
   const token = getAuthToken();
   return put("/config/permissions", permissions, token);

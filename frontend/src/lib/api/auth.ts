@@ -106,7 +106,7 @@ export async function getActiveSessions(): Promise<{
  * Revoke session
  */
 export async function revokeSession(
-  sessionId: string
+  sessionId: string,
 ): Promise<{ success: boolean; message: string }> {
   const token = getAuthToken();
   return del(`/auth/sessions/${sessionId}`, token);

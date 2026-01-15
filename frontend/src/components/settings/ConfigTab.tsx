@@ -59,7 +59,7 @@ export function ConfigTab() {
       setPermissions(response.data);
     } catch (err: unknown) {
       setError(
-        err instanceof Error ? err.message : "Failed to load permissions"
+        err instanceof Error ? err.message : "Failed to load permissions",
       );
     } finally {
       setLoading(false);
@@ -68,13 +68,13 @@ export function ConfigTab() {
 
   const roleLabel = useMemo(
     () => roles.find((r) => r.key === role)?.label ?? role,
-    [role]
+    [role],
   );
 
   const setPermission = (
     resource: string,
     permission: PermissionKey,
-    value: boolean
+    value: boolean,
   ) => {
     setPermissions((prev) => ({
       ...prev,
@@ -100,7 +100,7 @@ export function ConfigTab() {
       setTimeout(() => setSaveSuccess(false), 3000);
     } catch (err: unknown) {
       setError(
-        err instanceof Error ? err.message : "Failed to save permissions"
+        err instanceof Error ? err.message : "Failed to save permissions",
       );
     } finally {
       setSaving(false);

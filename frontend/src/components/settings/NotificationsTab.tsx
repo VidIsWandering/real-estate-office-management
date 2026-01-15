@@ -52,7 +52,7 @@ export function NotificationsTab() {
         sms: false,
         push: false,
       };
-    }
+    },
   );
 
   const [loading, setLoading] = useState(true);
@@ -105,7 +105,7 @@ export function NotificationsTab() {
     setHasChanges(
       settings.email !== savedSettings.email ||
         settings.sms !== savedSettings.sms ||
-        settings.push !== savedSettings.push
+        settings.push !== savedSettings.push,
     );
   }, [settings, savedSettings]);
 
@@ -139,7 +139,7 @@ export function NotificationsTab() {
       setError(
         err instanceof Error
           ? err.message
-          : "Failed to load notification settings"
+          : "Failed to load notification settings",
       );
     } finally {
       if (!silent) setLoading(false);
@@ -192,7 +192,7 @@ export function NotificationsTab() {
       setError(
         err instanceof Error
           ? err.message
-          : "Failed to save notification settings"
+          : "Failed to save notification settings",
       );
       // On error, reload to get correct state and update cache
       await loadNotificationConfigs(true);

@@ -69,7 +69,9 @@ export function OfficeTab() {
       setFormData(data);
     } catch (err: unknown) {
       setError(
-        err instanceof Error ? err.message : "Failed to load office information"
+        err instanceof Error
+          ? err.message
+          : "Failed to load office information",
       );
     } finally {
       if (!silent) setLoading(false);
@@ -105,7 +107,9 @@ export function OfficeTab() {
       setTimeout(() => setSaveSuccess(false), 3000);
     } catch (err: unknown) {
       setError(
-        err instanceof Error ? err.message : "Failed to save office information"
+        err instanceof Error
+          ? err.message
+          : "Failed to save office information",
       );
     } finally {
       setSaving(false);
