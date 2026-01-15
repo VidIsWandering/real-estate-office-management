@@ -54,6 +54,7 @@ const cleanDatabase = async () => {
 
   // Delete in correct order (respect foreign keys)
   await db.query('TRUNCATE TABLE audit_log CASCADE');
+  await db.query('TRUNCATE TABLE login_session CASCADE');
   await db.query('TRUNCATE TABLE file CASCADE');
   await db.query('TRUNCATE TABLE client_note CASCADE');
   await db.query('TRUNCATE TABLE term CASCADE');
@@ -77,6 +78,7 @@ const cleanDatabase = async () => {
   await db.query("SELECT setval('staff_id_seq', 1, false)");
   await db.query("SELECT setval('config_catalog_id_seq', 1, false)");
   await db.query("SELECT setval('role_permission_id_seq', 1, false)");
+  await db.query("SELECT setval('login_session_id_seq', 1, false)");
 };
 
 /**
@@ -96,8 +98,8 @@ const seedTestData = async () => {
   const db = getTestDb();
   const bcrypt = require('bcryptjs');
 
-  // Create test accounts
-  const hashedPassword = await bcrypt.hash('password123', 10);
+  // Create test accounts with Password123 (matches validation requirements)
+  const hashedPassword = await bcrypt.hash('Password123', 10);
 
   const accountResult = await db.query(
     `INSERT INTO account (username, password, is_active) 
