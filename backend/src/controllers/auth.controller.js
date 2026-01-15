@@ -71,10 +71,10 @@ class AuthController {
   }
 
   async changePassword(req, res) {
-    const { old_password, new_password } = req.body;
+    const { current_password, new_password } = req.body;
     const result = await authService.changePassword(
       req.user.id,
-      old_password,
+      current_password,
       new_password
     );
 

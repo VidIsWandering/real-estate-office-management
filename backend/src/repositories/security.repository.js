@@ -201,7 +201,6 @@ class SecurityRepository {
         created_at as login_at,
         ip_address,
         user_agent,
-        status,
         details
       FROM audit_log
       WHERE actor_id = $1 

@@ -3,7 +3,7 @@
  * Manages authentication and user profile
  */
 
-import { get, post, put, getAuthToken } from "./client";
+import { get, post, put, del, getAuthToken } from "./client";
 
 // ==================== TYPES ====================
 
@@ -72,6 +72,7 @@ export async function updateProfile(data: {
 export async function changePassword(data: {
   current_password: string;
   new_password: string;
+  confirm_password: string;
 }): Promise<{ success: boolean; message: string }> {
   const token = getAuthToken();
   return put("/auth/change-password", data, token);
@@ -87,7 +88,7 @@ export async function getLoginHistory(): Promise<{
   data: LoginHistory[];
 }> {
   const token = getAuthToken();
-  return get("/security/login-history", token);
+  return get("/auth/login-history", token);
 }
 
 /**
@@ -98,7 +99,7 @@ export async function getActiveSessions(): Promise<{
   data: ActiveSession[];
 }> {
   const token = getAuthToken();
-  return get("/security/sessions", token);
+  return get("/auth/sessions", token);
 }
 
 /**
@@ -108,7 +109,7 @@ export async function revokeSession(
   sessionId: string
 ): Promise<{ success: boolean; message: string }> {
   const token = getAuthToken();
-  return post(`/security/sessions/${sessionId}/revoke`, {}, token);
+  return del(`/auth/sessions/${sessionId}`, token);
 }
 
 /**
@@ -119,7 +120,7 @@ export async function revokeAllSessions(): Promise<{
   message: string;
 }> {
   const token = getAuthToken();
-  return post("/security/sessions/revoke-all", {}, token);
+  return post("/auth/sessions/revoke-all", {}, token);
 }
 
 // ==================== 2FA APIs (Placeholder) ====================
@@ -132,7 +133,7 @@ export async function enable2FA(): Promise<{
   data: { qr_code: string; secret: string };
 }> {
   const token = getAuthToken();
-  return post("/security/2fa/enable", {}, token);
+  return post("/auth/2fa/enable", {}, token);
 }
 
 /**
@@ -142,7 +143,7 @@ export async function disable2FA(data: {
   password: string;
 }): Promise<{ success: boolean; message: string }> {
   const token = getAuthToken();
-  return post("/security/2fa/disable", data, token);
+  return post("/auth/2fa/disable", data, token);
 }
 
 /**
@@ -152,5 +153,5 @@ export async function verify2FA(data: {
   code: string;
 }): Promise<{ success: boolean; message: string }> {
   const token = getAuthToken();
-  return post("/security/2fa/verify", data, token);
+  return post("/auth/2fa/verify", data, token);
 }

@@ -4,7 +4,7 @@
  */
 
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api/v1";
 
 export class ApiError extends Error {
   constructor(
@@ -51,6 +51,13 @@ async function request<T>(
     const data = await response.json().catch(() => null);
 
     if (!response.ok) {
+      // Log for debugging
+      console.log("API Error:", {
+        status: response.status,
+        data,
+        message: data?.message,
+      });
+
       throw new ApiError(
         data?.message || `HTTP ${response.status}: ${response.statusText}`,
         response.status,

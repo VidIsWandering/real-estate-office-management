@@ -4,7 +4,16 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, AlertCircle, CheckCircle2, Monitor, Smartphone, Globe } from "lucide-react";
+import {
+  Loader2,
+  AlertCircle,
+  CheckCircle2,
+  Monitor,
+  Smartphone,
+  Globe,
+  Eye,
+  EyeOff,
+} from "lucide-react";
 import {
   changePassword,
   getLoginHistory,
@@ -14,6 +23,7 @@ import {
   type LoginHistory,
   type ActiveSession,
 } from "@/lib/api";
+import { ApiError } from "@/lib/api/client";
 
 export function SecurityTab() {
   /* ================= CHANGE PASSWORD ================= */
@@ -26,13 +36,22 @@ export function SecurityTab() {
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [passwordSuccess, setPasswordSuccess] = useState(false);
   const [changingPassword, setChangingPassword] = useState(false);
+  const [showPasswords, setShowPasswords] = useState({
+    current: false,
+    new: false,
+    confirm: false,
+  });
 
-  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/;
 
   const handlePasswordChange = async () => {
     setPasswordError(null);
 
-    if (!passwordData.currentPassword || !passwordData.newPassword || !passwordData.confirmPassword) {
+    if (
+      !passwordData.currentPassword ||
+      !passwordData.newPassword ||
+      !passwordData.confirmPassword
+    ) {
       setPasswordError("Please fill in all fields");
       return;
     }
@@ -44,24 +63,46 @@ export function SecurityTab() {
 
     if (!passwordRegex.test(passwordData.newPassword)) {
       setPasswordError(
-        "Password must be at least 8 characters and include uppercase, lowercase, and a number"
+        "Password must be at least 6 characters and include uppercase, lowercase, and a number"
       );
       return;
     }
 
     try {
       setChangingPassword(true);
+      setPasswordError(null);
       await changePassword({
         current_password: passwordData.currentPassword,
         new_password: passwordData.newPassword,
+        confirm_password: passwordData.confirmPassword,
       });
 
       setPasswordSuccess(true);
       setShowChangePassword(false);
-      setPasswordData({ currentPassword: "", newPassword: "", confirmPassword: "" });
+      setPasswordData({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+      setShowPasswords({ current: false, new: false, confirm: false });
       setTimeout(() => setPasswordSuccess(false), 3000);
     } catch (err: unknown) {
-      setPasswordError(err instanceof Error ? err.message : "Failed to change password");
+      console.error("Change password error:", err);
+
+      if (err instanceof ApiError) {
+        // Check if we have a meaningful message
+        const errorMessage =
+          err.message && !err.message.startsWith("HTTP ")
+            ? err.message
+            : err.status === 400
+              ? "Current password is incorrect or validation failed"
+              : "Failed to change password";
+        setPasswordError(errorMessage);
+      } else if (err instanceof Error) {
+        setPasswordError(err.message);
+      } else {
+        setPasswordError("Failed to change password");
+      }
     } finally {
       setChangingPassword(false);
     }
@@ -83,7 +124,9 @@ export function SecurityTab() {
       const response = await getLoginHistory();
       setLoginHistory(response.data.slice(0, 10)); // Last 10 logins
     } catch (err: unknown) {
-      setHistoryError(err instanceof Error ? err.message : "Failed to load login history");
+      setHistoryError(
+        err instanceof Error ? err.message : "Failed to load login history"
+      );
     } finally {
       setLoadingHistory(false);
     }
@@ -106,7 +149,9 @@ export function SecurityTab() {
       const response = await getActiveSessions();
       setActiveSessions(response.data);
     } catch (err: unknown) {
-      setSessionsError(err instanceof Error ? err.message : "Failed to load active sessions");
+      setSessionsError(
+        err instanceof Error ? err.message : "Failed to load active sessions"
+      );
     } finally {
       setLoadingSessions(false);
     }
@@ -118,7 +163,9 @@ export function SecurityTab() {
     try {
       setRevokingSession(sessionId);
       await revokeSession(sessionId);
-      setActiveSessions(sessions => sessions.filter(s => s.id !== sessionId));
+      setActiveSessions((sessions) =>
+        sessions.filter((s) => s.id !== sessionId)
+      );
     } catch (err: unknown) {
       alert(err instanceof Error ? err.message : "Failed to revoke session");
     } finally {
@@ -127,7 +174,12 @@ export function SecurityTab() {
   };
 
   const handleRevokeAllSessions = async () => {
-    if (!confirm("Revoke all other sessions? All other devices will be logged out.")) return;
+    if (
+      !confirm(
+        "Revoke all other sessions? All other devices will be logged out."
+      )
+    )
+      return;
 
     try {
       setRevokingSession("all");
@@ -141,18 +193,19 @@ export function SecurityTab() {
   };
 
   const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+    return new Date(dateStr).toLocaleString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
   const getDeviceIcon = (userAgent: string | null) => {
     if (!userAgent) return <Globe className="w-4 h-4" />;
-    if (userAgent.toLowerCase().includes('mobile')) return <Smartphone className="w-4 h-4" />;
+    if (userAgent.toLowerCase().includes("mobile"))
+      return <Smartphone className="w-4 h-4" />;
     return <Monitor className="w-4 h-4" />;
   };
 
@@ -163,7 +216,9 @@ export function SecurityTab() {
         <div className="flex justify-between items-center">
           <div>
             <h3 className="text-lg font-semibold">Change Password</h3>
-            <p className="text-sm text-gray-500">Update your account password</p>
+            <p className="text-sm text-gray-500">
+              Update your account password
+            </p>
           </div>
           <Button
             variant="ghost"
@@ -185,35 +240,98 @@ export function SecurityTab() {
           <div className="border rounded-lg p-4 space-y-4">
             <div>
               <Label>Current Password</Label>
-              <Input
-                type="password"
-                value={passwordData.currentPassword}
-                onChange={(e) =>
-                  setPasswordData({ ...passwordData, currentPassword: e.target.value })
-                }
-              />
+              <div className="relative">
+                <Input
+                  type={showPasswords.current ? "text" : "password"}
+                  value={passwordData.currentPassword}
+                  onChange={(e) => {
+                    setPasswordData({
+                      ...passwordData,
+                      currentPassword: e.target.value,
+                    });
+                    setPasswordError(null);
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() =>
+                    setShowPasswords((prev) => ({
+                      ...prev,
+                      current: !prev.current,
+                    }))
+                  }
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                >
+                  {showPasswords.current ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
+                </button>
+              </div>
             </div>
 
             <div>
               <Label>New Password</Label>
-              <Input
-                type="password"
-                value={passwordData.newPassword}
-                onChange={(e) =>
-                  setPasswordData({ ...passwordData, newPassword: e.target.value })
-                }
-              />
+              <div className="relative">
+                <Input
+                  type={showPasswords.new ? "text" : "password"}
+                  value={passwordData.newPassword}
+                  onChange={(e) => {
+                    setPasswordData({
+                      ...passwordData,
+                      newPassword: e.target.value,
+                    });
+                    setPasswordError(null);
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() =>
+                    setShowPasswords((prev) => ({ ...prev, new: !prev.new }))
+                  }
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                >
+                  {showPasswords.new ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
+                </button>
+              </div>
             </div>
 
             <div>
               <Label>Confirm New Password</Label>
-              <Input
-                type="password"
-                value={passwordData.confirmPassword}
-                onChange={(e) =>
-                  setPasswordData({ ...passwordData, confirmPassword: e.target.value })
-                }
-              />
+              <div className="relative">
+                <Input
+                  type={showPasswords.confirm ? "text" : "password"}
+                  value={passwordData.confirmPassword}
+                  onChange={(e) => {
+                    setPasswordData({
+                      ...passwordData,
+                      confirmPassword: e.target.value,
+                    });
+                    setPasswordError(null);
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() =>
+                    setShowPasswords((prev) => ({
+                      ...prev,
+                      confirm: !prev.confirm,
+                    }))
+                  }
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                >
+                  {showPasswords.confirm ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
+                </button>
+              </div>
             </div>
 
             {passwordError && (
@@ -224,10 +342,16 @@ export function SecurityTab() {
             )}
 
             <div className="flex justify-end gap-3">
-              <Button variant="outline" onClick={() => setShowChangePassword(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setShowChangePassword(false)}
+              >
                 Cancel
               </Button>
-              <Button onClick={handlePasswordChange} disabled={changingPassword}>
+              <Button
+                onClick={handlePasswordChange}
+                disabled={changingPassword}
+              >
                 {changingPassword ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -247,7 +371,9 @@ export function SecurityTab() {
         <div className="flex justify-between items-center">
           <div>
             <h3 className="text-lg font-semibold">Active Sessions</h3>
-            <p className="text-sm text-gray-500">Manage devices with access to your account</p>
+            <p className="text-sm text-gray-500">
+              Manage devices with access to your account
+            </p>
           </div>
           {activeSessions.length > 1 && (
             <Button
@@ -282,7 +408,10 @@ export function SecurityTab() {
         ) : (
           <div className="divide-y divide-gray-200">
             {activeSessions.map((session) => (
-              <div key={session.id} className="py-4 flex items-center justify-between">
+              <div
+                key={session.id}
+                className="py-4 flex items-center justify-between"
+              >
                 <div className="flex items-start gap-3">
                   <div className="text-gray-500 mt-1">
                     {getDeviceIcon(session.user_agent)}
@@ -322,7 +451,9 @@ export function SecurityTab() {
       <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6 space-y-4">
         <div>
           <h3 className="text-lg font-semibold">Login History</h3>
-          <p className="text-sm text-gray-500">Recent login activity on your account</p>
+          <p className="text-sm text-gray-500">
+            Recent login activity on your account
+          </p>
         </div>
 
         {loadingHistory ? (

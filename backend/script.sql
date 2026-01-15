@@ -459,13 +459,13 @@ CREATE INDEX idx_permission_position_resource ON role_permission(position, resou
 -- ============================================================================
 
 -- Sample accounts (passwords hashed with bcrypt, rounds=10)
--- All passwords: "password123"
+-- All passwords: "Password123"
 INSERT INTO account (username, password, is_active) VALUES 
-    ('admin', '$2a$10$FfyY6fa1UHD8su5OEDOxc.cEHwbyjM4yN1wUizLL4NK2zLFSdxSOa', true),
-    ('manager1', '$2a$10$FfyY6fa1UHD8su5OEDOxc.cEHwbyjM4yN1wUizLL4NK2zLFSdxSOa', true),
-    ('agent1', '$2a$10$FfyY6fa1UHD8su5OEDOxc.cEHwbyjM4yN1wUizLL4NK2zLFSdxSOa', true),
-    ('legal1', '$2a$10$FfyY6fa1UHD8su5OEDOxc.cEHwbyjM4yN1wUizLL4NK2zLFSdxSOa', true),
-    ('accountant1', '$2a$10$FfyY6fa1UHD8su5OEDOxc.cEHwbyjM4yN1wUizLL4NK2zLFSdxSOa', true);
+    ('admin', '$2a$10$71VDs1FutQqWIekh8mNhVeCvEdBsMZAfHwe35OY9EIXLI3NVAQbQC', true),
+    ('manager1', '$2a$10$71VDs1FutQqWIekh8mNhVeCvEdBsMZAfHwe35OY9EIXLI3NVAQbQC', true),
+    ('agent1', '$2a$10$71VDs1FutQqWIekh8mNhVeCvEdBsMZAfHwe35OY9EIXLI3NVAQbQC', true),
+    ('legal1', '$2a$10$71VDs1FutQqWIekh8mNhVeCvEdBsMZAfHwe35OY9EIXLI3NVAQbQC', true),
+    ('accountant1', '$2a$10$71VDs1FutQqWIekh8mNhVeCvEdBsMZAfHwe35OY9EIXLI3NVAQbQC', true);
 
 -- Sample staff
 INSERT INTO staff (account_id, full_name, email, position, status) VALUES 

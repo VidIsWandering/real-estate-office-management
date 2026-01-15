@@ -121,7 +121,9 @@ const updateProfileValidator = [
  * Change password validation
  */
 const changePasswordValidator = [
-  body('old_password').notEmpty().withMessage('Current password is required'),
+  body('current_password')
+    .notEmpty()
+    .withMessage('Current password is required'),
 
   body('new_password')
     .notEmpty()

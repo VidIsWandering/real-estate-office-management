@@ -57,10 +57,7 @@ class SecurityController {
    */
   async getLoginHistory(req, res) {
     const limit = parseInt(req.query.limit) || 50;
-    const history = await securityService.getLoginHistory(
-      req.user.staff_id,
-      limit
-    );
+    const history = await securityService.getLoginHistory(req.user.id, limit);
     return successResponse(
       res,
       history,

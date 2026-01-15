@@ -84,7 +84,7 @@ class SecurityService {
       timestamp: entry.timestamp,
       ip_address: entry.ip_address,
       user_agent: entry.user_agent,
-      status: entry.status,
+
       details: entry.details,
     }));
   }

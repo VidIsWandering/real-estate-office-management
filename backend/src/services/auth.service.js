@@ -181,7 +181,7 @@ class AuthService {
     // Get account
     const account = await accountRepository.findById(accountId);
     if (!account) {
-      throw new Error('Account not found');
+      throw new NotFoundError('Account not found');
     }
 
     // Verify old password
@@ -190,7 +190,7 @@ class AuthService {
       account.password
     );
     if (!isPasswordValid) {
-      throw new Error('Current password is incorrect');
+      throw new ValidationError('Current password is incorrect');
     }
 
     // Hash new password
