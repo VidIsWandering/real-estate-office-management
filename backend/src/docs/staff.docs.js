@@ -22,7 +22,7 @@
  *       - in: query
  *         name: role
  *         schema:
- *           $ref: '#/components/schemas/StaffRole'
+ *           $ref: '#/components/schemas/StaffPosition'
  *       - in: query
  *         name: status
  *         schema:
@@ -90,7 +90,7 @@
  *                 type: string
  *                 description: Khu vực phụ trách (cho Agent)
  *               role:
- *                 $ref: '#/components/schemas/StaffRole'
+ *                 $ref: '#/components/schemas/StaffPosition'
  *     responses:
  *       201:
  *         description: Staff created successfully
@@ -169,7 +169,7 @@
  *               assigned_area:
  *                 type: string
  *               role:
- *                 $ref: '#/components/schemas/StaffRole'
+ *                 $ref: '#/components/schemas/StaffPosition'
  *     responses:
  *       200:
  *         description: Staff updated successfully
@@ -231,7 +231,7 @@
  *             type: object
  *             properties:
  *               role:
- *                 $ref: '#/components/schemas/StaffRole'
+ *                 $ref: '#/components/schemas/StaffPosition'
  *               permissions:
  *                 type: array
  *                 items:

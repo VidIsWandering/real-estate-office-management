@@ -13,7 +13,7 @@ class StaffRepository {
     const sql = `
       INSERT INTO staff (
         account_id, full_name, email, phone_number, 
-        address, assigned_area, role, status
+        address, assigned_area, position, status
       )
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
       RETURNING *
@@ -26,7 +26,7 @@ class StaffRepository {
       staffData.phone_number || null,
       staffData.address || null,
       staffData.assigned_area || null,
-      staffData.role || 'staff',
+      staffData.position || 'agent',
       staffData.status || 'working',
     ];
 
@@ -113,9 +113,10 @@ class StaffRepository {
         phone_number = COALESCE($3, phone_number),
         address = COALESCE($4, address),
         assigned_area = COALESCE($5, assigned_area),
-        role = COALESCE($6, role),
-        status = COALESCE($7, status)
-      WHERE id = $8
+        position = COALESCE($6, position),
+        status = COALESCE($7, status),
+        preferences = COALESCE($8, preferences)
+      WHERE id = $9
       RETURNING *
     `;
 
@@ -125,8 +126,9 @@ class StaffRepository {
       staffData.phone_number,
       staffData.address,
       staffData.assigned_area,
-      staffData.role,
+      staffData.position,
       staffData.status,
+      staffData.preferences ? JSON.stringify(staffData.preferences) : null,
       id,
     ];
 
@@ -156,10 +158,10 @@ class StaffRepository {
     let paramCount = 0;
 
     // Apply filters
-    if (filters.role) {
+    if (filters.position) {
       paramCount++;
-      sql += ` AND s.role = $${paramCount}`;
-      values.push(filters.role);
+      sql += ` AND s.position = $${paramCount}`;
+      values.push(filters.position);
     }
 
     if (filters.status) {

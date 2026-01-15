@@ -11,8 +11,15 @@ class Staff {
     this.phone_number = data.phone_number;
     this.address = data.address;
     this.assigned_area = data.assigned_area;
-    this.role = data.role;
+    this.position = data.position;
     this.status = data.status;
+    this.preferences = data.preferences || {
+      email: true,
+      sms: false,
+      push: true,
+    };
+    this.created_at = data.created_at;
+    this.updated_at = data.updated_at;
   }
 
   /**
@@ -27,8 +34,11 @@ class Staff {
       phone_number: this.phone_number,
       address: this.address,
       assigned_area: this.assigned_area,
-      role: this.role,
+      position: this.position,
       status: this.status,
+      preferences: this.preferences,
+      created_at: this.created_at,
+      updated_at: this.updated_at,
     };
   }
 }

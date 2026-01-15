@@ -10,6 +10,23 @@ on:
 jobs:
   build-and-test-backend:
     runs-on: ubuntu-latest
+
+    # PostgreSQL service for tests
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: devuser
+          POSTGRES_PASSWORD: devpassword
+          POSTGRES_DB: se100_test_db
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     defaults:
       run:
         working-directory: ./backend
@@ -17,15 +34,28 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Use Node.js 18.x
+      - name: Use Node.js 20.x
         uses: actions/setup-node@v3
         with:
-          node-version: 18.x
+          node-version: 20.x
           cache: "npm"
           cache-dependency-path: backend/package-lock.json
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Install PostgreSQL Client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+          psql --version
+
+      - name: Setup Test Database Schema
+        env:
+          PGPASSWORD: devpassword
+        run: |
+          psql -h localhost -p 5433 -U devuser -d se100_test_db < script.sql
+          echo "✅ Database schema initialized"
 
       - name: Check Formatting
         run: npm run check:format
@@ -34,4 +64,16 @@ jobs:
         run: npm run lint --if-present
 
       - name: Run Tests
+        env:
+          NODE_ENV: test
+          DB_HOST: localhost
+          DB_PORT: 5433
+          DB_USER: devuser
+          DB_PASSWORD: devpassword
+          DB_NAME: se100_test_db
+          DB_SSL: false
+          JWT_SECRET: test-jwt-secret-key-for-ci
+          JWT_EXPIRE: 7d
+          JWT_REFRESH_SECRET: test-jwt-refresh-secret-for-ci
+          JWT_REFRESH_EXPIRE: 30d
         run: npm test --if-present

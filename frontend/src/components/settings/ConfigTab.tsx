@@ -1,7 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { Input } from "@/components/ui/input";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -12,229 +11,60 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Pencil, Save, Trash2, X } from "lucide-react";
+import { Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
+import {
+  getAllPermissions,
+  updatePermissions,
+  type PermissionMatrix,
+} from "@/lib/api";
+import { CatalogList } from "./CatalogList";
 
-type RoleKey = "agent" | "legal" | "accounting";
+type RoleKey = "agent" | "legal_officer" | "accountant";
 
 type PermissionKey = "view" | "add" | "edit" | "delete";
 
-type PermissionSet = Record<PermissionKey, boolean>;
-
-type PermissionMatrix = Record<string, Record<RoleKey, PermissionSet>>;
-
 const roles: Array<{ key: RoleKey; label: string }> = [
   { key: "agent", label: "Agent" },
-  { key: "legal", label: "Legal" },
-  { key: "accounting", label: "Accounting" },
+  { key: "legal_officer", label: "Legal Officer" },
+  { key: "accountant", label: "Accountant" },
 ];
 
 const forms: Array<{ key: string; label: string }> = [
   { key: "transactions", label: "Transactions" },
   { key: "contracts", label: "Contracts" },
-  { key: "payments", label: "Vouchers / Payments" },
+  { key: "payments", label: "Payments" },
   { key: "properties", label: "Properties" },
-  { key: "partners", label: "Clients / Partners" },
+  { key: "partners", label: "Partners" },
   { key: "staff", label: "Staff" },
 ];
 
-function createDefaultPermissionSet(): PermissionSet {
-  return { view: true, add: false, edit: false, delete: false };
-}
+export function ConfigTab() {
+  const [role, setRole] = useState<RoleKey>("agent");
+  const [permissions, setPermissions] = useState<PermissionMatrix>({});
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
-function createDefaultMatrix(): PermissionMatrix {
-  const matrix: PermissionMatrix = {};
-  for (const form of forms) {
-    matrix[form.key] = {
-      agent: createDefaultPermissionSet(),
-      legal: createDefaultPermissionSet(),
-      accounting: createDefaultPermissionSet(),
-    };
-  }
-  return matrix;
-}
+  // Load permissions on mount
+  useEffect(() => {
+    loadPermissions();
+  }, []);
 
-function ConfigListSection({
-  title,
-  items,
-  onChange,
-  addPlaceholder,
-}: {
-  title: string;
-  items: string[];
-  onChange: (next: string[]) => void;
-  addPlaceholder: string;
-}) {
-  const [newValue, setNewValue] = useState("");
-  const [editingIndex, setEditingIndex] = useState<number | null>(null);
-  const [editingValue, setEditingValue] = useState("");
-
-  const canSaveEdit = editingIndex !== null && editingValue.trim().length > 0;
-
-  const handleAdd = () => {
-    const value = newValue.trim();
-    if (!value) return;
-
-    const exists = items.some((x) => x.toLowerCase() === value.toLowerCase());
-    if (exists) return;
-
-    onChange([value, ...items]);
-    setNewValue("");
-  };
-
-  const handleStartEdit = (index: number) => {
-    setEditingIndex(index);
-    setEditingValue(items[index] ?? "");
-  };
-
-  const handleCancelEdit = () => {
-    setEditingIndex(null);
-    setEditingValue("");
-  };
-
-  const handleSaveEdit = () => {
-    if (editingIndex === null) return;
-
-    const nextValue = editingValue.trim();
-    if (!nextValue) return;
-
-    const exists = items.some(
-      (x, i) =>
-        i !== editingIndex && x.toLowerCase() === nextValue.toLowerCase(),
-    );
-    if (exists) return;
-
-    onChange(items.map((x, i) => (i === editingIndex ? nextValue : x)));
-    setEditingIndex(null);
-    setEditingValue("");
-  };
-
-  const handleDelete = (index: number) => {
-    const value = items[index];
-    const ok = window.confirm(`Delete "${value}"?`);
-    if (!ok) return;
-
-    onChange(items.filter((_, i) => i !== index));
-
-    if (editingIndex === index) {
-      handleCancelEdit();
+  const loadPermissions = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await getAllPermissions();
+      setPermissions(response.data);
+    } catch (err: unknown) {
+      setError(
+        err instanceof Error ? err.message : "Failed to load permissions",
+      );
+    } finally {
+      setLoading(false);
     }
   };
-
-  return (
-    <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6 space-y-4">
-      <h3 className="text-base font-semibold text-gray-900">{title}</h3>
-
-      <div className="flex gap-2">
-        <Input
-          value={newValue}
-          onChange={(e) => setNewValue(e.target.value)}
-          placeholder={addPlaceholder}
-        />
-        <Button type="button" onClick={handleAdd}>
-          Add
-        </Button>
-      </div>
-
-      <div className="divide-y divide-gray-100 border border-gray-200 rounded-lg">
-        {items.length === 0 ? (
-          <div className="p-4 text-sm text-gray-500">No items yet.</div>
-        ) : (
-          items.map((item, index) => {
-            const isEditing = editingIndex === index;
-
-            return (
-              <div
-                key={`${item}-${index}`}
-                className="flex items-center justify-between gap-3 p-3"
-              >
-                {isEditing ? (
-                  <Input
-                    value={editingValue}
-                    onChange={(e) => setEditingValue(e.target.value)}
-                  />
-                ) : (
-                  <div className="text-sm text-gray-800">{item}</div>
-                )}
-
-                <div className="flex items-center gap-2">
-                  {isEditing ? (
-                    <>
-                      <button
-                        type="button"
-                        onClick={handleSaveEdit}
-                        disabled={!canSaveEdit}
-                        className="p-1.5 text-emerald-700 hover:bg-emerald-50 rounded disabled:opacity-50"
-                        title="Save"
-                      >
-                        <Save className="w-4 h-4" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleCancelEdit}
-                        className="p-1.5 text-gray-600 hover:bg-gray-100 rounded"
-                        title="Cancel"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => handleStartEdit(index)}
-                      className="p-1.5 text-gray-600 hover:bg-gray-100 rounded"
-                      title="Edit"
-                    >
-                      <Pencil className="w-4 h-4" />
-                    </button>
-                  )}
-
-                  <button
-                    type="button"
-                    onClick={() => handleDelete(index)}
-                    className="p-1.5 text-red-700 hover:bg-red-50 rounded"
-                    title="Delete"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            );
-          })
-        )}
-      </div>
-    </div>
-  );
-}
-
-export function ConfigTab() {
-  const [propertyTypes, setPropertyTypes] = useState<string[]>([
-    "Apartment",
-    "House",
-    "Land",
-    "Commercial",
-  ]);
-  const [areas, setAreas] = useState<string[]>([
-    "Downtown",
-    "Riverside",
-    "Westside",
-    "North Valley",
-  ]);
-  const [sources, setSources] = useState<string[]>([
-    "Website",
-    "Facebook",
-    "Referral",
-    "Walk-in",
-  ]);
-  const [contractTypes, setContractTypes] = useState<string[]>([
-    "Deposit agreement",
-    "Sale & purchase agreement",
-    "Lease agreement",
-  ]);
-
-  const [role, setRole] = useState<RoleKey>("agent");
-  const [permissions, setPermissions] = useState<PermissionMatrix>(() =>
-    createDefaultMatrix(),
-  );
 
   const roleLabel = useMemo(
     () => roles.find((r) => r.key === role)?.label ?? role,
@@ -242,20 +72,39 @@ export function ConfigTab() {
   );
 
   const setPermission = (
-    formKey: string,
+    resource: string,
     permission: PermissionKey,
     value: boolean,
   ) => {
     setPermissions((prev) => ({
       ...prev,
-      [formKey]: {
-        ...prev[formKey],
-        [role]: {
-          ...prev[formKey][role],
+      [role]: {
+        ...prev[role],
+        [resource]: {
+          ...(prev[role]?.[resource] || {}),
           [permission]: value,
         },
       },
     }));
+  };
+
+  const handleSavePermissions = async () => {
+    try {
+      setSaving(true);
+      setSaveSuccess(false);
+      setError(null);
+      await updatePermissions(permissions);
+      // Reload from backend to confirm save
+      await loadPermissions();
+      setSaveSuccess(true);
+      setTimeout(() => setSaveSuccess(false), 3000);
+    } catch (err: unknown) {
+      setError(
+        err instanceof Error ? err.message : "Failed to save permissions",
+      );
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -267,36 +116,34 @@ export function ConfigTab() {
         </p>
       </div>
 
+      {/* Catalogs Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <ConfigListSection
+        <CatalogList
           title="Property types"
-          items={propertyTypes}
-          onChange={setPropertyTypes}
+          type="property_type"
           addPlaceholder="Add a property type..."
         />
 
-        <ConfigListSection
+        <CatalogList
           title="Areas"
-          items={areas}
-          onChange={setAreas}
+          type="area"
           addPlaceholder="Add an area..."
         />
 
-        <ConfigListSection
+        <CatalogList
           title="Lead sources"
-          items={sources}
-          onChange={setSources}
+          type="lead_source"
           addPlaceholder="Add a source..."
         />
 
-        <ConfigListSection
+        <CatalogList
           title="Contract types"
-          items={contractTypes}
-          onChange={setContractTypes}
+          type="contract_type"
           addPlaceholder="Add a contract type..."
         />
       </div>
 
+      {/* Permissions Section */}
       <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6 space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
@@ -327,81 +174,122 @@ export function ConfigTab() {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full border border-gray-200 rounded-lg overflow-hidden">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
-                  Form (BM)
-                </th>
-                <th className="px-4 py-3 text-center text-xs font-semibold text-gray-700">
-                  View
-                </th>
-                <th className="px-4 py-3 text-center text-xs font-semibold text-gray-700">
-                  Add
-                </th>
-                <th className="px-4 py-3 text-center text-xs font-semibold text-gray-700">
-                  Edit
-                </th>
-                <th className="px-4 py-3 text-center text-xs font-semibold text-gray-700">
-                  Delete
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {forms.map((form) => {
-                const current = permissions[form.key]?.[role];
-                return (
-                  <tr key={form.key} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-sm text-gray-900">
-                      {form.label}
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex justify-center">
-                        <Checkbox
-                          checked={Boolean(current?.view)}
-                          onCheckedChange={(v) =>
-                            setPermission(form.key, "view", Boolean(v))
-                          }
-                        />
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex justify-center">
-                        <Checkbox
-                          checked={Boolean(current?.add)}
-                          onCheckedChange={(v) =>
-                            setPermission(form.key, "add", Boolean(v))
-                          }
-                        />
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex justify-center">
-                        <Checkbox
-                          checked={Boolean(current?.edit)}
-                          onCheckedChange={(v) =>
-                            setPermission(form.key, "edit", Boolean(v))
-                          }
-                        />
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex justify-center">
-                        <Checkbox
-                          checked={Boolean(current?.delete)}
-                          onCheckedChange={(v) =>
-                            setPermission(form.key, "delete", Boolean(v))
-                          }
-                        />
-                      </div>
-                    </td>
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+          </div>
+        ) : error ? (
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 text-red-600 py-4">
+              <AlertCircle className="w-5 h-5" />
+              <span className="text-sm">{error}</span>
+            </div>
+            <Button onClick={loadPermissions} variant="outline" size="sm">
+              Retry
+            </Button>
+          </div>
+        ) : (
+          <>
+            <div className="overflow-x-auto">
+              <table className="w-full border border-gray-200 rounded-lg overflow-hidden">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">
+                      Form (BM)
+                    </th>
+                    <th className="px-4 py-3 text-center text-xs font-semibold text-gray-700">
+                      View
+                    </th>
+                    <th className="px-4 py-3 text-center text-xs font-semibold text-gray-700">
+                      Add
+                    </th>
+                    <th className="px-4 py-3 text-center text-xs font-semibold text-gray-700">
+                      Edit
+                    </th>
+                    <th className="px-4 py-3 text-center text-xs font-semibold text-gray-700">
+                      Delete
+                    </th>
                   </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {forms.map((form) => {
+                    const current = permissions[role]?.[form.key] || {};
+                    return (
+                      <tr key={form.key} className="hover:bg-gray-50">
+                        <td className="px-4 py-3 text-sm text-gray-900">
+                          {form.label}
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex justify-center">
+                            <Checkbox
+                              checked={Boolean(current.view)}
+                              onCheckedChange={(v) =>
+                                setPermission(form.key, "view", Boolean(v))
+                              }
+                            />
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex justify-center">
+                            <Checkbox
+                              checked={Boolean(current.add)}
+                              onCheckedChange={(v) =>
+                                setPermission(form.key, "add", Boolean(v))
+                              }
+                            />
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex justify-center">
+                            <Checkbox
+                              checked={Boolean(current.edit)}
+                              onCheckedChange={(v) =>
+                                setPermission(form.key, "edit", Boolean(v))
+                              }
+                            />
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="flex justify-center">
+                            <Checkbox
+                              checked={Boolean(current.delete)}
+                              onCheckedChange={(v) =>
+                                setPermission(form.key, "delete", Boolean(v))
+                              }
+                            />
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="flex items-center justify-between pt-4 border-t">
+              <div className="flex items-center gap-2">
+                {saveSuccess && (
+                  <div className="flex items-center gap-2 text-emerald-600">
+                    <CheckCircle2 className="w-4 h-4" />
+                    <span className="text-sm">
+                      Permissions saved successfully
+                    </span>
+                  </div>
+                )}
+              </div>
+              <Button onClick={handleSavePermissions} disabled={saving}>
+                {saving ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  "Save Permissions"
+                )}
+              </Button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

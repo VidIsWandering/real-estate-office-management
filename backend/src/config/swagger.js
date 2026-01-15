@@ -59,6 +59,7 @@ Authorization: Bearer <your_access_token>
     { name: 'Vouchers', description: 'Payment & Receipts' },
     { name: 'Reports', description: 'Reporting & Analytics' },
     { name: 'System', description: 'System Configuration & Logs' },
+    { name: 'Config', description: 'Configuration Management' },
   ],
   components: {
     securitySchemes: {
@@ -101,8 +102,9 @@ Authorization: Bearer <your_access_token>
       // ========== Enums (aligned with context_design.md) ==========
       StaffPosition: {
         type: 'string',
-        enum: ['manager', 'agent', 'legal_officer', 'accountant'],
-        description: 'Vị trí nhân viên (per context_design.md)',
+        enum: ['admin', 'manager', 'agent', 'legal_officer', 'accountant'],
+        description:
+          'Vị trí nhân viên (admin, manager, agent, legal_officer, accountant)',
       },
       StaffStatus: {
         type: 'string',

@@ -16,6 +16,7 @@ const contractRoutes = require('./contract.route');
 const voucherRoutes = require('./voucher.route');
 const reportRoutes = require('./report.route');
 const systemRoutes = require('./system.route');
+const configRoutes = require('./config.route');
 
 /**
  * Route mapping
@@ -29,6 +30,7 @@ router.use('/transactions', transactionRoutes);
 router.use('/contracts', contractRoutes);
 router.use('/vouchers', voucherRoutes);
 router.use('/reports', reportRoutes);
+router.use('/config', configRoutes);
 
 // System routes (logs, config, terms, debts)
 router.use('/', systemRoutes);
