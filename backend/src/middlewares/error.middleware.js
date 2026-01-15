@@ -18,7 +18,9 @@ const notFoundHandler = (req, res, next) => {
 
 /**
  * Global Error Handler
+ * Note: Express requires 4 parameters (err, req, res, next) to identify error handlers
  */
+// eslint-disable-next-line no-unused-vars
 const errorHandler = (err, req, res, next) => {
   // Log error
   logger.error('Error:', {
