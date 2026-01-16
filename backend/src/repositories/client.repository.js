@@ -113,15 +113,11 @@ class ClientRepository {
 
     // 🔢 Query total
     const countSQL = `
-    // 🔢 Query total
-    const countSQL = `
     SELECT COUNT(*) 
     FROM client
     ${whereSQL}
   `;
 
-    const dataResult = await db.query(dataSQL, [...values, limit, offset]);
-    const countResult = await db.query(countSQL, values);
     const dataResult = await db.query(dataSQL, [...values, limit, offset]);
     const countResult = await db.query(countSQL, values);
 

@@ -1,4 +1,3 @@
-const { cli } = require("winston/lib/winston/config")
 const { STAFF_ROLES } = require("../config/constants")
 const clientNoteRepository = require("../repositories/client-note.repository")
 const clientRepository = require("../repositories/client.repository")
