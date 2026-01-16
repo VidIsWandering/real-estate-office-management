@@ -470,3 +470,5 @@ CREATE TABLE real_estate_price_history (
 CREATE INDEX idx_price_history_real_estate 
     ON real_estate_price_history(real_estate_id);
 
+ALTER TABLE contract
+ADD COLUMN cancellation_reason TEXT;
