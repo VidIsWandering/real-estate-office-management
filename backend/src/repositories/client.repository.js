@@ -54,7 +54,8 @@ class ClientRepository {
       email,
       phone_number,
       address,
-      type
+      type,
+      staff_id,
     } = query;
 
     const conditions = [];
@@ -85,8 +86,12 @@ class ClientRepository {
       conditions.push(`type = $${values.length}`);
     }
 
-    const whereSQL =
-      conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+    if (staff_id) { // 🔹 Filter staff_id
+      values.push(staff_id);
+      conditions.push(`staff_id = $${values.length}`);
+    }
+
+    const whereSQL = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
 
     const offset = (page - 1) * limit;
 
@@ -102,6 +107,8 @@ class ClientRepository {
 
     // 🔢 Query total
     const countSQL = `
+    // 🔢 Query total
+    const countSQL = `
     SELECT COUNT(*) 
     FROM client
     ${whereSQL}
@@ -109,17 +116,20 @@ class ClientRepository {
 
     const dataResult = await db.query(dataSQL, [...values, limit, offset]);
     const countResult = await db.query(countSQL, values);
+    const dataResult = await db.query(dataSQL, [...values, limit, offset]);
+    const countResult = await db.query(countSQL, values);
 
-    return {
-      items: dataResult.rows.map(row => new Client(row)),
-      pagination: {
-        page: Number(page),
-        limit: Number(limit),
-        total: Number(countResult.rows[0].count),
-        totalPages: Math.ceil(countResult.rows[0].count / limit)
-      }
-    };
-  }
+  return {
+    items: dataResult.rows.map(row => new Client(row)),
+    pagination: {
+      page: Number(page),
+      limit: Number(limit),
+      total: Number(countResult.rows[0].count),
+      totalPages: Math.ceil(countResult.rows[0].count / limit),
+    },
+  };
+}
+
 
 
 
