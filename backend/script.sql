@@ -470,3 +470,249 @@ CREATE TABLE real_estate_price_history (
 CREATE INDEX idx_price_history_real_estate 
     ON real_estate_price_history(real_estate_id);
 
+
+
+
+
+
+
+
+
+
+
+
+-- ============================================================================
+-- SAMPLE DATA FOR REPORT TESTING - ALL IN ONE
+-- Real Estate Management System
+-- 
+-- File này sẽ:
+-- 1. Truncate tất cả tables (trừ account, staff)
+-- 2. Reset sequences
+-- 3. Insert sample data
+-- 
+-- Đơn vị tiền: TRIỆU ĐỒNG (VD: 12500 = 12.5 tỷ VND)
+-- ============================================================================
+
+-- ============================================================================
+-- STEP 1: TRUNCATE ALL TABLES (giữ lại account & staff)
+-- ============================================================================
+TRUNCATE 
+    voucher,
+    contract,
+    transaction,
+    appointment,
+    client_note,
+    audit_log,
+    real_estate,
+    client,
+    file,
+    term
+CASCADE;
+
+-- ============================================================================
+-- STEP 2: RESET SEQUENCES
+-- ============================================================================
+ALTER SEQUENCE file_id_seq RESTART WITH 1;
+ALTER SEQUENCE client_id_seq RESTART WITH 1;
+ALTER SEQUENCE real_estate_id_seq RESTART WITH 1;
+ALTER SEQUENCE appointment_id_seq RESTART WITH 1;
+ALTER SEQUENCE transaction_id_seq RESTART WITH 1;
+ALTER SEQUENCE contract_id_seq RESTART WITH 1;
+ALTER SEQUENCE voucher_id_seq RESTART WITH 1;
+ALTER SEQUENCE client_note_id_seq RESTART WITH 1;
+ALTER SEQUENCE audit_log_id_seq RESTART WITH 1;
+ALTER SEQUENCE term_id_seq RESTART WITH 1;
+
+-- ============================================================================
+-- STEP 3: INSERT SAMPLE DATA
+-- ============================================================================
+
+-- 3.1 TERMS (IDs: 1-8)
+INSERT INTO term (name, content) VALUES 
+    ('Thanh toán lần 1', 'Thanh toán 30% khi ký hợp đồng'),
+    ('Thanh toán lần 2', 'Thanh toán 40% khi bàn giao'),
+    ('Thanh toán lần 3', 'Thanh toán 30% sau 30 ngày bàn giao'),
+    ('Điều khoản bảo hành', 'Bên bán bảo hành kết cấu trong 12 tháng kể từ ngày bàn giao'),
+    ('Điều khoản phạt', 'Bên vi phạm phải chịu phạt 8% giá trị hợp đồng'),
+    ('Điều khoản bàn giao', 'Bàn giao nhà trong vòng 30 ngày sau khi thanh toán đủ 70%'),
+    ('Điều khoản thuê', 'Tiền thuê thanh toán vào ngày 01 hàng tháng'),
+    ('Điều khoản gia hạn', 'Hợp đồng tự động gia hạn nếu không có thông báo trước 30 ngày');
+
+-- 3.2 FILES (IDs: 1-10)
+INSERT INTO file (url, name, type) VALUES 
+    ('https://storage.example.com/images/house1_1.jpg', 'Mặt tiền nhà 1', 'image'),
+    ('https://storage.example.com/images/house1_2.jpg', 'Phòng khách nhà 1', 'image'),
+    ('https://storage.example.com/images/house2_1.jpg', 'Mặt tiền nhà 2', 'image'),
+    ('https://storage.example.com/images/apt1_1.jpg', 'Căn hộ 1 view', 'image'),
+    ('https://storage.example.com/images/land1_1.jpg', 'Đất nền 1', 'image'),
+    ('https://storage.example.com/docs/sodo_001.pdf', 'Sổ đỏ BĐS 001', 'pdf'),
+    ('https://storage.example.com/docs/sodo_002.pdf', 'Sổ đỏ BĐS 002', 'pdf'),
+    ('https://storage.example.com/docs/sodo_003.pdf', 'Sổ đỏ BĐS 003', 'pdf'),
+    ('https://storage.example.com/docs/hopdong_001.pdf', 'Hợp đồng 001', 'pdf'),
+    ('https://storage.example.com/docs/hopdong_002.pdf', 'Hợp đồng 002', 'pdf');
+
+-- 3.3 CLIENTS (IDs: 1-15)
+-- Sellers/Landlords: 1-5 (owners)
+-- Buyers/Tenants: 6-15
+INSERT INTO client (full_name, email, phone_number, address, type, referral_src, requirement, staff_id) VALUES 
+    ('Nguyễn Văn An', 'an.nguyen@gmail.com', '0901234567', '123 Nguyễn Huệ, Q1, HCM', 'seller', 'Website', 'Bán nhà phố Q1', 2),
+    ('Trần Thị Bình', 'binh.tran@gmail.com', '0912345678', '456 Lê Lợi, Q3, HCM', 'landlord', 'Giới thiệu', 'Cho thuê căn hộ cao cấp', 2),
+    ('Lê Văn Cường', 'cuong.le@gmail.com', '0923456789', '789 Võ Văn Tần, Q3, HCM', 'seller', 'Facebook', 'Bán đất nền Thủ Đức', 2),
+    ('Phạm Thị Dung', 'dung.pham@gmail.com', '0934567890', '321 Cách Mạng Tháng 8, Q10, HCM', 'seller', 'Zalo', 'Bán biệt thự Q2', 2),
+    ('Hoàng Văn Em', 'em.hoang@gmail.com', '0945678901', '654 Điện Biên Phủ, Q3, HCM', 'landlord', 'Website', 'Cho thuê mặt bằng kinh doanh', 2),
+    ('Võ Thị Phương', 'phuong.vo@gmail.com', '0956789012', '987 Trần Hưng Đạo, Q5, HCM', 'buyer', 'Google Ads', 'Mua nhà Q1-Q3, ngân sách 8-12 tỷ', 2),
+    ('Đặng Văn Giang', 'giang.dang@gmail.com', '0967890123', '147 Hai Bà Trưng, Q1, HCM', 'tenant', 'Giới thiệu', 'Thuê căn hộ 2PN, Q2-Q7', 2),
+    ('Bùi Thị Hoa', 'hoa.bui@gmail.com', '0978901234', '258 Pasteur, Q3, HCM', 'buyer', 'Website', 'Mua đất nền đầu tư', 2),
+    ('Ngô Văn Khải', 'khai.ngo@gmail.com', '0989012345', '369 Nam Kỳ Khởi Nghĩa, Q3, HCM', 'buyer', 'Facebook', 'Mua biệt thự cho gia đình', 2),
+    ('Lý Thị Lan', 'lan.ly@gmail.com', '0990123456', '741 Nguyễn Đình Chiểu, Q3, HCM', 'tenant', 'Zalo', 'Thuê văn phòng 100-200m2', 2),
+    ('Trịnh Văn Minh', 'minh.trinh@gmail.com', '0901111111', '111 Lý Tự Trọng, Q1, HCM', 'buyer', 'Website', 'Mua căn hộ Q7', 2),
+    ('Đinh Thị Ngọc', 'ngoc.dinh@gmail.com', '0902222222', '222 Lê Duẩn, Q1, HCM', 'seller', 'Giới thiệu', 'Bán shophouse Q9', 2),
+    ('Mai Văn Phúc', 'phuc.mai@gmail.com', '0903333333', '333 Tôn Đức Thắng, Q1, HCM', 'buyer', 'Google Ads', 'Mua nhà phố Q2', 2),
+    ('Chu Thị Quỳnh', 'quynh.chu@gmail.com', '0904444444', '444 Nguyễn Thị Minh Khai, Q3, HCM', 'tenant', 'Facebook', 'Thuê kho xưởng', 2),
+    ('Vương Văn Sơn', 'son.vuong@gmail.com', '0905555555', '555 Võ Thị Sáu, Q3, HCM', 'buyer', 'Website', 'Mua đất Q9', 2);
+
+-- 3.4 REAL ESTATE (IDs: 1-13)
+INSERT INTO real_estate (title, type, transaction_type, location, price, area, description, direction, media_files, owner_id, legal_docs, staff_id, status) VALUES 
+    ('Nhà phố Nguyễn Huệ Q1', 'Nhà phố', 'sale', '123 Nguyễn Huệ, Quận 1, HCM', 12500, 120.5, 'Nhà 4 tầng, mặt tiền 5m, sổ hồng chính chủ', 'south', ARRAY[1,2], 1, ARRAY[6], 2, 'transacted'),
+    ('Căn hộ Vinhomes Central Park', 'Căn hộ', 'rent', '208 Nguyễn Hữu Cảnh, Bình Thạnh, HCM', 25, 85.0, 'Căn 2PN, full nội thất, view sông', 'east', ARRAY[4], 2, ARRAY[7], 2, 'transacted'),
+    ('Đất nền Thủ Đức', 'Đất nền', 'sale', 'KDC Bình Chiểu, Thủ Đức, HCM', 3500, 200.0, 'Đất thổ cư 100%, đường 12m', 'north', ARRAY[5], 3, ARRAY[8], 2, 'negotiating'),
+    ('Biệt thự Thảo Điền Q2', 'Biệt thự', 'sale', '15 Nguyễn Văn Hưởng, Q2, HCM', 45000, 500.0, 'Biệt thự compound, hồ bơi riêng, 5PN', 'southeast', ARRAY[1,2,3], 4, ARRAY[6,7], 2, 'negotiating'),
+    ('Mặt bằng kinh doanh Q3', 'Mặt bằng', 'rent', '100 Võ Văn Tần, Q3, HCM', 80, 150.0, 'Mặt tiền 8m, phù hợp showroom, nhà hàng', 'west', ARRAY[3,4], 5, ARRAY[8], 2, 'listed'),
+    ('Căn hộ Masteri Thảo Điền', 'Căn hộ', 'sale', 'Xa lộ Hà Nội, Q2, HCM', 5200, 70.0, 'Căn 2PN, tầng cao, view city', 'northeast', ARRAY[4], 2, ARRAY[7], 2, 'listed'),
+    ('Nhà phố Phú Mỹ Hưng Q7', 'Nhà phố', 'sale', 'Khu Cảnh Đồi, PMH, Q7, HCM', 18000, 180.0, 'Nhà 3 tầng, nội thất cao cấp, gara ô tô', 'south', ARRAY[1,2], 1, ARRAY[6], 2, 'listed'),
+    ('Đất nền Long An', 'Đất nền', 'sale', 'KCN Đức Hòa, Long An', 1800, 300.0, 'Đất công nghiệp, đã san lấp', 'north', ARRAY[5], 3, ARRAY[8], 2, 'listed'),
+    ('Căn hộ Sunrise City Q7', 'Căn hộ', 'rent', '23-25 Nguyễn Hữu Thọ, Q7, HCM', 18, 65.0, 'Căn 1PN+1, full nội thất', 'west', ARRAY[4], 2, NULL, 2, 'pending_legal_check'),
+    ('Nhà phố Gò Vấp', 'Nhà phố', 'sale', '55 Nguyễn Oanh, Gò Vấp, HCM', 6500, 90.0, 'Nhà 3 tầng, hẻm xe hơi', 'east', ARRAY[1,2], 12, NULL, 2, 'pending_legal_check'),
+    ('Shophouse Q9', 'Shophouse', 'sale', 'Vinhomes Grand Park, Q9, HCM', 8500, 120.0, 'Shophouse mặt tiền, kinh doanh tốt', 'south', ARRAY[3], 12, NULL, 2, 'created'),
+    ('Căn hộ Empire City', 'Căn hộ', 'sale', 'Empire City, Q2, HCM', 9800, 95.0, 'Căn 3PN, tầng penthouse', 'northeast', ARRAY[4], 4, NULL, 2, 'created'),
+    ('Đất nền Củ Chi', 'Đất nền', 'sale', 'Xã Tân Phú Trung, Củ Chi, HCM', 2200, 500.0, 'Đất vườn, đang chờ lên thổ', 'north', ARRAY[5], 3, NULL, 2, 'suspended');
+
+-- 3.5 APPOINTMENTS (IDs: 1-12)
+INSERT INTO appointment (real_estate_id, client_id, staff_id, start_time, end_time, location, status, note) VALUES 
+    (1, 6, 2, '2025-12-15 09:00:00', '2025-12-15 10:00:00', '123 Nguyễn Huệ, Q1', 'completed', 'Khách rất thích, muốn thương lượng giá'),
+    (1, 9, 2, '2025-12-16 14:00:00', '2025-12-16 15:00:00', '123 Nguyễn Huệ, Q1', 'completed', 'Khách cần suy nghĩ thêm'),
+    (2, 7, 2, '2025-12-18 10:00:00', '2025-12-18 11:00:00', '208 Nguyễn Hữu Cảnh, BT', 'completed', 'Khách đồng ý thuê'),
+    (3, 8, 2, '2025-12-20 09:00:00', '2025-12-20 10:30:00', 'KDC Bình Chiểu, TĐ', 'completed', 'Khách quan tâm, đang xem thêm'),
+    (4, 9, 2, '2025-12-22 15:00:00', '2025-12-22 17:00:00', '15 Nguyễn Văn Hưởng, Q2', 'completed', 'Khách rất thích, đang thương lượng'),
+    (5, 10, 2, '2026-01-17 09:00:00', '2026-01-17 10:00:00', '100 Võ Văn Tần, Q3', 'confirmed', 'Khách muốn thuê làm văn phòng'),
+    (6, 11, 2, '2026-01-17 14:00:00', '2026-01-17 15:00:00', 'Masteri Thảo Điền, Q2', 'confirmed', 'Khách mua đầu tư'),
+    (7, 13, 2, '2026-01-18 10:00:00', '2026-01-18 11:30:00', 'PMH, Q7', 'confirmed', 'Gia đình 4 người'),
+    (8, 15, 2, '2026-01-20 09:00:00', '2026-01-20 10:00:00', 'KCN Đức Hòa, Long An', 'created', 'Khách mua để xây xưởng'),
+    (5, 14, 2, '2026-01-21 15:00:00', '2026-01-21 16:00:00', '100 Võ Văn Tần, Q3', 'created', 'Khách thuê làm kho'),
+    (6, 8, 2, '2025-12-25 09:00:00', '2025-12-25 10:00:00', 'Masteri Thảo Điền, Q2', 'cancelled', 'Khách bận việc đột xuất'),
+    (3, 11, 2, '2025-12-28 14:00:00', '2025-12-28 15:00:00', 'KDC Bình Chiểu, TĐ', 'cancelled', 'Khách đã mua BĐS khác');
+
+-- 3.6 TRANSACTIONS (IDs: 1-7)
+INSERT INTO transaction (real_estate_id, client_id, staff_id, offer_price, terms, status, cancellation_reason) VALUES 
+    (1, 6, 2, 12000, ARRAY[1,2,3], 'pending_contract', NULL),
+    (2, 7, 2, 24, ARRAY[1], 'pending_contract', NULL),
+    (3, 8, 2, 3200, ARRAY[1,2], 'negotiating', NULL),
+    (4, 9, 2, 43000, ARRAY[1,2,3], 'negotiating', NULL),
+    (6, 11, 2, 5000, ARRAY[1,2], 'negotiating', NULL),
+    (7, 13, 2, 16500, ARRAY[1,2,3], 'cancelled', 'Khách không đủ tài chính'),
+    (8, 15, 2, 1600, NULL, 'cancelled', 'Khách thay đổi kế hoạch');
+
+-- 3.7 CONTRACTS (IDs: 1-5)
+INSERT INTO contract (transaction_id, type, party_a, party_b, total_value, deposit_amount, payment_terms, paid_amount, remaining_amount, signed_date, effective_date, expiration_date, attachments, status, staff_id) VALUES 
+    (1, 'purchase', 1, 6, 12000, 1200, ARRAY[1,2,3], 12000, 0, '2025-12-20', '2025-12-20', NULL, ARRAY[9], 'finalized', 3),
+    (2, 'lease', 2, 7, 288, 48, ARRAY[1], 96, 192, '2025-12-22', '2026-01-01', '2026-12-31', ARRAY[10], 'signed', 3),
+    (3, 'deposit', 3, 8, 350, 350, NULL, 0, 350, NULL, '2026-01-20', '2026-02-20', NULL, 'pending_signature', 3),
+    (4, 'deposit', 4, 9, 4500, 4500, NULL, 0, 4500, NULL, '2026-01-25', '2026-02-25', NULL, 'draft', 3),
+    (5, 'purchase', 2, 11, 5000, 500, ARRAY[1,2], 500, 4500, '2026-01-10', '2026-01-10', NULL, ARRAY[9,10], 'notarized', 3);
+
+-- 3.8 VOUCHERS (IDs: 1-9)
+INSERT INTO voucher (contract_id, type, party, payment_time, amount, payment_method, payment_description, attachments, staff_id, status) VALUES 
+    (1, 'receipt', 'Võ Thị Phương', '2025-12-20 10:00:00', 3600, 'bank_transfer', 'Thanh toán đợt 1 - 30%', ARRAY[9], 4, 'confirmed'),
+    (1, 'receipt', 'Võ Thị Phương', '2025-12-28 14:00:00', 4800, 'bank_transfer', 'Thanh toán đợt 2 - 40%', ARRAY[9], 4, 'confirmed'),
+    (1, 'receipt', 'Võ Thị Phương', '2026-01-05 09:00:00', 3600, 'bank_transfer', 'Thanh toán đợt 3 - 30%', ARRAY[9], 4, 'confirmed'),
+    (2, 'receipt', 'Đặng Văn Giang', '2025-12-22 11:00:00', 48, 'bank_transfer', 'Tiền cọc 2 tháng', ARRAY[10], 4, 'confirmed'),
+    (2, 'receipt', 'Đặng Văn Giang', '2026-01-01 09:00:00', 24, 'bank_transfer', 'Tiền thuê tháng 1/2026', ARRAY[10], 4, 'confirmed'),
+    (2, 'receipt', 'Đặng Văn Giang', '2026-01-01 09:05:00', 24, 'cash', 'Tiền thuê tháng 2/2026 (trả trước)', NULL, 4, 'confirmed'),
+    (5, 'receipt', 'Trịnh Văn Minh', '2026-01-10 15:00:00', 500, 'bank_transfer', 'Tiền cọc 10%', ARRAY[9], 4, 'confirmed'),
+    (3, 'receipt', 'Bùi Thị Hoa', '2026-01-15 10:00:00', 350, 'bank_transfer', 'Tiền đặt cọc', NULL, 4, 'created'),
+    (1, 'payment', 'Công ty ABC', '2026-01-06 16:00:00', 120, 'bank_transfer', 'Phí môi giới 1%', NULL, 4, 'confirmed');
+
+-- 3.9 CLIENT NOTES
+INSERT INTO client_note (client_id, staff_id, content, created_at) VALUES 
+    (6, 2, 'Gọi điện tư vấn về nhà phố Q1, khách quan tâm đến vị trí và pháp lý', '2025-12-10 09:30:00'),
+    (6, 2, 'Đã đưa khách đi xem nhà, khách rất hài lòng với thiết kế', '2025-12-15 11:00:00'),
+    (6, 2, 'Thương lượng giá thành công, khách đồng ý 12 tỷ', '2025-12-18 14:00:00'),
+    (6, 3, 'Hướng dẫn khách chuẩn bị giấy tờ ký hợp đồng', '2025-12-19 10:00:00'),
+    (7, 2, 'Khách tìm căn hộ thuê gấp, cần view sông', '2025-12-14 08:00:00'),
+    (7, 2, 'Đã show căn hộ Vinhomes, khách rất thích', '2025-12-18 12:00:00'),
+    (7, 2, 'Ký hợp đồng thuê 1 năm, bắt đầu từ 1/1/2026', '2025-12-22 15:00:00'),
+    (8, 2, 'Khách quan tâm đất nền đầu tư, ngân sách 3-4 tỷ', '2025-12-15 10:00:00'),
+    (8, 2, 'Đưa khách xem đất Thủ Đức, khách đang cân nhắc', '2025-12-20 11:00:00'),
+    (8, 2, 'Khách đã chốt, chuẩn bị đặt cọc', '2026-01-10 09:00:00'),
+    (9, 2, 'Khách VIP, tìm biệt thự cao cấp Q2', '2025-12-18 09:00:00'),
+    (9, 2, 'Xem biệt thự Thảo Điền, khách rất thích compound', '2025-12-22 17:30:00'),
+    (9, 2, 'Đang thương lượng giá, khách offer 43 tỷ', '2025-12-28 10:00:00'),
+    (10, 2, 'Khách công ty, cần thuê văn phòng hoặc mặt bằng', '2026-01-05 14:00:00'),
+    (10, 2, 'Đã giới thiệu mặt bằng Q3, khách sẽ xem tuần sau', '2026-01-10 16:00:00');
+
+-- 3.10 AUDIT LOGS
+INSERT INTO audit_log (actor_id, action_type, target_type, target_id, details, ip_address, created_at) VALUES 
+    (2, 'create', 'real_estate', 1, '{"title": "Nhà phố Nguyễn Huệ Q1", "price": 12500}', '192.168.1.100', '2025-12-01 09:00:00'),
+    (2, 'create', 'real_estate', 2, '{"title": "Căn hộ Vinhomes Central Park", "price": 25}', '192.168.1.100', '2025-12-02 10:00:00'),
+    (2, 'create', 'client', 6, '{"name": "Võ Thị Phương", "type": "buyer"}', '192.168.1.100', '2025-12-05 11:00:00'),
+    (3, 'approve', 'real_estate', 1, '{"status_from": "pending_legal_check", "status_to": "listed"}', '192.168.1.101', '2025-12-08 14:00:00'),
+    (2, 'create', 'appointment', 1, '{"real_estate_id": 1, "client_id": 6}', '192.168.1.100', '2025-12-10 09:00:00'),
+    (2, 'status_change', 'appointment', 1, '{"from": "created", "to": "confirmed"}', '192.168.1.100', '2025-12-12 10:00:00'),
+    (2, 'status_change', 'appointment', 1, '{"from": "confirmed", "to": "completed"}', '192.168.1.100', '2025-12-15 10:30:00'),
+    (2, 'create', 'transaction', 1, '{"real_estate_id": 1, "client_id": 6, "offer_price": 12000}', '192.168.1.100', '2025-12-16 11:00:00'),
+    (2, 'status_change', 'real_estate', 1, '{"from": "listed", "to": "negotiating"}', '192.168.1.100', '2025-12-16 11:05:00'),
+    (2, 'status_change', 'transaction', 1, '{"from": "negotiating", "to": "pending_contract"}', '192.168.1.100', '2025-12-18 15:00:00'),
+    (3, 'create', 'contract', 1, '{"transaction_id": 1, "type": "purchase", "total_value": 12000}', '192.168.1.101', '2025-12-19 09:00:00'),
+    (3, 'status_change', 'contract', 1, '{"from": "draft", "to": "pending_signature"}', '192.168.1.101', '2025-12-19 14:00:00'),
+    (3, 'status_change', 'contract', 1, '{"from": "pending_signature", "to": "signed"}', '192.168.1.101', '2025-12-20 10:30:00'),
+    (4, 'create', 'voucher', 1, '{"contract_id": 1, "amount": 3600, "type": "receipt"}', '192.168.1.102', '2025-12-20 11:00:00'),
+    (3, 'status_change', 'contract', 1, '{"from": "signed", "to": "notarized"}', '192.168.1.101', '2025-12-23 09:00:00'),
+    (4, 'create', 'voucher', 2, '{"contract_id": 1, "amount": 4800, "type": "receipt"}', '192.168.1.102', '2025-12-28 14:30:00'),
+    (4, 'create', 'voucher', 3, '{"contract_id": 1, "amount": 3600, "type": "receipt"}', '192.168.1.102', '2026-01-05 09:30:00'),
+    (3, 'status_change', 'contract', 1, '{"from": "notarized", "to": "finalized"}', '192.168.1.101', '2026-01-05 10:00:00'),
+    (2, 'status_change', 'real_estate', 1, '{"from": "negotiating", "to": "transacted"}', '192.168.1.100', '2026-01-05 10:05:00'),
+    (1, 'export', 'report', NULL, '{"report_type": "monthly_sales", "period": "2025-12"}', '192.168.1.99', '2026-01-06 08:00:00'),
+    (2, 'create', 'real_estate', 11, '{"title": "Shophouse Q9", "price": 8500}', '192.168.1.100', '2026-01-08 09:00:00'),
+    (2, 'create', 'appointment', 6, '{"real_estate_id": 5, "client_id": 10}', '192.168.1.100', '2026-01-10 10:00:00'),
+    (3, 'create', 'contract', 5, '{"transaction_id": 5, "type": "purchase", "total_value": 5000}', '192.168.1.101', '2026-01-10 14:00:00'),
+    (4, 'create', 'voucher', 7, '{"contract_id": 5, "amount": 500, "type": "receipt"}', '192.168.1.102', '2026-01-10 15:30:00'),
+    (2, 'login', 'account', 2, '{"ip": "192.168.1.100"}', '192.168.1.100', '2026-01-15 08:00:00'),
+    (1, 'login', 'account', 1, '{"ip": "192.168.1.99"}', '192.168.1.99', '2026-01-15 08:30:00');
+
+-- ============================================================================
+-- VERIFY DATA
+-- ============================================================================
+SELECT 'terms' as tbl, count(*) FROM term
+UNION ALL SELECT 'files', count(*) FROM file
+UNION ALL SELECT 'clients', count(*) FROM client
+UNION ALL SELECT 'real_estate', count(*) FROM real_estate
+UNION ALL SELECT 'appointments', count(*) FROM appointment
+UNION ALL SELECT 'transactions', count(*) FROM transaction
+UNION ALL SELECT 'contracts', count(*) FROM contract
+UNION ALL SELECT 'vouchers', count(*) FROM voucher
+UNION ALL SELECT 'client_notes', count(*) FROM client_note
+UNION ALL SELECT 'audit_logs', count(*) FROM audit_log;
+
+-- ============================================================================
+-- SUMMARY
+-- ============================================================================
+-- Terms: 8
+-- Files: 10
+-- Clients: 15 (sellers 1-5, buyers/tenants 6-15)
+-- Real Estate: 13 (đủ các trạng thái)
+-- Appointments: 12
+-- Transactions: 7
+-- Contracts: 5
+-- Vouchers: 9
+-- Client Notes: 15
+-- Audit Logs: 26
+--
+-- ĐƠN VỊ TIỀN: TRIỆU ĐỒNG (12500 = 12.5 tỷ VND)
+-- ============================================================================
+
+
+
+
+
+
+

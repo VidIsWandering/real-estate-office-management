@@ -24,18 +24,15 @@ class TransactionRepository {
   }
 
   async findById(id) {
-    const result = await db.query(
-      `SELECT * FROM transaction WHERE id = $1`,
-      [id]
-    );
+    const result = await db.query(`SELECT * FROM transaction WHERE id = $1`, [
+      id,
+    ]);
     return result.rows.length ? new Transaction(result.rows[0]) : null;
   }
 
   async findAll() {
-    const result = await db.query(
-      `SELECT * FROM transaction ORDER BY id DESC`
-    );
-    return result.rows.map(r => new Transaction(r));
+    const result = await db.query(`SELECT * FROM transaction ORDER BY id DESC`);
+    return result.rows.map((r) => new Transaction(r));
   }
 
   async findByStaffId(staffId) {
@@ -43,7 +40,7 @@ class TransactionRepository {
       `SELECT * FROM transaction WHERE staff_id = $1 ORDER BY id DESC`,
       [staffId]
     );
-    return result.rows.map(r => new Transaction(r));
+    return result.rows.map((r) => new Transaction(r));
   }
 
   async updateOfferPrice(id, offerPrice) {

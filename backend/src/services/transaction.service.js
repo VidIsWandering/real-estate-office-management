@@ -1,5 +1,5 @@
 const transactionRepository = require('../repositories/transaction.repository');
-const { ApiError } = require('../utils/api-error');
+const { ApiError } = require('../utils/error.util');
 
 class TransactionService {
   async getAll({ role, staff_id }) {
@@ -26,7 +26,7 @@ class TransactionService {
       staff_id: user.staff_id,
       status: 'negotiating',
     });
-    
+    return transaction;
   }
 
   async update(id, data, user) {
@@ -39,7 +39,10 @@ class TransactionService {
     let updated = transaction;
 
     if (data.offer_price !== undefined) {
-      updated = await transactionRepository.updateOfferPrice(id, data.offer_price);
+      updated = await transactionRepository.updateOfferPrice(
+        id,
+        data.offer_price
+      );
     }
 
     if (data.terms !== undefined) {

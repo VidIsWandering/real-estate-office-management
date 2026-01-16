@@ -9,7 +9,7 @@ class Term {
     return {
       id: this.id,
       name: this.name,
-      context: this.context
-    }
+      context: this.context,
+    };
   }
 }

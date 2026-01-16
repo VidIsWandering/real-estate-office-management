@@ -1,11 +1,5 @@
 class RealEstatePriceHistory {
-  constructor({
-    id,
-    real_estate_id,
-    price,
-    changed_at,
-    changed_by
-  }) {
+  constructor({ id, real_estate_id, price, changed_at, changed_by }) {
     this.id = id;
     this.real_estate_id = real_estate_id;
     this.price = price;
@@ -19,7 +13,7 @@ class RealEstatePriceHistory {
       real_estate_id: this.real_estate_id,
       price: this.price,
       changed_at: this.changed_at,
-      changed_by: this.changed_by
+      changed_by: this.changed_by,
     };
   }
 }
