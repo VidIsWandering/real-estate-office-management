@@ -9,6 +9,7 @@ const clientController = require('../controllers/client.controller');
 const { authenticate } = require('../middlewares/auth.middleware');
 const { createValidator } = require('../validators/client.validator');
 const { validate } = require('../middlewares/validate.middleware');
+const { asyncHandler } = require('../middlewares/error.middleware');
 
 // All routes require authentication
 router.use(authenticate);
@@ -18,14 +19,14 @@ router.use(authenticate);
  * @desc    Get all clients
  * @access  Private
  */
-router.get('/', clientController.getAll);
+router.get('/', asyncHandler(clientController.getAll))
 
 /**
  * @route   GET /api/v1/clients/:id
  * @desc    Get client by ID
  * @access  Private
  */
-router.get('/:id', clientController.getById);
+router.get('/:id', asyncHandler(clientController.getById));
 
 /**
  * @route   POST /api/v1/clients
