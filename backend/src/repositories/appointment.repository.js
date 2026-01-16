@@ -30,59 +30,61 @@ class AppointmentRepository {
   /**
    * Get all appointments (optional filters)
    */
-  async findAll(query = {}) {
-    const {
-      real_estate_id,
-      client_id,
-      staff_id,
-      status,
-      from_time,
-      to_time,
-      page = 1,
-      limit = 10,
-    } = query;
+async findAll(query = {}) {
+  const {
+    real_estate_id,
+    client_id,
+    staff_id,
+    status,
+    from_time,
+    to_time,
+    page = 1,
+    limit = 10,
+  } = query;
 
-    const conditions = [];
-    const values = [];
+  const conditions = [];
+  const values = [];
 
-    if (real_estate_id) {
-      values.push(real_estate_id);
-      conditions.push(`real_estate_id = $${values.length}`);
-    }
+  if (real_estate_id) {
+    values.push(real_estate_id);
+    conditions.push(`real_estate_id = $${values.length}`);
+  }
 
-    if (client_id) {
-      values.push(client_id);
-      conditions.push(`client_id = $${values.length}`);
-    }
+  if (client_id) {
+    values.push(client_id);
+    conditions.push(`client_id = $${values.length}`);
+  }
 
-    if (staff_id) {
-      values.push(staff_id);
-      conditions.push(`staff_id = $${values.length}`);
-    }
+  if (staff_id) {
+    values.push(staff_id);
+    conditions.push(`staff_id = $${values.length}`);
+  }
 
-    if (status) {
-      values.push(status);
-      conditions.push(`status = $${values.length}`);
-    }
+  if (status) {
+    values.push(status);
+    conditions.push(`status = $${values.length}`);
+  }
 
-    if (from_time) {
-      values.push(from_time);
-      conditions.push(`start_time >= $${values.length}`);
-    }
+  if (from_time) {
+    values.push(from_time);
+    conditions.push(`start_time >= $${values.length}`);
+  }
 
-    if (to_time) {
-      values.push(to_time);
-      conditions.push(`end_time <= $${values.length}`);
-    }
+  if (to_time) {
+    values.push(to_time);
+    conditions.push(`end_time <= $${values.length}`);
+  }
 
-    const whereSQL =
-      conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+  const whereSQL =
+    conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
 
-    // 🔹 Pagination
-    const offset = (Number(page) - 1) * Number(limit);
+  // 🔹 Pagination
+  const currentPage = Number(page);
+  const pageSize = Number(limit);
+  const offset = (currentPage - 1) * pageSize;
 
-    // 🔹 Query data
-    const dataSQL = `
+  // 🔹 Query data
+  const dataSQL = `
     SELECT *
     FROM appointment
     ${whereSQL}
@@ -91,23 +93,35 @@ class AppointmentRepository {
     OFFSET $${values.length + 2};
   `;
 
-    // 🔹 Query total
-    const countSQL = `
+  // 🔹 Query total
+  const countSQL = `
     SELECT COUNT(*) AS total
     FROM appointment
     ${whereSQL};
   `;
 
-    const dataResult = await db.query(dataSQL, [...values, limit, offset]);
+  const dataResult = await db.query(dataSQL, [
+    ...values,
+    pageSize,
+    offset,
+  ]);
 
-    const countResult = await db.query(countSQL, values);
+  const countResult = await db.query(countSQL, values);
 
-    return {
-      items: dataResult.rows.map((row) => new Appointment(row)),
+  const total = Number(countResult.rows[0].total);
 
-      total: Number(countResult.rows[0].total),
-    };
-  }
+  return {
+    items: dataResult.rows.map(row => new Appointment(row)),
+    pagination: {
+      page: currentPage,
+      limit: pageSize,
+      total,
+      totalPages: Math.ceil(total / pageSize),
+    },
+  };
+}
+
+
 
   /**
    * Get appointment by id

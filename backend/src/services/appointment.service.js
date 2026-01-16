@@ -68,6 +68,8 @@ class AppointmentService {
     const staff = await staffRepository.findById(user.staff_id);
     if (!staff) throw new Error('Staff not found');
 
+    
+
     // Check trùng lịch
     const conflict = await appointmentRepository.checkScheduleConflict({
       staff_id: user.staff_id,
