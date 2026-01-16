@@ -39,7 +39,7 @@ const DIRECTIONS = {
 
 const REAL_ESTATE_STATUS = {
   CREATED: 'created',
-  PENDING: 'pending',
+  PENDING_LEGAL_CHECK: 'pending_legal_check',
   LISTED: 'listed',
   NEGOTIATING: 'negotiating',
   TRANSACTED: 'transacted',
@@ -55,7 +55,7 @@ const APPOINTMENT_STATUS = {
 
 const TRANSACTION_STATUS = {
   NEGOTIATING: 'negotiating',
-  PENDING: 'pending',
+  PENDING_CONTRACT: 'pending_contract',
   CANCELLED: 'cancelled',
 };
 
@@ -67,7 +67,7 @@ const CONTRACT_TYPES = {
 
 const CONTRACT_STATUS = {
   DRAFT: 'draft',
-  PENDING: 'pending',
+  PENDING_SIGNATURE: 'pending_signature',
   SIGNED: 'signed',
   NOTARIZED: 'notarized',
   FINALIZED: 'finalized',

@@ -116,6 +116,12 @@ class FileService {
       throw new Error('ERROR: FileService - createManyFiles');
     }
   }
+
+  async getFilesByIds(ids) {
+  const files = await fileRepository.findByIds(ids);
+  return files.map(file => file.toJSON());
+}
+
 }
 
 module.exports = new FileService();
