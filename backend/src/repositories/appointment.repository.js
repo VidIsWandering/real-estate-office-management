@@ -1,7 +1,5 @@
-const { db } = require("../config/database");
-const Appointment = require("../models/appointment.model");
-
-
+const { db } = require('../config/database');
+const Appointment = require('../models/appointment.model');
 
 class AppointmentRepository {
   /**
@@ -100,23 +98,16 @@ class AppointmentRepository {
     ${whereSQL};
   `;
 
-    const dataResult = await db.query(dataSQL, [
-      ...values,
-      limit,
-      offset,
-    ]);
+    const dataResult = await db.query(dataSQL, [...values, limit, offset]);
 
     const countResult = await db.query(countSQL, values);
 
     return {
-      items: dataResult.rows.map(row => new Appointment(row)),
+      items: dataResult.rows.map((row) => new Appointment(row)),
 
       total: Number(countResult.rows[0].total),
-
-
     };
   }
-
 
   /**
    * Get appointment by id
@@ -177,11 +168,7 @@ class AppointmentRepository {
   }
 
   async checkScheduleConflict({ staff_id, start_time, end_time, exclude_id }) {
-    const conditions = [
-      `staff_id = $1`,
-      `start_time < $3`,
-      `end_time > $2`,
-    ];
+    const conditions = [`staff_id = $1`, `start_time < $3`, `end_time > $2`];
 
     const values = [staff_id, start_time, end_time];
 
@@ -193,14 +180,13 @@ class AppointmentRepository {
     const sql = `
     SELECT 1
     FROM appointment
-    WHERE ${conditions.join(" AND ")}
+    WHERE ${conditions.join(' AND ')}
     LIMIT 1;
   `;
 
     const result = await db.query(sql, values);
     return result.rows.length > 0;
   }
-
 }
 
 module.exports = new AppointmentRepository();

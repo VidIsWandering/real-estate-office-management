@@ -14,7 +14,7 @@ class AppointmentController {
   async getAll(req, res) {
     // TODO: Implement - Agent: chỉ xem của mình, Manager: xem tất cả
     const { page = 1, limit = 10 } = req.query;
-    const query = { ...req.query }
+    const query = { ...req.query };
 
     const result = await appointmentService.getAll(
       { ...query, page: Number(page), limit: Number(limit) },
@@ -25,7 +25,11 @@ class AppointmentController {
       res,
       {
         items: result.items,
-        pagination: { page: Number(page), limit: Number(limit), total: result.total },
+        pagination: {
+          page: Number(page),
+          limit: Number(limit),
+          total: result.total,
+        },
       },
       'Appointment list retrieved successfully'
     );
@@ -38,7 +42,11 @@ class AppointmentController {
     // TODO: Implement
     const { id } = req.params;
     const appointment = await appointmentService.getById(id, req.user);
-    return successResponse(res, { ...appointment }, 'Appointment retrieved successfully');
+    return successResponse(
+      res,
+      { ...appointment },
+      'Appointment retrieved successfully'
+    );
   }
 
   /**
@@ -61,11 +69,7 @@ class AppointmentController {
   async update(req, res) {
     // TODO: Implement
     const { id } = req.params;
-    const appointment = await appointmentService.update(
-      id,
-      req.body,
-      req.user
-    );
+    const appointment = await appointmentService.update(id, req.body, req.user);
 
     return successResponse(
       res,
