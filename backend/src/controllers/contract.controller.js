@@ -2,33 +2,53 @@
  * Contract Controller - Quản lý hợp đồng
  */
 
-const { successResponse } = require('../utils/response.util');
+const { successResponse, errorResponse, successResponseWithPagination } = require('../utils/response.util');
 const { HTTP_STATUS } = require('../config/constants');
 const { asyncHandler } = require('../middlewares/error.middleware');
+const contractService = require('../services/contract.service');
+const { formatUploadedFiles } = require('../utils/file.utils');
 
 class ContractController {
   /**
    * GET /contracts
    */
   async getAll(req, res) {
-    const { page = 1, limit = 10 } = req.query;
+    try {
+      const { page = 1, limit = 10 } = req.query;
+      const result = await contractService.getAll(req.query);
 
-    return successResponse(
-      res,
-      {
-        items: [],
-        pagination: { page: Number(page), limit: Number(limit), total: 0 },
-      },
-      'Contract list retrieved successfully'
-    );
+      return successResponseWithPagination(
+        res,
+      
+          result.items,
+          result.pagination,
+        
+        'Contract list retrieved successfully'
+      );
+    } catch (error) {
+      return errorResponse(
+        res,
+        error.message || 'Failed to retrieve contract list',
+        error.statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR
+      );
+    }
   }
 
   /**
    * GET /contracts/:id
    */
   async getById(req, res) {
-    const { id } = req.params;
-    return successResponse(res, { id }, 'Contract retrieved successfully');
+    try {
+      const { id } = req.params;
+      const result = await contractService.getById(id);
+      return successResponse(res, result, 'Contract retrieved successfully');
+    } catch (error) {
+      return errorResponse(
+        res,
+        error.message || 'Failed to retrieve contract',
+        error.statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR
+      );
+    }
   }
 
   /**
@@ -36,75 +56,116 @@ class ContractController {
    * Chỉ Legal Officer có quyền
    */
   async create(req, res) {
-    // TODO: Implement - Calculate remaining_amount = total_value - deposit_amount
-    const { total_value, deposit_amount = 0 } = req.body;
-
-    return successResponse(
-      res,
-      {
-        ...req.body,
-        staff_id: req.user.staff_id,
-        status: 'draft',
-        paid_amount: 0,
-        remaining_amount: total_value - deposit_amount,
-      },
-      'Contract created successfully',
-      HTTP_STATUS.CREATED
-    );
+    try {
+      // TODO: Implement - Calculate remaining_amount = total_value - deposit_amount
+      const result = await contractService.create(req.body, req.user);
+      return successResponse(
+        res,
+        result,
+        'Contract created successfully',
+        HTTP_STATUS.CREATED
+      );
+    } catch (error) {
+      return errorResponse(
+        res,
+        error.message || 'Failed to create contract',
+        error.statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR
+      );
+    }
   }
 
   /**
    * PUT /contracts/:id
    */
   async update(req, res) {
-    // TODO: Implement - Only allow when status = DRAFT
-    const { id } = req.params;
-    return successResponse(
-      res,
-      { id, ...req.body },
-      'Contract updated successfully'
-    );
+    try {
+      // TODO: Implement - Only allow when status = DRAFT
+      const result = await contractService.update(req.params.id, req.body);
+      return successResponse(
+        res,
+        { ...result },
+        'Contract updated successfully'
+      );
+    } catch (error) {
+      return errorResponse(
+        res,
+        error.message || 'Failed to update contract',
+        error.statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR
+      );
+    }
   }
 
   /**
    * PATCH /contracts/:id/status
    */
   async updateStatus(req, res) {
-    // TODO: Implement - Validate status transition workflow
-    const { id } = req.params;
-    const { status, signed_date, cancellation_reason } = req.body;
+    try {
+      const { id } = req.params;
 
-    return successResponse(
-      res,
-      { id, status, signed_date, cancellation_reason },
-      'Contract status updated successfully'
-    );
+      const updatedContract = await contractService.updateStatus(
+        id,
+        req.body
+      );
+
+      return successResponse(
+        res,
+        updatedContract,
+        'Contract status updated successfully'
+      );
+    } catch (error) {
+      return errorResponse(
+        res,
+        error.message || 'Failed to update contract status',
+        error.statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR
+      );
+    }
   }
 
   /**
    * POST /contracts/:id/files
    */
   async uploadFiles(req, res) {
-    // TODO: Implement - Handle file uploads
-    const { id } = req.params;
+    try {
+      // TODO: Implement - Handle file uploads
+      const { id } = req.params;
 
-    return successResponse(
-      res,
-      { contract_id: id, files: [] },
-      'Files uploaded successfully'
-    );
+      const attachments = formatUploadedFiles(req.files?.attachments);
+      console.log(attachments);
+
+      const result = await contractService.addAttachments(id, attachments);
+      return successResponse(
+        res,
+        { ...result },
+        'Files uploaded successfully'
+      );
+    } catch (error) {
+      return errorResponse(
+        res,
+        error.message || 'Failed to upload contract files',
+        error.statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR
+      );
+    }
   }
 
   /**
    * GET /contracts/:id/files
    */
   async getFiles(req, res) {
-    const { id } = req.params;
-    return successResponse(
-      res,
-      { contract_id: id, files: [] },
-      'Files retrieved successfully'
-    );
+    try {
+      const { id } = req.params;
+      const result = await contractService.getAttachments(id);
+      return successResponse(
+        res,
+        { ...result },
+        'Files retrieved successfully'
+      );
+    } catch (error) {
+      return errorResponse(
+        res,
+        error.message || 'Failed to retrieve contract files',
+        error.statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR
+      );
+    }
   }
 }
 
