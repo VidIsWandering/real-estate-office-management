@@ -1,7 +1,6 @@
 const {
   REAL_ESTATE_STATUS,
   APPOINTMENT_STATUS,
-  TRANSACTION_TYPES,
   TRANSACTION_STATUS,
 } = require('../config/constants');
 const appointmentRepository = require('../repositories/appointment.repository');
@@ -95,7 +94,7 @@ class TransactionService {
     };
   }
 
-  async update(id, data, user) {
+  async update(id, data) {
     const transaction = await transactionRepository.findById(id);
 
     if (transaction.status !== 'negotiating') {
@@ -128,7 +127,7 @@ class TransactionService {
     return updated;
   }
 
-  async finalize(id, user) {
+  async finalize(id) {
     const transaction = await transactionRepository.findById(id);
 
     if (transaction.status != 'negotiating') {

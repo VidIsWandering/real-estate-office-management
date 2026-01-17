@@ -17,7 +17,7 @@ class AuthService {
    * Register new account + staff
    */
   async register(registerData) {
-    const { username, password, full_name, email, phone_number, position } =
+    const { username, password, full_name, email, phone_number, role } =
       registerData;
 
     // Check username đã tồn tại chưa

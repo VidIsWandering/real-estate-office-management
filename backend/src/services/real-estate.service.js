@@ -111,21 +111,7 @@ class RealEstateService {
       : null;
 
     // 4️⃣ Cập nhật bản ghi
-    const updatedRealEstate = await realEstateRepository.update(realEstateId, {
-      ...updateData,
-      staff_id: user.staff_id,
-      media_files: media_files?.length > 0 ? media_files : null,
-      legal_docs: legal_docs?.length > 0 ? legal_docs : null,
-    });
-
-    console.log({
-      ...updateData,
-      staff_id: user.staff_id,
-      media_files: media_files?.length > 0 ? media_files : null,
-      legal_docs: legal_docs?.length > 0 ? legal_docs : null,
-    });
-
-    console.log({
+    await realEstateRepository.update(realEstateId, {
       ...updateData,
       staff_id: user.staff_id,
       media_files: media_files?.length > 0 ? media_files : null,

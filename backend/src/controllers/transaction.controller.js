@@ -17,8 +17,6 @@ class TransactionController {
    */
   async getAll(req, res) {
     try {
-      const { page = 1, limit = 10 } = req.query;
-
       const result = await transactionService.getAll(req.query, req.user);
 
       return successResponseWithPagination(
@@ -91,8 +89,7 @@ class TransactionController {
       // TODO: Implement - Only allow when status = NEGOTIATING
       const transaction = await transactionService.update(
         req.params.id,
-        req.body,
-        req.user
+        req.body
       );
 
       return successResponse(
@@ -117,7 +114,7 @@ class TransactionController {
     try {
       // TODO: Implement - Update status to PENDING, notify Legal Officer
       const { id } = req.params;
-      const result = await transactionService.finalize(id, req.user);
+      const result = await transactionService.finalize(id);
 
       return successResponse(
         res,

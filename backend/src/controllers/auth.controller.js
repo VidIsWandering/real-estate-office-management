@@ -70,12 +70,6 @@ class AuthController {
     return successResponse(res, profile, 'Profile updated successfully');
   }
 
-  async updateProfile(req, res) {
-    const result = await authService.updateProfile(req.user.id, req.body);
-
-    return successResponse(res, result, 'Profile updated successfully');
-  }
-
   async changePassword(req, res) {
     const { current_password, new_password } = req.body;
     const result = await authService.changePassword(

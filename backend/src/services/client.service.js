@@ -28,6 +28,7 @@ class ClientService {
 
   async getById(clientId, user) {
     const client = await clientRepository.findById(clientId);
+    const staff = await clientRepository.findById(client.staff_id);
 
     if (
       client.staff_id != user.staff_id &&
@@ -43,7 +44,7 @@ class ClientService {
 
   async update(clientId, updateData, user) {
     const client = await clientRepository.findById(clientId);
-
+    const staff = await clientRepository.findById(client.staff_id);
     if (
       client.staff_id != user.staff_id &&
       user.position != STAFF_ROLES.MANAGER

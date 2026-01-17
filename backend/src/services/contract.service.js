@@ -6,7 +6,6 @@ const clientRepository = require('../repositories/client.repository');
 const contractRepository = require('../repositories/contract.repository');
 const termRepository = require('../repositories/term.repository');
 const fileService = require('./file.service');
-const realEstateService = require('./real-estate.service');
 
 class ContractService {
   async create(data, user) {

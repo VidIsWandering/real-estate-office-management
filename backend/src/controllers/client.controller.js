@@ -10,8 +10,6 @@ const {
 const { HTTP_STATUS } = require('../config/constants');
 const { asyncHandler } = require('../middlewares/error.middleware');
 const clientService = require('../services/client.service');
-const clientNoteRepository = require('../repositories/client-note.repository');
-const { query } = require('winston');
 
 class ClientController {
   /**

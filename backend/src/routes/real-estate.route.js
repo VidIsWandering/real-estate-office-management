@@ -10,7 +10,6 @@ const { authenticate, authorize } = require('../middlewares/auth.middleware');
 const { STAFF_ROLES } = require('../config/constants');
 const upload = require('../middlewares/upload.middleware');
 const {
-  getAllRealEstateValidator,
   createRealEstateValidator,
   updateRealEstateValidator,
 } = require('../validators/real-estate.validator');
