@@ -17,25 +17,22 @@ class RealEstateService {
     }
 
 
-    try {
-      const media_files = await fileService.createManyFiles(data.media_files)
-      const legal_docs = await fileService.createManyFiles(data.legal_docs)
 
-      const mediaFileIds = media_files.items.map((item) => item.id);
-      const legalDocIds = legal_docs.items.map((item) => item.id);
+    const media_files = await fileService.createManyFiles(data.media_files)
+    const legal_docs = await fileService.createManyFiles(data.legal_docs)
 
-      console.log(mediaFileIds);
-      const res = await realEstateRepository.create({
-        ...data,
-        media_files: mediaFileIds,
-        legal_docs: legalDocIds,
-      });
-      return {
-        realEstate: res.toJSON(),
-      };
-    // } catch (error) {
-    //   throw error;
-    // }
+    const mediaFileIds = media_files.items.map((item) => item.id);
+    const legalDocIds = legal_docs.items.map((item) => item.id);
+
+    console.log(mediaFileIds);
+    const res = await realEstateRepository.create({
+      ...data,
+      media_files: mediaFileIds,
+      legal_docs: legalDocIds,
+    });
+    return {
+      realEstate: res.toJSON(),
+    };
   }
 
   async getRealEstates(query, user) {
@@ -94,14 +91,14 @@ class RealEstateService {
     // 3️⃣ Upload media files và legal docs
     const media_files = updateData.media_files
       ? (await fileService.createManyFiles(updateData.media_files)).items.map(
-          (item) => item.id
-        )
+        (item) => item.id
+      )
       : null;
 
     const legal_docs = updateData.legal_docs
       ? (await fileService.createManyFiles(updateData.legal_docs)).items.map(
-          (item) => item.id
-        )
+        (item) => item.id
+      )
       : null;
 
     // 4️⃣ Cập nhật bản ghi
