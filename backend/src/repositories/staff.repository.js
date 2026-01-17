@@ -1,5 +1,5 @@
 /**
- * Staff Repository - Tương tác với database
+ * Staff Repository - Database interactions for staff
  */
 
 const { db } = require('../config/database');
@@ -7,7 +7,7 @@ const Staff = require('../models/staff.model');
 
 class StaffRepository {
   /**
-   * Tạo staff mới
+   * Create new staff
    */
   async create(staffData) {
     const sql = `
@@ -35,7 +35,7 @@ class StaffRepository {
   }
 
   /**
-   * Tìm staff theo account_id
+   * Find staff by account_id
    */
   async findByAccountId(accountId) {
     const sql = `
@@ -52,7 +52,7 @@ class StaffRepository {
   }
 
   /**
-   * Tìm staff theo id
+   * Find staff by id
    */
   async findById(id) {
     const sql = `
@@ -69,7 +69,7 @@ class StaffRepository {
   }
 
   /**
-   * Tìm staff với thông tin account
+   * Find staff with account information
    */
   async findByIdWithAccount(id) {
     const sql = `
@@ -91,7 +91,7 @@ class StaffRepository {
   }
 
   /**
-   * Check email đã tồn tại chưa
+   * Check if email exists
    */
   async existsByEmail(email) {
     const sql = `
@@ -142,7 +142,7 @@ class StaffRepository {
   }
 
   /**
-   * Get all staff với pagination
+   * Get all staff with pagination and filters
    */
   async findAll(page = 1, limit = 10, filters = {}) {
     let sql = `
