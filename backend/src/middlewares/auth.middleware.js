@@ -60,7 +60,6 @@ const authorize = (allowedRoles = []) => {
       return next();
     }
 
-    console.log(req.user.position);
     if (!allowedRoles.includes(req.user.position)) {
       return forbiddenResponse(
         res,

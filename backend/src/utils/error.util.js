@@ -1,35 +1,51 @@
-const { HTTP_STATUS } = require('../config/constants');
-
 /**
- * Custom Application Error Class
+ * Custom error classes cho application
  */
+
 class AppError extends Error {
-  constructor(message, statusCode = HTTP_STATUS.INTERNAL_SERVER_ERROR) {
+  constructor(message, statusCode) {
     super(message);
     this.statusCode = statusCode;
-    this.isOperational = true;
-
+    this.name = this.constructor.name;
     Error.captureStackTrace(this, this.constructor);
   }
 }
 
-/**
- * Error response
- */
-const errorResponse = (
-  res,
-  message = 'Internal Server Error',
-  statusCode = HTTP_STATUS.INTERNAL_SERVER_ERROR,
-  data = null
-) => {
-  return res.status(statusCode).json({
-    success: false,
-    message,
-    ...(data && { data }),
-  });
-};
+class NotFoundError extends AppError {
+  constructor(message = 'Resource not found') {
+    super(message, 404);
+  }
+}
+
+class ValidationError extends AppError {
+  constructor(message = 'Validation failed') {
+    super(message, 400);
+  }
+}
+
+class ConflictError extends AppError {
+  constructor(message = 'Resource already exists') {
+    super(message, 409);
+  }
+}
+
+class UnauthorizedError extends AppError {
+  constructor(message = 'Unauthorized') {
+    super(message, 401);
+  }
+}
+
+class ForbiddenError extends AppError {
+  constructor(message = 'Forbidden') {
+    super(message, 403);
+  }
+}
 
 module.exports = {
   AppError,
-  errorResponse,
+  NotFoundError,
+  ValidationError,
+  ConflictError,
+  UnauthorizedError,
+  ForbiddenError,
 };

@@ -18,8 +18,10 @@ const notFoundHandler = (req, res, next) => {
 
 /**
  * Global Error Handler
+ * Note: Express requires 4 parameters (err, req, res, next) to identify error handlers
  */
-const errorHandler = (err, req, res) => {
+// eslint-disable-next-line no-unused-vars
+const errorHandler = (err, req, res, next) => {
   // Log error
   logger.error('Error:', {
     message: err.message,
@@ -29,7 +31,7 @@ const errorHandler = (err, req, res) => {
     ip: req.ip,
   });
 
-  // Determine status code
+  // Determine status code and message
   let statusCode = err.statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR;
   let message = err.message || 'Internal Server Error';
 
@@ -68,11 +70,8 @@ const errorHandler = (err, req, res) => {
     message = 'Token expired';
   }
 
-  // Validation errors (express-validator)
-  if (err.name === 'ValidationError') {
-    statusCode = HTTP_STATUS.BAD_REQUEST;
-    message = 'Validation failed';
-  }
+  // Note: Custom error classes (ValidationError, NotFoundError, etc.) from error.util.js
+  // already have statusCode set, so they will use their own message and statusCode
 
   // Response object
   const response = {
