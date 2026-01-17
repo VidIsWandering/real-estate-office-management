@@ -15,15 +15,22 @@ module.exports = [
   {
     languageOptions: {
       ecmaVersion: 2020,
-      sourceType: 'commonjs', // Vì dự án dùng `require` và `module.exports`
+      sourceType: 'commonjs',
       globals: {
-        ...globals.node, // Thêm các biến toàn cục của Node.js
-        ...globals.es6, // Thêm các biến toàn cục của ES6
+        ...globals.node,
+        ...globals.es6,
       },
     },
-    rules: {
-      // Bạn có thể thêm các rule tùy chỉnh ở đây
-      // Ví dụ: "no-unused-vars": "warn" // Báo warning thay vì lỗi
+    rules: {},
+  },
+
+  // 4. Bật jest globals cho file test
+  {
+    files: ['**/__tests__/**/*.js', '**/*.test.js', '**/*.spec.js'],
+    languageOptions: {
+      globals: {
+        ...globals.jest,
+      },
     },
   },
 ];

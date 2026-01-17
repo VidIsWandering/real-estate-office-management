@@ -1,0 +1,157 @@
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { CalendarEvent } from "./CalendarView";
+
+interface AllEventsPanelProps {
+  isOpen: boolean;
+  onClose: () => void;
+  events: CalendarEvent[];
+}
+
+export function AllEventsPanel({
+  isOpen,
+  onClose,
+  events,
+}: AllEventsPanelProps) {
+  const getEventColor = (type: string) => {
+    switch (type) {
+      case "Viewing":
+        return "bg-blue-50 border-blue-200";
+      case "Showing":
+        return "bg-purple-50 border-purple-200";
+      case "Inspection":
+        return "bg-amber-50 border-amber-200";
+      case "Meeting":
+        return "bg-green-50 border-green-200";
+      case "Closing":
+        return "bg-red-50 border-red-200";
+      default:
+        return "bg-gray-50 border-gray-200";
+    }
+  };
+
+  const getEventBadgeColor = (type: string) => {
+    switch (type) {
+      case "Viewing":
+        return "bg-blue-100 text-blue-700";
+      case "Showing":
+        return "bg-purple-100 text-purple-700";
+      case "Inspection":
+        return "bg-amber-100 text-amber-700";
+      case "Meeting":
+        return "bg-green-100 text-green-700";
+      case "Closing":
+        return "bg-red-100 text-red-700";
+      default:
+        return "bg-gray-100 text-gray-700";
+    }
+  };
+
+  const formatDate = (dateStr: string) => {
+    try {
+      const date = new Date(dateStr);
+      return date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      });
+    } catch {
+      return dateStr;
+    }
+  };
+
+  const sortedEvents = [...events].sort((a, b) => {
+    const dateA = new Date(a.date);
+    const dateB = new Date(b.date);
+    if (dateA !== dateB) return dateA.getTime() - dateB.getTime();
+    return a.time.localeCompare(b.time);
+  });
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[700px]">
+        <DialogHeader>
+          <DialogTitle>All Events ({events.length})</DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-3 max-h-[70vh] overflow-y-auto">
+          {sortedEvents.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-gray-500">No events scheduled</p>
+            </div>
+          ) : (
+            sortedEvents.map((event) => (
+              <div
+                key={event.id}
+                className={`p-4 border rounded-lg ${getEventColor(event.type)}`}
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-2 flex-wrap">
+                      <span className="text-xs font-medium text-gray-600">
+                        {formatDate(event.date)}
+                      </span>
+                      <span
+                        className={`text-xs px-2 py-1 rounded-full font-medium ${getEventBadgeColor(
+                          event.type,
+                        )}`}
+                      >
+                        {event.type}
+                      </span>
+                      <span className="text-sm font-semibold text-gray-900">
+                        {event.time}
+                      </span>
+                    </div>
+
+                    <h4 className="text-sm font-semibold text-gray-900 mb-2">
+                      {event.title}
+                    </h4>
+
+                    <div className="space-y-1 text-sm text-gray-600">
+                      {event.property && (
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-gray-700">
+                            Property:
+                          </span>
+                          <span>{event.property}</span>
+                        </div>
+                      )}
+                      {event.client && (
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-gray-700">
+                            Client:
+                          </span>
+                          <span>{event.client}</span>
+                        </div>
+                      )}
+                      {event.agent && (
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-gray-700">
+                            Agent:
+                          </span>
+                          <span>{event.agent}</span>
+                        </div>
+                      )}
+                      {event.location && (
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-gray-700">
+                            Location:
+                          </span>
+                          <span>{event.location}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
