@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { post } from "@/lib/api/client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -26,20 +27,12 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:8081/api/v1/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Login failed");
-      }
+      const response = await post<{
+        data: { tokens: { access_token: string } };
+      }>("auth/login", { username, password });
 
       // Save token to localStorage
-      localStorage.setItem("auth_token", data.data.tokens.access_token);
+      localStorage.setItem("auth_token", response.data.tokens.access_token);
 
       // Redirect to dashboard/settings
       router.push("/settings");
