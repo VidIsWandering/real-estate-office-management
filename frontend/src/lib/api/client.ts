@@ -39,7 +39,8 @@ async function request<T>(
     headers["Authorization"] = `Bearer ${token}`;
   }
 
-  const url = `${API_BASE_URL}${endpoint}`;
+  // Ensure proper URL construction with slash
+  const url = `${API_BASE_URL}/${endpoint}`;
 
   try {
     const response = await fetch(url, {
