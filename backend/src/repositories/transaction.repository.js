@@ -30,60 +30,60 @@ class TransactionRepository {
     return result.rows.length ? new Transaction(result.rows[0]) : null;
   }
 
-async findAll(query = {}) {
-  const {
-    real_estate_id,
-    client_id,
-    staff_id,
-    status,
-    min_price,
-    max_price,
-    page = 1,
-    limit = 10,
-  } = query;
+  async findAll(query = {}) {
+    const {
+      real_estate_id,
+      client_id,
+      staff_id,
+      status,
+      min_price,
+      max_price,
+      page = 1,
+      limit = 10,
+    } = query;
 
-  const conditions = [];
-  const values = [];
+    const conditions = [];
+    const values = [];
 
-  if (real_estate_id) {
-    values.push(real_estate_id);
-    conditions.push(`real_estate_id = $${values.length}`);
-  }
+    if (real_estate_id) {
+      values.push(real_estate_id);
+      conditions.push(`real_estate_id = $${values.length}`);
+    }
 
-  if (client_id) {
-    values.push(client_id);
-    conditions.push(`client_id = $${values.length}`);
-  }
+    if (client_id) {
+      values.push(client_id);
+      conditions.push(`client_id = $${values.length}`);
+    }
 
-  if (staff_id) {
-    values.push(staff_id);
-    conditions.push(`staff_id = $${values.length}`);
-  }
+    if (staff_id) {
+      values.push(staff_id);
+      conditions.push(`staff_id = $${values.length}`);
+    }
 
-  if (status) {
-    values.push(status);
-    conditions.push(`status = $${values.length}`);
-  }
+    if (status) {
+      values.push(status);
+      conditions.push(`status = $${values.length}`);
+    }
 
-  if (min_price) {
-    values.push(min_price);
-    conditions.push(`offer_price >= $${values.length}`);
-  }
+    if (min_price) {
+      values.push(min_price);
+      conditions.push(`offer_price >= $${values.length}`);
+    }
 
-  if (max_price) {
-    values.push(max_price);
-    conditions.push(`offer_price <= $${values.length}`);
-  }
+    if (max_price) {
+      values.push(max_price);
+      conditions.push(`offer_price <= $${values.length}`);
+    }
 
-  const whereSQL =
-    conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+    const whereSQL =
+      conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
 
-  const pageNumber = Number(page);
-  const limitNumber = Number(limit);
-  const offset = (pageNumber - 1) * limitNumber;
+    const pageNumber = Number(page);
+    const limitNumber = Number(limit);
+    const offset = (pageNumber - 1) * limitNumber;
 
-  // 🔹 Query data
-  const dataSQL = `
+    // 🔹 Query data
+    const dataSQL = `
     SELECT *
     FROM transaction
     ${whereSQL}
@@ -92,37 +92,34 @@ async findAll(query = {}) {
     OFFSET $${values.length + 2};
   `;
 
-  // 🔹 Query total
-  const countSQL = `
+    // 🔹 Query total
+    const countSQL = `
     SELECT COUNT(*)::int AS total
     FROM transaction
     ${whereSQL};
   `;
 
-  const dataResult = await db.query(dataSQL, [
-    ...values,
-    limitNumber,
-    offset,
-  ]);
+    const dataResult = await db.query(dataSQL, [
+      ...values,
+      limitNumber,
+      offset,
+    ]);
 
-  const countResult = await db.query(countSQL, values);
+    const countResult = await db.query(countSQL, values);
 
-  const total = countResult.rows[0].total;
+    const total = countResult.rows[0].total;
 
-  return {
-    items: dataResult.rows.map(r => new Transaction(r)),
+    return {
+      items: dataResult.rows.map((r) => new Transaction(r)),
 
-    pagination: {
-      page: pageNumber,
-      limit: limitNumber,
-      total,
-      totalPages: Math.ceil(total / limitNumber),
-    },
-  };
-}
-
-
-
+      pagination: {
+        page: pageNumber,
+        limit: limitNumber,
+        total,
+        totalPages: Math.ceil(total / limitNumber),
+      },
+    };
+  }
 
   async findByStaffId(staffId) {
     const result = await db.query(

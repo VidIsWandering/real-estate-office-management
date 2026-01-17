@@ -1,4 +1,9 @@
-const { REAL_ESTATE_STATUS, APPOINTMENT_STATUS, TRANSACTION_TYPES, TRANSACTION_STATUS } = require('../config/constants');
+const {
+  REAL_ESTATE_STATUS,
+  APPOINTMENT_STATUS,
+  TRANSACTION_TYPES,
+  TRANSACTION_STATUS,
+} = require('../config/constants');
 const appointmentRepository = require('../repositories/appointment.repository');
 const clientRepository = require('../repositories/client.repository');
 const realEstateRepository = require('../repositories/real-estate.repository');
@@ -8,11 +13,9 @@ const realEstateService = require('./real-estate.service');
 
 class TransactionService {
   async getAll(query, user) {
+    if (user.position == 'agent') query.staff_id = user.staff_id;
 
-    if (user.position == "agent")
-      query.staff_id = user.staff_id
-
-    return transactionRepository.findAll(query)
+    return transactionRepository.findAll(query);
   }
 
   async getById(id, { position, staff_id }) {
@@ -23,26 +26,26 @@ class TransactionService {
 
     if (position === 'agent' && transaction.staff_id !== staff_id) {
       throw new Error('Forbidden');
-
     }
 
-    const terms = []
+    const terms = [];
 
     for (const termId of transaction.terms) {
-      const term = await termRepository.findById(termId)
+      const term = await termRepository.findById(termId);
 
-      terms.push(term)
+      terms.push(term);
     }
 
-    const client = await clientRepository.findById(transaction.client_id)
+    const client = await clientRepository.findById(transaction.client_id);
 
-    const realEstate = await realEstateRepository.findById(transaction.real_estate_id)
-
+    const realEstate = await realEstateRepository.findById(
+      transaction.real_estate_id
+    );
 
     return {
       transaction: { ...transaction, terms },
       client: client,
-      real_estate: realEstate
+      real_estate: realEstate,
     };
   }
 
@@ -53,20 +56,26 @@ class TransactionService {
     const client = await clientRepository.findById(data.client_id);
     if (!client) throw new Error('Client not found');
 
-    const completedAppointment = await appointmentRepository.findAll({ client_id: client.id, real_estate_id: realEstate.id, status: APPOINTMENT_STATUS.COMPLETED })
-    console.log(completedAppointment)
+    const completedAppointment = await appointmentRepository.findAll({
+      client_id: client.id,
+      real_estate_id: realEstate.id,
+      status: APPOINTMENT_STATUS.COMPLETED,
+    });
+    console.log(completedAppointment);
 
     if (realEstate.status != REAL_ESTATE_STATUS.LISTED)
-      throw new Error('This real estate is currently not available for transaction');
+      throw new Error(
+        'This real estate is currently not available for transaction'
+      );
 
-    const terms = []
+    const terms = [];
 
     for (const termData of data.terms) {
-      const term = await termRepository.create(termData)
-      terms.push(term.toJSON())
+      const term = await termRepository.create(termData);
+      terms.push(term.toJSON());
     }
 
-    const termIds = terms.map(item => item.id)
+    const termIds = terms.map((item) => item.id);
 
     const transaction = await transactionRepository.create({
       ...data,
@@ -74,9 +83,10 @@ class TransactionService {
       staff_id: user.staff_id,
     });
 
-    const updatedStatusRealEstate = await realEstateRepository.updateStatus(realEstate.id, REAL_ESTATE_STATUS.NEGOTIATING)
-
-
+    const updatedStatusRealEstate = await realEstateRepository.updateStatus(
+      realEstate.id,
+      REAL_ESTATE_STATUS.NEGOTIATING
+    );
 
     return {
       transaction: { ...transaction.toJSON(), terms: terms },
@@ -86,7 +96,7 @@ class TransactionService {
   }
 
   async update(id, data, user) {
-    const transaction = await transactionRepository.findById(id)
+    const transaction = await transactionRepository.findById(id);
 
     if (transaction.status !== 'negotiating') {
       throw new Error('Only negotiating transactions can be updated');
@@ -102,16 +112,17 @@ class TransactionService {
     }
 
     if (data.terms !== undefined) {
-
-      const terms = []
+      const terms = [];
 
       for (const termData of data.terms) {
-        const term = await termRepository.update(termData.id, { name: termData.name, content: termData.content })
-        terms.push(term)
+        const term = await termRepository.update(termData.id, {
+          name: termData.name,
+          content: termData.content,
+        });
+        terms.push(term);
       }
 
-      updated.terms = terms
-
+      updated.terms = terms;
     }
 
     return updated;
@@ -124,7 +135,10 @@ class TransactionService {
       throw new Error('Transaction is not negotiating');
     }
 
-    return transactionRepository.updateStatus(id, TRANSACTION_STATUS.PENDING_CONTRACT);
+    return transactionRepository.updateStatus(
+      id,
+      TRANSACTION_STATUS.PENDING_CONTRACT
+    );
   }
 
   async cancel(id, reason, user) {
@@ -133,8 +147,17 @@ class TransactionService {
     if (transaction.status != 'negotiating') {
       throw new Error('Only negotiating transactions can be cancelled');
     }
-    await realEstateService.updateStatus(transaction.real_estate_id, REAL_ESTATE_STATUS.LISTED, user, reason)
-    return await transactionRepository.updateStatus(id, 'cancelled', reason || null);
+    await realEstateService.updateStatus(
+      transaction.real_estate_id,
+      REAL_ESTATE_STATUS.LISTED,
+      user,
+      reason
+    );
+    return await transactionRepository.updateStatus(
+      id,
+      'cancelled',
+      reason || null
+    );
   }
 }
 

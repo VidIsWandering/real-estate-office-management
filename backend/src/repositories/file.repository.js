@@ -59,18 +59,17 @@ class FileRepository {
   }
 
   async findByIds(ids = []) {
-  if (ids.length === 0) return [];
+    if (ids.length === 0) return [];
 
-  const sql = `
+    const sql = `
     SELECT *
     FROM file
     WHERE id = ANY($1);
   `;
 
-  const result = await db.query(sql, [ids]);
-  return result.rows.map(row => new File(row));
-}
-
+    const result = await db.query(sql, [ids]);
+    return result.rows.map((row) => new File(row));
+  }
 
   /**
    * 📌 Cập nhật file (partial update)

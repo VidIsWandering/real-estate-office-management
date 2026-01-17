@@ -9,9 +9,9 @@ class Term {
     return {
       id: this.id,
       name: this.name,
-      content: this.content
-    }
+      content: this.content,
+    };
   }
 }
 
-module.exports = Term
+module.exports = Term;

@@ -1,25 +1,24 @@
-const { STAFF_ROLES } = require("../config/constants");
-const clientRepository = require("../repositories/client.repository");
-const fileRepository = require("../repositories/file.repository");
-const realEstateRepository = require("../repositories/real-estate.repository");
-const staffRepository = require("../repositories/staff.repository");
-const fileService = require("./file.service");
-
+const { STAFF_ROLES } = require('../config/constants');
+const clientRepository = require('../repositories/client.repository');
+const fileRepository = require('../repositories/file.repository');
+const realEstateRepository = require('../repositories/real-estate.repository');
+const staffRepository = require('../repositories/staff.repository');
+const fileService = require('./file.service');
 
 class RealEstateService {
   async create(data, user) {
-
     const existingOwner = await clientRepository.findById(data.owner_id);
     if (!existingOwner) throw new Error('Owner does not exist');
 
-    if (existingOwner.staff_id != user.staff_id && user.position != STAFF_ROLES.MANAGER) {
+    if (
+      existingOwner.staff_id != user.staff_id &&
+      user.position != STAFF_ROLES.MANAGER
+    ) {
       throw new Error('You do not have permission to manage this customer');
     }
 
-
-
-    const media_files = await fileService.createManyFiles(data.media_files)
-    const legal_docs = await fileService.createManyFiles(data.legal_docs)
+    const media_files = await fileService.createManyFiles(data.media_files);
+    const legal_docs = await fileService.createManyFiles(data.legal_docs);
 
     const mediaFileIds = media_files.items.map((item) => item.id);
     const legalDocIds = legal_docs.items.map((item) => item.id);
@@ -37,23 +36,30 @@ class RealEstateService {
 
   async getRealEstates(query, user) {
     if (user.position != STAFF_ROLES.MANAGER) {
-      query.staff_id = user.staff_id
+      query.staff_id = user.staff_id;
     }
-    const res = await realEstateRepository.findAll(query)
-    return res
+    const res = await realEstateRepository.findAll(query);
+    return res;
   }
 
   async getRealEstateById(realEstateId, user) {
-    const realEstate = await realEstateRepository.findById(realEstateId)
-    if (!realEstate) throw new Error("Real estate not found")
+    const realEstate = await realEstateRepository.findById(realEstateId);
+    if (!realEstate) throw new Error('Real estate not found');
 
-    if (realEstate.staff_id != user.staff_id && user.position != STAFF_ROLES.MANAGER) {
+    if (
+      realEstate.staff_id != user.staff_id &&
+      user.position != STAFF_ROLES.MANAGER
+    ) {
       throw new Error('You do not have permission to manage this real estate');
     }
-    const mediaFilesPromise = realEstate.media_files.map(item => fileRepository.findById(item))
-    const media_files = await Promise.all(mediaFilesPromise)
-    const legalDocsPromise = realEstate.legal_docs.map(item => fileRepository.findById(item))
-    const legal_docs = await Promise.all(legalDocsPromise)
+    const mediaFilesPromise = realEstate.media_files.map((item) =>
+      fileRepository.findById(item)
+    );
+    const media_files = await Promise.all(mediaFilesPromise);
+    const legalDocsPromise = realEstate.legal_docs.map((item) =>
+      fileRepository.findById(item)
+    );
+    const legal_docs = await Promise.all(legalDocsPromise);
 
     const owner = await clientRepository.findById(realEstate.owner_id);
     const staff = await staffRepository.findById(owner.staff_id);
@@ -70,7 +76,10 @@ class RealEstateService {
       await realEstateRepository.findById(realEstateId);
     if (!existingRealEstate) throw new Error('Real estate not found');
 
-    if (existingRealEstate.staff_id != user.staff_id && user.position != STAFF_ROLES.MANAGER) {
+    if (
+      existingRealEstate.staff_id != user.staff_id &&
+      user.position != STAFF_ROLES.MANAGER
+    ) {
       throw new Error('You do not have permission to manage this real estate');
     }
     // 2️⃣ Kiểm tra location để tránh trùng
@@ -91,14 +100,14 @@ class RealEstateService {
     // 3️⃣ Upload media files và legal docs
     const media_files = updateData.media_files
       ? (await fileService.createManyFiles(updateData.media_files)).items.map(
-        (item) => item.id
-      )
+          (item) => item.id
+        )
       : null;
 
     const legal_docs = updateData.legal_docs
       ? (await fileService.createManyFiles(updateData.legal_docs)).items.map(
-        (item) => item.id
-      )
+          (item) => item.id
+        )
       : null;
 
     // 4️⃣ Cập nhật bản ghi
@@ -113,22 +122,22 @@ class RealEstateService {
       ...updateData,
       staff_id: user.staff_id,
       media_files: media_files?.length > 0 ? media_files : null,
-      legal_docs: legal_docs?.length > 0 ? legal_docs : null
+      legal_docs: legal_docs?.length > 0 ? legal_docs : null,
     });
 
     console.log({
       ...updateData,
       staff_id: user.staff_id,
       media_files: media_files?.length > 0 ? media_files : null,
-      legal_docs: legal_docs?.length > 0 ? legal_docs : null
-    })
+      legal_docs: legal_docs?.length > 0 ? legal_docs : null,
+    });
 
     // 5️⃣ Nếu price thay đổi, lưu lịch sử giá
     if (updateData.price && updateData.price !== existingRealEstate.price) {
       await realEstateRepository.addPriceHistory({
         real_estate_id: realEstateId,
         price: updateData.price,
-        changed_by: user.staff_id
+        changed_by: user.staff_id,
       });
     }
 
@@ -168,7 +177,10 @@ class RealEstateService {
     const realEstate = await realEstateRepository.findById(realEstateId);
     if (!realEstate) throw new Error('Real estate not found');
 
-    if (realEstate.staff_id != user.staff_id && user.position == STAFF_ROLES.AGENT) {
+    if (
+      realEstate.staff_id != user.staff_id &&
+      user.position == STAFF_ROLES.AGENT
+    ) {
       throw new Error('You do not have permission to manage this real estate');
     }
 

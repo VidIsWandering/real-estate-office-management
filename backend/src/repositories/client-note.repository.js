@@ -27,13 +27,7 @@ class ClientNoteRepository {
    * @returns {Promise<{items: ClientNote[], total: number}>}
    */
   async findAll(query = {}) {
-    const {
-      client_id,
-      from,
-      to,
-      page = 1,
-      limit = 10
-    } = query;
+    const { client_id, from, to, page = 1, limit = 10 } = query;
 
     const conditions = [];
     const values = [];
@@ -83,22 +77,21 @@ class ClientNoteRepository {
 
     const [dataResult, countResult] = await Promise.all([
       db.query(dataSQL, values),
-      db.query(countSQL, values.slice(0, values.length - 2))
+      db.query(countSQL, values.slice(0, values.length - 2)),
     ]);
 
     const total = countResult.rows[0].total;
 
     return {
-      items: dataResult.rows.map(row => new ClientNote(row)),
+      items: dataResult.rows.map((row) => new ClientNote(row)),
       pagination: {
         page: Number(page),
         limit: Number(limit),
         total,
-        totalPages: Math.ceil(total / limit)
-      }
+        totalPages: Math.ceil(total / limit),
+      },
     };
   }
-
 
   /**
    * Tìm note theo id

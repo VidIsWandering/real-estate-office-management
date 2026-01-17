@@ -8,21 +8,19 @@ const termRepository = require('../repositories/term.repository');
 const fileService = require('./file.service');
 const realEstateService = require('./real-estate.service');
 
-
 class ContractService {
   async create(data, user) {
     const total_value = Number(data.total_value) || 0;
     const deposit_amount = Number(data.deposit_amount) || 0;
 
-
-    const terms = []
+    const terms = [];
 
     for (const termData of data.payment_terms) {
-      const term = await termRepository.create(termData)
-      terms.push(term.toJSON())
+      const term = await termRepository.create(termData);
+      terms.push(term.toJSON());
     }
 
-    const termIds = terms.map(item => item.id)
+    const termIds = terms.map((item) => item.id);
 
     const contract = {
       ...data,
@@ -30,10 +28,8 @@ class ContractService {
       status: 'draft',
       paid_amount: deposit_amount,
       remaining_amount: total_value - deposit_amount,
-      payment_terms: termIds
+      payment_terms: termIds,
     };
-
-
 
     const result = await contractRepository.create(contract);
     return result.toJSON();
@@ -46,12 +42,12 @@ class ContractService {
 
   async getById(id) {
     const contract = await contractRepository.findById(id);
-    const party_a = await clientRepository.findById(contract.partyA)
-    const party_b = await clientRepository.findById(contract.partyB)
-    const payment_terms = []
+    const party_a = await clientRepository.findById(contract.partyA);
+    const party_b = await clientRepository.findById(contract.partyB);
+    const payment_terms = [];
     for (const termId of contract.paymentTerms) {
-      const term = await termRepository.findById(termId)
-      payment_terms.push(term)
+      const term = await termRepository.findById(termId);
+      payment_terms.push(term);
     }
     if (!contract) throw new Error('Contract not found');
     return { ...contract.toJSON(), payment_terms, party_a, party_b };
@@ -60,7 +56,8 @@ class ContractService {
   async update(id, updateData) {
     const existing = await contractRepository.findById(id);
     if (!existing) throw new Error('Contract not found');
-    if (existing.status !== 'draft') throw new Error('Only draft contracts can be updated');
+    if (existing.status !== 'draft')
+      throw new Error('Only draft contracts can be updated');
 
     // Nếu cập nhật giá trị, tính toán lại remaining_amount
     if (updateData.total_value || updateData.deposit_amount) {
@@ -69,17 +66,18 @@ class ContractService {
       updateData.remaining_amount = total - deposit;
     }
     if (updateData.payment_terms !== undefined) {
-
-      const terms = []
+      const terms = [];
 
       for (const termData of updateData.payment_terms) {
-        console.log(termData)
-        const term = await termRepository.update(termData.id, { name: termData.name, content: termData.content })
-        terms.push(term)
+        console.log(termData);
+        const term = await termRepository.update(termData.id, {
+          name: termData.name,
+          content: termData.content,
+        });
+        terms.push(term);
       }
 
-      updateData.payment_terms = terms.map(item => item.id)
-
+      updateData.payment_terms = terms.map((item) => item.id);
     }
     const updated = await contractRepository.updateById(id, updateData);
     return updated.toJSON();
@@ -92,7 +90,7 @@ class ContractService {
       signed: ['notarized'],
       notarized: ['finalized'],
       finalized: [],
-      cancelled: []
+      cancelled: [],
     };
 
     const { status: nextStatus, signed_date, cancellation_reason } = statusData;
@@ -118,12 +116,14 @@ class ContractService {
     }
 
     if (nextStatus === CONTRACT_STATUS.CANCELLED && !cancellation_reason) {
-      throw new Error('cancellation_reason is required when cancelling contract');
+      throw new Error(
+        'cancellation_reason is required when cancelling contract'
+      );
     }
 
     // 3. Chuẩn bị data update
     const updateData = {
-      status: nextStatus
+      status: nextStatus,
     };
 
     if (nextStatus === CONTRACT_STATUS.SIGNED) {
@@ -139,19 +139,18 @@ class ContractService {
   }
   async addAttachments(id, files) {
     const attachments = files
-      ? (await fileService.createManyFiles(files)).items.map(item => item.id)
+      ? (await fileService.createManyFiles(files)).items.map((item) => item.id)
       : null;
-    console.log(attachments)
+    console.log(attachments);
     const updated = await contractRepository.updateById(id, { attachments });
     return updated;
-
   }
 
   async getAttachments(id) {
-    const contract = await contractRepository.findById(id)
-    console.log(contract.attachments)
-    const attachments = await fileService.getFilesByIds(contract.attachments)
-    return { attachments }
+    const contract = await contractRepository.findById(id);
+    console.log(contract.attachments);
+    const attachments = await fileService.getFilesByIds(contract.attachments);
+    return { attachments };
   }
 }
 

@@ -25,7 +25,7 @@ class Contract {
     this.status = data.status;
     this.staffId = data.staff_id;
 
-    this.cancellationReason = data.cancellation_reason
+    this.cancellationReason = data.cancellation_reason;
   }
 
   toJSON() {
@@ -46,7 +46,7 @@ class Contract {
       attachments: this.attachments,
       status: this.status,
       staff_id: this.staffId,
-      cancellation_reason: this.cancellationReason
+      cancellation_reason: this.cancellationReason,
     };
   }
 }

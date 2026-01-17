@@ -134,11 +134,7 @@ class RealEstateController {
       const { is_approved, note } = req.body;
 
       const updatedRealEstate = is_approved
-        ? await realEstateService.legalCheck(
-            Number(id),
-            req.user.id,
-            note
-          )
+        ? await realEstateService.legalCheck(Number(id), req.user.id, note)
         : await realEstateService.updateStatus(
             Number(id),
             'pending_legal_check',
@@ -153,9 +149,7 @@ class RealEstateController {
           status: updatedRealEstate.status,
           note,
         },
-        is_approved
-          ? 'Legal check approved'
-          : 'Legal check requires attention'
+        is_approved ? 'Legal check approved' : 'Legal check requires attention'
       );
     } catch (error) {
       return errorResponse(
@@ -175,7 +169,7 @@ class RealEstateController {
       const { status, reason } = req.body;
 
       const updatedRealEstate = await realEstateService.updateStatus(
-       id,
+        id,
         status,
         req.user,
         reason

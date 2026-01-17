@@ -1,7 +1,6 @@
 const { db } = require('../config/database');
 const Term = require('../models/term.model');
 
-
 class TermRepository {
   /**
    * Create term
@@ -13,10 +12,7 @@ class TermRepository {
       RETURNING *;
     `;
 
-    const result = await db.query(sql, [
-      data.name,
-      data.content || null,
-    ]);
+    const result = await db.query(sql, [data.name, data.content || null]);
 
     return new Term(result.rows[0]);
   }
@@ -32,7 +28,7 @@ class TermRepository {
     `;
 
     const result = await db.query(sql);
-    return result.rows.map(row => new Term(row));
+    return result.rows.map((row) => new Term(row));
   }
 
   /**
@@ -58,11 +54,7 @@ class TermRepository {
       RETURNING *;
     `;
 
-    const result = await db.query(sql, [
-      data.name,
-      data.content,
-      id,
-    ]);
+    const result = await db.query(sql, [data.name, data.content, id]);
 
     if (result.rows.length === 0) return null;
     return new Term(result.rows[0]);

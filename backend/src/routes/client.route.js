@@ -19,7 +19,7 @@ router.use(authenticate);
  * @desc    Get all clients
  * @access  Private
  */
-router.get('/', asyncHandler(clientController.getAll))
+router.get('/', asyncHandler(clientController.getAll));
 
 /**
  * @route   GET /api/v1/clients/:id

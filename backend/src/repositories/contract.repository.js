@@ -18,10 +18,21 @@ class ContractRepository {
       RETURNING *
     `;
     const values = [
-      data.transaction_id, data.type, data.party_a, data.party_b,
-      data.total_value, data.deposit_amount, data.payment_terms, data.paid_amount,
-      data.remaining_amount, data.signed_date, data.effective_date, data.expiration_date,
-      data.attachments, data.status, data.staff_id
+      data.transaction_id,
+      data.type,
+      data.party_a,
+      data.party_b,
+      data.total_value,
+      data.deposit_amount,
+      data.payment_terms,
+      data.paid_amount,
+      data.remaining_amount,
+      data.signed_date,
+      data.effective_date,
+      data.expiration_date,
+      data.attachments,
+      data.status,
+      data.staff_id,
     ];
 
     const result = await db.query(sql, values);
@@ -68,17 +79,13 @@ class ContractRepository {
     ${whereSQL}
   `;
 
-    const dataResult = await db.query(dataSQL, [
-      ...values,
-      limitNum,
-      offset,
-    ]);
+    const dataResult = await db.query(dataSQL, [...values, limitNum, offset]);
 
     const countResult = await db.query(countSQL, values);
     const total = countResult.rows[0].total;
 
     return {
-      items: dataResult.rows.map(row => new Contract(row)),
+      items: dataResult.rows.map((row) => new Contract(row)),
       pagination: {
         page: pageNum,
         limit: limitNum,
@@ -87,7 +94,6 @@ class ContractRepository {
       },
     };
   }
-
 
   async findById(id) {
     const sql = `SELECT * FROM contract WHERE id = $1`;

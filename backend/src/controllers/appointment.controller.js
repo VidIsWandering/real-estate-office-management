@@ -152,7 +152,5 @@ module.exports = {
   getById: asyncHandler((req, res) => controller.getById(req, res)),
   create: asyncHandler((req, res) => controller.create(req, res)),
   update: asyncHandler((req, res) => controller.update(req, res)),
-  updateStatus: asyncHandler((req, res) =>
-    controller.updateStatus(req, res)
-  ),
+  updateStatus: asyncHandler((req, res) => controller.updateStatus(req, res)),
 };

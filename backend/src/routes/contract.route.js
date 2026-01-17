@@ -65,10 +65,11 @@ router.patch(
  * @desc    Upload contract files
  * @access  Private
  */
-router.post('/:id/files', upload.fields([
-  { name: 'attachments', maxCount: 10 },
-
-]), contractController.uploadFiles);
+router.post(
+  '/:id/files',
+  upload.fields([{ name: 'attachments', maxCount: 10 }]),
+  contractController.uploadFiles
+);
 
 /**
  * @route   GET /api/v1/contracts/:id/files

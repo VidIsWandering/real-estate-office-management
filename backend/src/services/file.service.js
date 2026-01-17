@@ -118,10 +118,9 @@ class FileService {
   }
 
   async getFilesByIds(ids) {
-  const files = await fileRepository.findByIds(ids);
-  return files.map(file => file.toJSON());
-}
-
+    const files = await fileRepository.findByIds(ids);
+    return files.map((file) => file.toJSON());
+  }
 }
 
 module.exports = new FileService();

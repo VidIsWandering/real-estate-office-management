@@ -2,7 +2,11 @@
  * Contract Controller - Quản lý hợp đồng
  */
 
-const { successResponse, errorResponse, successResponseWithPagination } = require('../utils/response.util');
+const {
+  successResponse,
+  errorResponse,
+  successResponseWithPagination,
+} = require('../utils/response.util');
 const { HTTP_STATUS } = require('../config/constants');
 const { asyncHandler } = require('../middlewares/error.middleware');
 const contractService = require('../services/contract.service');
@@ -19,10 +23,10 @@ class ContractController {
 
       return successResponseWithPagination(
         res,
-      
-          result.items,
-          result.pagination,
-        
+
+        result.items,
+        result.pagination,
+
         'Contract list retrieved successfully'
       );
     } catch (error) {
@@ -102,10 +106,7 @@ class ContractController {
     try {
       const { id } = req.params;
 
-      const updatedContract = await contractService.updateStatus(
-        id,
-        req.body
-      );
+      const updatedContract = await contractService.updateStatus(id, req.body);
 
       return successResponse(
         res,
@@ -133,11 +134,7 @@ class ContractController {
       console.log(attachments);
 
       const result = await contractService.addAttachments(id, attachments);
-      return successResponse(
-        res,
-        { ...result },
-        'Files uploaded successfully'
-      );
+      return successResponse(res, { ...result }, 'Files uploaded successfully');
     } catch (error) {
       return errorResponse(
         res,
