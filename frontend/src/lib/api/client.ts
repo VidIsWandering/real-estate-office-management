@@ -39,8 +39,10 @@ async function request<T>(
     headers["Authorization"] = `Bearer ${token}`;
   }
 
-  // Ensure proper URL construction with slash
-  const url = `${API_BASE_URL}/${endpoint}`;
+  // Normalize URL: remove trailing slash from base, leading slash from endpoint
+  const normalizedBase = API_BASE_URL.replace(/\/$/, "");
+  const normalizedEndpoint = endpoint.replace(/^\//, "");
+  const url = `${normalizedBase}/${normalizedEndpoint}`;
 
   try {
     const response = await fetch(url, {
