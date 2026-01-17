@@ -233,3 +233,4 @@ Purpose: Automatic deployments from `develop` branch for team integration testin
 - **Backend**: https://real-estate-office-management-prod.onrender.com/
 
 Purpose: Only leaders merge to `main`. Used for demos to instructors.
+# Trigger Vercel rebuild with env vars
