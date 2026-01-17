@@ -4,6 +4,7 @@
 
 // Position per database schema: staff_position_enum
 const STAFF_ROLES = {
+  ADMIN: "admin",
   MANAGER: 'manager',
   LEGAL_OFFICER: 'legal_officer',
   AGENT: 'agent',
