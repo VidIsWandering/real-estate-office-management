@@ -458,10 +458,6 @@ frontend/
 
 ## 📚 API Documentation
 
----
-
-## 📚 API Documentation
-
 ### Swagger UI
 
 API documentation được tự động sinh bằng Swagger và có thể truy cập tại:

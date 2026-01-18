@@ -499,6 +499,7 @@ classDiagram
     Contract "1" --> "1" Transaction
     Contract "*" --> "1" Staff : legalOfficer
     Voucher "*" --> "1" Contract
+```
 
 ---
 
