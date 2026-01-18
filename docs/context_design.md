@@ -506,6 +506,7 @@ classDiagram
 ### 3.2 Chi Tiết Các Entity Classes
 
 #### **Account (Tài khoản)**
+
 ```javascript
 class Account {
   // Properties
