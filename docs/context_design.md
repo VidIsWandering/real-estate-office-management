@@ -294,212 +294,98 @@ class RealEstateService {
 
 ### 3.1 Domain Model - Class Diagram
 
-Hệ thống được thiết kế dựa trên các Domain Entities chính và mối quan hệ giữa chúng:
+Hệ thống được thiết kế dựa trên các Domain Entities chính và mối quan hệ giữa chúng.
 
-Here represent the Domain Models and DTOs in Mermaid format.
+#### **Enumerations (Enums)**
 
-````mermaid
-classDiagram
-    %% ENUMS %%
-    class StaffPosition {
-        <<enumeration>>
-        AGENT
-        LEGAL_OFFICER
-        ACCOUNTANT
-        MANAGER
-    }
-    class ClientType {
-        <<enumeration>>
-        BUYER
-        SELLER
-        LANDLORD
-        TENANT
-    }
-    class RealEstateStatus {
-        <<enumeration>>
-        CREATED
-        PENDING_LEGAL_CHECK
-        LISTED
-        NEGOTIATING
-        TRANSACTED
-        SUSPENDED
-    }
-    class TransactionStatus {
-        <<enumeration>>
-        NEGOTIATING
-        PENDING_CONTRACT
-        CANCELLED
-    }
-    class AppointmentStatus {
-        <<enumeration>>
-        CREATED
-        CONFIRMED
-        COMPLETED
-        CANCELLED
-    }
-    class ContractStatus {
-        <<enumeration>>
-        DRAFT
-        PENDING_SIGNATURE
-        SIGNED
-        NOTARIZED
-        FINALIZED
-        CANCELLED
-    }
-    class VoucherType {
-        <<enumeration>>
-        RECEIPT
-        PAYMENT
-    }
-    class DirectionType {
-        <<enumeration>>
-        NORTH
-        SOUTH
-        EAST
-        WEST
-        NORTHEAST
-        NORTHWEST
-        SOUTHEAST
-        SOUTHWEST
-    }
-    class PaymentMethod {
-        <<enumeration>>
-        CASH
-        BANK_TRANSFER
-    }
+| Enum Name             | Values                                                                               |
+| --------------------- | ------------------------------------------------------------------------------------ |
+| **StaffPosition**     | `admin`, `manager`, `agent`, `legal_officer`, `accountant`                           |
+| **ClientType**        | `buyer`, `seller`, `landlord`, `tenant`                                              |
+| **RealEstateStatus**  | `created`, `pending_legal_check`, `listed`, `negotiating`, `transacted`, `suspended` |
+| **TransactionStatus** | `negotiating`, `pending_contract`, `cancelled`                                       |
+| **AppointmentStatus** | `created`, `confirmed`, `completed`, `cancelled`                                     |
+| **ContractStatus**    | `draft`, `pending_signature`, `signed`, `notarized`, `finalized`, `cancelled`        |
+| **VoucherType**       | `receipt`, `payment`                                                                 |
+| **DirectionType**     | `north`, `south`, `east`, `west`, `northeast`, `northwest`, `southeast`, `southwest` |
+| **PaymentMethod**     | `cash`, `bank_transfer`                                                              |
 
-    %% ENTITIES %%
-    class PersonInformation {
-        +String fullName
-        +String email
-        +String phoneNumber
-        +String address
-    }
+#### **Core Domain Entities**
 
-    class Account {
-        +String username
-        +String password
-        +boolean isActive
-    }
+| Entity                | Key Properties                                                                                                                                                                                                      | Description                               |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
+| **Account**           | `username`, `password`, `isActive`                                                                                                                                                                                  | Tài khoản đăng nhập                       |
+| **PersonInformation** | `fullName`, `email`, `phoneNumber`, `address`                                                                                                                                                                       | Thông tin cá nhân                         |
+| **Staff**             | `id`, `account`, `information`, `position`, `assignedArea`, `status`                                                                                                                                                | Nhân viên hệ thống                        |
+| **Client**            | `id`, `information`, `type`, `referralSrc`, `requirement`                                                                                                                                                           | Khách hàng (buyer/seller/landlord/tenant) |
+| **RealEstate**        | `id`, `title`, `type`, `transactionType`, `location`, `price`, `area`, `description`, `direction`, `mediaFiles`, `legalDocuments`, `owner`, `assignedAgent`, `status`                                               | Bất động sản                              |
+| **Appointment**       | `id`, `relatedRealEstate`, `client`, `assignedAgent`, `startTime`, `endTime`, `location`, `status`, `note`                                                                                                          | Lịch hẹn xem nhà                          |
+| **Transaction**       | `id`, `relatedRealEstate`, `client`, `assignedAgent`, `offerPrice`, `terms`, `status`, `cancellationReason`                                                                                                         | Giao dịch đàm phán                        |
+| **Contract**          | `id`, `transaction`, `type`, `partyA`, `partyB`, `totalValue`, `depositAmount`, `paymentTerms`, `remainingAmount`, `signedDate`, `effectiveDate`, `expirationDate`, `attachments`, `status`, `assignedLegalOfficer` | Hợp đồng                                  |
+| **Voucher**           | `id`, `relatedContract`, `type`, `party`, `paymentTime`, `amount`, `paymentMethod`, `paymentDescription`, `attachments`, `assignedAccountant`                                                                       | Phiếu thu/chi                             |
+| **File**              | `id`, `url`, `name`, `type`, `uploadedAt`                                                                                                                                                                           | File đính kèm (hình ảnh, tài liệu)        |
+| **SystemLog**         | `id`, `actorId`, `actionType`, `targetId`, `timestamp`, `details`                                                                                                                                                   | Nhật ký hệ thống                          |
 
-    class File {
-        +String id
-        +String url
-        +String name
-        +String type
-        +Datetime uploadedAt
-    }
+#### **Entity Relationships Diagram**
 
-    class Staff {
-        +String id
-        +Account account
-        +PersonInformation information
-        +StaffPosition position
-        +String assignedArea
-        +StaffStatus status
-    }
-
-    class Client {
-        +String id
-        +PersonInformation information
-        +ClientType type
-        +String referralSrc
-        +String requirement
-    }
-
-    class RealEstate {
-        +String id
-        +String title
-        +String type
-        +TransactionType transactionType
-        +String location
-        +Number price
-        +Number area
-        +String description
-        +DirectionType direction
-        +List~File~ mediaFiles
-        +Client owner
-        +List~File~ legalDocuments
-        +Staff assignedAgent
-        +RealEstateStatus status
-    }
-
-    class Appointment {
-        +String id
-        +RealEstate relatedRealEstate
-        +Client client
-        +Staff assignedAgent
-        +Datetime startTime
-        +Datetime endTime
-        +String location
-        +AppointmentStatus status
-        +String note
-    }
-
-    class Transaction {
-        +String id
-        +RealEstate relatedRealEstate
-        +Client client
-        +Staff assignedAgent
-        +Number offerPrice
-        +String terms
-        +TransactionStatus status
-        +String cancellationReason
-    }
-
-    class Contract {
-        +String id
-        +Transaction transaction
-        +ContractType type
-        +Client partyA
-        +Client partyB
-        +Number totalValue
-        +Number depositAmount
-        +String paymentTerms
-        +Number remainingAmount
-        +Date signedDate
-        +Date effectiveDate
-        +Date expirationDate
-        +List~File~ attachments
-        +ContractStatus status
-        +Staff assignedLegalOfficer
-    }
-
-    class Voucher {
-        +String id
-        +Contract relatedContract
-        +VoucherType type
-        +String party
-        +Datetime paymentTime
-        +Number amount
-        +PaymentMethod paymentMethod
-        +String paymentDescription
-        +List~File~ attachments
-        +Staff assignedAccountant
-        +VoucherStatus status
-    }
-
-    class SystemLog {
-        +String id
-        +String actorId
-        +String actionType
-        +String targetId
-        +Datetime timestamp
-        +String details
-    }
-
-    %% RELATIONSHIPS %%
-    Staff --* Account
-    Staff --* PersonInformation
-    RealEstate "1" --> "1" Client : owner
-    RealEstate "*" --> "1" Staff : assignedAgent
-    Appointment "*" --> "1" RealEstate
-    Appointment "*" --> "1" Client
-    Transaction "*" --> "1" RealEstate
-    Contract "1" --> "1" Transaction
-    Contract "*" --> "1" Staff : legalOfficer
-    Voucher "*" --> "1" Contract
 ```
+┌──────────────┐
+│   Account    │◄────────────┐
+└──────────────┘             │ 1:1
+                             │
+┌──────────────┐         ┌───┴──────┐
+│PersonInfo    │◄────────│  Staff   │
+└──────────────┘ 1:1     └──┬───┬───┘
+                            │   │
+                         1:*│   │1:*
+                            │   │
+        ┌───────────────────┘   └─────────────┐
+        ↓                                     ↓
+    ┌────────┐ 1:*                     ┌──────────────┐
+    │ Client │◄────────────────────────│  RealEstate  │
+    └───┬────┘     owner               └──────┬───┬───┘
+        │                                     │   │
+        │ 1:*                              1:*│   │1:*
+        │                                     │   │
+        └────────┐                ┌───────────┘   └─────────────┐
+                 ↓                ↓                             ↓
+            ┌─────────────┐  ┌─────────────┐           ┌──────────────┐
+            │ Appointment │  │ Transaction │           │ PriceHistory │
+            └─────────────┘  └──────┬──────┘           └──────────────┘
+                                    │ 1:1
+                                    ↓
+                             ┌──────────────┐
+                             │   Contract   │
+                             └──────┬───────┘
+                                    │ 1:*
+                                    ↓
+                             ┌──────────────┐
+                             │   Voucher    │
+                             └──────────────┘
+```
+
+#### **Detailed Relationship Table**
+
+| From Entity       | Relationship | To Entity   | Cardinality | Description                          |
+| ----------------- | ------------ | ----------- | ----------- | ------------------------------------ |
+| Account           | composition  | Staff       | 1:1         | Mỗi account tương ứng 1 staff        |
+| PersonInformation | composition  | Staff       | 1:1         | Thông tin cá nhân của staff          |
+| Staff             | manages      | Client      | 1:N         | Agent quản lý nhiều khách hàng       |
+| Staff             | assigned to  | RealEstate  | 1:N         | Agent phụ trách nhiều BĐS            |
+| Client            | owns         | RealEstate  | 1:N         | Khách hàng sở hữu nhiều BĐS          |
+| RealEstate        | has          | Appointment | 1:N         | BĐS có nhiều lịch hẹn                |
+| Client            | books        | Appointment | 1:N         | Khách hàng đặt nhiều lịch hẹn        |
+| Staff             | handles      | Appointment | 1:N         | Agent xử lý nhiều lịch hẹn           |
+| RealEstate        | has          | Transaction | 1:N         | BĐS có nhiều giao dịch               |
+| Client            | participates | Transaction | 1:N         | Khách hàng tham gia nhiều giao dịch  |
+| Staff             | manages      | Transaction | 1:N         | Agent quản lý nhiều giao dịch        |
+| Transaction       | generates    | Contract    | 1:1         | Giao dịch tạo ra 1 hợp đồng          |
+| Staff             | prepares     | Contract    | 1:N         | Legal Officer soạn nhiều hợp đồng    |
+| Contract          | has          | Voucher     | 1:N         | Hợp đồng có nhiều phiếu thu/chi      |
+| Staff             | records      | Voucher     | 1:N         | Accountant ghi nhiều phiếu thu/chi   |
+| RealEstate        | contains     | File        | 1:N         | BĐS có nhiều file đính kèm           |
+| Contract          | contains     | File        | 1:N         | Hợp đồng có nhiều file đính kèm      |
+| Voucher           | contains     | File        | 1:N         | Phiếu thu/chi có nhiều file đính kèm |
 
 ---
 
@@ -520,7 +406,7 @@ class Account {
   + validatePassword(plainPassword): Boolean
   + toJSON(): Object
 }
-````
+```
 
 #### **Staff (Nhân viên)**
 
