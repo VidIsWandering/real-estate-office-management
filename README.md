@@ -5,6 +5,10 @@
 [![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](LICENSE)
 [![Node.js Version](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen)](https://nodejs.org)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-336791.svg)](https://www.postgresql.org)
+[![Express.js](https://img.shields.io/badge/Express.js-5.1-000000.svg?logo=express)](https://expressjs.com)
+[![Next.js](https://img.shields.io/badge/Next.js-15-black.svg?logo=next.js)](https://nextjs.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6.svg?logo=typescript)](https://www.typescriptlang.org)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg?logo=docker)](https://www.docker.com)
 
 > **Đề tài:** Phần mềm quản lý văn phòng bất động sản  
 > **Phương pháp phát triển:** Lập trình hướng đối tượng (Object-Oriented Programming)  
