@@ -1,7 +1,7 @@
 /**
  * Auth Controller - Xử lý HTTP requests cho authentication
  */
-
+const { ApiError } = require('../utils/apiError');
 const authService = require('../services/auth.service');
 const { successResponse } = require('../utils/response.util');
 const { HTTP_STATUS } = require('../config/constants');
@@ -22,6 +22,15 @@ class AuthController {
   async login(req, res) {
     const { username, password } = req.body;
     const result = await authService.login(username, password);
+
+    // Nếu không có user hoặc sai mật khẩu
+    if (!result) {
+      throw new ApiError(
+        HTTP_STATUS.BAD_REQUEST,
+        'Invalid username or password',
+        'INVALID_CREDENTIALS'
+      );
+    }
 
     return successResponse(res, result, 'Login successful');
   }
