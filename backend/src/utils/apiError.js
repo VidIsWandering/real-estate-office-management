@@ -95,30 +95,60 @@ const ErrorCodes = {
   // ============================================
   // Voucher specific
   VOUCHER_ALREADY_CONFIRMED: { code: 'VOUCHER_ALREADY_CONFIRMED', status: 400 },
-  CANNOT_EDIT_CONFIRMED_VOUCHER: { code: 'CANNOT_EDIT_CONFIRMED_VOUCHER', status: 400 },
-  CANNOT_DELETE_CONFIRMED_VOUCHER: { code: 'CANNOT_DELETE_CONFIRMED_VOUCHER', status: 400 },
+  CANNOT_EDIT_CONFIRMED_VOUCHER: {
+    code: 'CANNOT_EDIT_CONFIRMED_VOUCHER',
+    status: 400,
+  },
+  CANNOT_DELETE_CONFIRMED_VOUCHER: {
+    code: 'CANNOT_DELETE_CONFIRMED_VOUCHER',
+    status: 400,
+  },
   INVALID_VOUCHER_TYPE: { code: 'INVALID_VOUCHER_TYPE', status: 400 },
   INVALID_PAYMENT_METHOD: { code: 'INVALID_PAYMENT_METHOD', status: 400 },
   AMOUNT_EXCEEDS_REMAINING: { code: 'AMOUNT_EXCEEDS_REMAINING', status: 400 },
 
   // Contract specific
-  CONTRACT_ALREADY_CANCELLED: { code: 'CONTRACT_ALREADY_CANCELLED', status: 400 },
-  CONTRACT_ALREADY_FINALIZED: { code: 'CONTRACT_ALREADY_FINALIZED', status: 400 },
-  CANNOT_EDIT_FINALIZED_CONTRACT: { code: 'CANNOT_EDIT_FINALIZED_CONTRACT', status: 400 },
-  INVALID_CONTRACT_STATUS_TRANSITION: { code: 'INVALID_CONTRACT_STATUS_TRANSITION', status: 400 },
+  CONTRACT_ALREADY_CANCELLED: {
+    code: 'CONTRACT_ALREADY_CANCELLED',
+    status: 400,
+  },
+  CONTRACT_ALREADY_FINALIZED: {
+    code: 'CONTRACT_ALREADY_FINALIZED',
+    status: 400,
+  },
+  CANNOT_EDIT_FINALIZED_CONTRACT: {
+    code: 'CANNOT_EDIT_FINALIZED_CONTRACT',
+    status: 400,
+  },
+  INVALID_CONTRACT_STATUS_TRANSITION: {
+    code: 'INVALID_CONTRACT_STATUS_TRANSITION',
+    status: 400,
+  },
 
   // Real Estate specific
   REAL_ESTATE_NOT_AVAILABLE: { code: 'REAL_ESTATE_NOT_AVAILABLE', status: 400 },
-  REAL_ESTATE_ALREADY_TRANSACTED: { code: 'REAL_ESTATE_ALREADY_TRANSACTED', status: 400 },
-  INVALID_REAL_ESTATE_STATUS: { code: 'INVALID_REAL_ESTATE_STATUS', status: 400 },
+  REAL_ESTATE_ALREADY_TRANSACTED: {
+    code: 'REAL_ESTATE_ALREADY_TRANSACTED',
+    status: 400,
+  },
+  INVALID_REAL_ESTATE_STATUS: {
+    code: 'INVALID_REAL_ESTATE_STATUS',
+    status: 400,
+  },
 
   // Transaction specific
-  TRANSACTION_ALREADY_COMPLETED: { code: 'TRANSACTION_ALREADY_COMPLETED', status: 400 },
+  TRANSACTION_ALREADY_COMPLETED: {
+    code: 'TRANSACTION_ALREADY_COMPLETED',
+    status: 400,
+  },
   TRANSACTION_CANCELLED: { code: 'TRANSACTION_CANCELLED', status: 400 },
 
   // Appointment specific
   APPOINTMENT_TIME_CONFLICT: { code: 'APPOINTMENT_TIME_CONFLICT', status: 400 },
-  APPOINTMENT_ALREADY_COMPLETED: { code: 'APPOINTMENT_ALREADY_COMPLETED', status: 400 },
+  APPOINTMENT_ALREADY_COMPLETED: {
+    code: 'APPOINTMENT_ALREADY_COMPLETED',
+    status: 400,
+  },
   APPOINTMENT_CANCELLED: { code: 'APPOINTMENT_CANCELLED', status: 400 },
   INVALID_APPOINTMENT_TIME: { code: 'INVALID_APPOINTMENT_TIME', status: 400 },
 
@@ -143,23 +173,6 @@ const ErrorCodes = {
   // ============================================
   SERVICE_UNAVAILABLE: { code: 'SERVICE_UNAVAILABLE', status: 503 },
   DATABASE_UNAVAILABLE: { code: 'DATABASE_UNAVAILABLE', status: 503 },
-};
-
-/**
- * Create ApiError from error code
- * @param {string} errorCode - Key from ErrorCodes
- * @param {string} message - Custom message (optional)
- * @param {object} details - Additional details (optional)
- * @returns {ApiError}
- */
-const createError = (errorCode, message = null, details = null) => {
-  const errorDef = ErrorCodes[errorCode] || ErrorCodes.INTERNAL_ERROR;
-  return new ApiError(
-    errorDef.status,
-    message || getDefaultMessage(errorCode),
-    errorDef.code,
-    details
-  );
 };
 
 /**
@@ -231,13 +244,33 @@ const getDefaultMessage = (errorCode) => {
 };
 
 /**
+ * Create ApiError from error code
+ * @param {string} errorCode - Key from ErrorCodes
+ * @param {string} message - Custom message (optional)
+ * @param {object} details - Additional details (optional)
+ * @returns {ApiError}
+ */
+const createError = (errorCode, message = null, details = null) => {
+  const errorDef = ErrorCodes[errorCode] || ErrorCodes.INTERNAL_ERROR;
+  return new ApiError(
+    errorDef.status,
+    message || getDefaultMessage(errorCode),
+    errorDef.code,
+    details
+  );
+};
+
+/**
  * Helper functions for common errors
  */
 const Errors = {
   // Validation
-  validation: (message, details) => createError('VALIDATION_ERROR', message, details),
-  invalidInput: (field) => createError('INVALID_INPUT', `${field} không hợp lệ`),
-  missingField: (field) => createError('MISSING_REQUIRED_FIELD', `${field} là bắt buộc`),
+  validation: (message, details) =>
+    createError('VALIDATION_ERROR', message, details),
+  invalidInput: (field) =>
+    createError('INVALID_INPUT', `${field} không hợp lệ`),
+  missingField: (field) =>
+    createError('MISSING_REQUIRED_FIELD', `${field} là bắt buộc`),
 
   // Auth
   unauthorized: (message) => createError('UNAUTHORIZED', message),
@@ -246,7 +279,8 @@ const Errors = {
   invalidToken: () => createError('INVALID_TOKEN'),
 
   // Not found
-  notFound: (resource) => createError('NOT_FOUND', `Không tìm thấy ${resource}`),
+  notFound: (resource) =>
+    createError('NOT_FOUND', `Không tìm thấy ${resource}`),
   staffNotFound: () => createError('STAFF_NOT_FOUND'),
   clientNotFound: () => createError('CLIENT_NOT_FOUND'),
   contractNotFound: () => createError('CONTRACT_NOT_FOUND'),
@@ -258,8 +292,10 @@ const Errors = {
 
   // Business logic
   voucherAlreadyConfirmed: () => createError('VOUCHER_ALREADY_CONFIRMED'),
-  cannotEditConfirmedVoucher: () => createError('CANNOT_EDIT_CONFIRMED_VOUCHER'),
-  cannotDeleteConfirmedVoucher: () => createError('CANNOT_DELETE_CONFIRMED_VOUCHER'),
+  cannotEditConfirmedVoucher: () =>
+    createError('CANNOT_EDIT_CONFIRMED_VOUCHER'),
+  cannotDeleteConfirmedVoucher: () =>
+    createError('CANNOT_DELETE_CONFIRMED_VOUCHER'),
 
   // Server
   internal: (message) => createError('INTERNAL_ERROR', message),
