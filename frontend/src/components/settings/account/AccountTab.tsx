@@ -6,10 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Pencil, User, Loader2, AlertCircle, Save, X } from "lucide-react";
-import { getProfile, updateProfile, type UserProfile } from "@/lib/api";
+import { getProfile, type UserProfile } from "@/lib/api";
+import { useAuth } from "@/lib/context/AuthProvider";
 
 export function AccountTab() {
   const router = useRouter();
+  const { updateMyProfile } = useAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -71,7 +73,7 @@ export function AccountTab() {
     try {
       setSaving(true);
       setError(null);
-      await updateProfile(formData);
+      await updateMyProfile(formData);
       await loadProfile();
       setIsEditing(false);
     } catch (err: unknown) {

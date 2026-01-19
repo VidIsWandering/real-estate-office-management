@@ -111,6 +111,21 @@ export async function put<T>(
 }
 
 /**
+ * PATCH request
+ */
+export async function patch<T>(
+  endpoint: string,
+  body?: unknown,
+  token?: string,
+): Promise<T> {
+  return request<T>(endpoint, {
+    method: "PATCH",
+    body: JSON.stringify(body),
+    token,
+  });
+}
+
+/**
  * DELETE request
  */
 export async function del<T>(endpoint: string, token?: string): Promise<T> {

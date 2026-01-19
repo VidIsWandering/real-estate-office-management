@@ -5,6 +5,7 @@
 const { successResponse } = require('../utils/response.util');
 const { HTTP_STATUS } = require('../config/constants');
 const { asyncHandler } = require('../middlewares/error.middleware');
+const staffService = require('../services/staff.service');
 
 class StaffController {
   /**
@@ -12,17 +13,18 @@ class StaffController {
    * Lấy danh sách nhân viên
    */
   async getAll(req, res) {
-    // TODO: Implement với staffService.getAll(req.query)
-    const { page = 1, limit = 10 } = req.query;
-
-    return successResponse(
-      res,
-      {
-        items: [],
-        pagination: { page: Number(page), limit: Number(limit), total: 0 },
+    const result = await staffService.getAll(req.query, req.user?.position);
+    return res.status(HTTP_STATUS.OK).json({
+      success: true,
+      message: 'Staff list retrieved successfully',
+      data: result.items,
+      pagination: {
+        page: result.pagination.page,
+        limit: result.pagination.limit,
+        total: result.pagination.total,
+        totalPages: Math.ceil(result.pagination.total / result.pagination.limit),
       },
-      'Staff list retrieved successfully'
-    );
+    });
   }
 
   /**
@@ -30,10 +32,9 @@ class StaffController {
    * Lấy thông tin chi tiết nhân viên
    */
   async getById(req, res) {
-    // TODO: Implement với staffService.getById(req.params.id)
     const { id } = req.params;
-
-    return successResponse(res, { id }, 'Staff retrieved successfully');
+    const staff = await staffService.getById(id, req.user?.position);
+    return successResponse(res, staff, 'Staff retrieved successfully');
   }
 
   /**
@@ -41,14 +42,8 @@ class StaffController {
    * Tạo nhân viên mới
    */
   async create(req, res) {
-    // TODO: Implement với staffService.create(req.body)
-
-    return successResponse(
-      res,
-      { ...req.body },
-      'Staff created successfully',
-      HTTP_STATUS.CREATED
-    );
+    const staff = await staffService.create(req.body);
+    return successResponse(res, staff, 'Staff created successfully', HTTP_STATUS.CREATED);
   }
 
   /**
@@ -56,14 +51,9 @@ class StaffController {
    * Cập nhật thông tin nhân viên
    */
   async update(req, res) {
-    // TODO: Implement với staffService.update(req.params.id, req.body)
     const { id } = req.params;
-
-    return successResponse(
-      res,
-      { id, ...req.body },
-      'Staff updated successfully'
-    );
+    const staff = await staffService.update(id, req.body);
+    return successResponse(res, staff, 'Staff updated successfully');
   }
 
   /**
@@ -71,15 +61,10 @@ class StaffController {
    * Kích hoạt/vô hiệu hóa nhân viên
    */
   async updateStatus(req, res) {
-    // TODO: Implement với staffService.updateStatus(req.params.id, req.body.status)
     const { id } = req.params;
     const { status } = req.body;
-
-    return successResponse(
-      res,
-      { id, status },
-      'Staff status updated successfully'
-    );
+    const staff = await staffService.updateStatus(id, status);
+    return successResponse(res, staff, 'Staff status updated successfully');
   }
 
   /**
@@ -87,14 +72,9 @@ class StaffController {
    * Cập nhật quyền hạn nhân viên
    */
   async updatePermissions(req, res) {
-    // TODO: Implement với staffService.updatePermissions(req.params.id, req.body)
     const { id } = req.params;
-
-    return successResponse(
-      res,
-      { id, ...req.body },
-      'Staff permissions updated successfully'
-    );
+    const staff = await staffService.updatePermissions(id, req.body);
+    return successResponse(res, staff, 'Staff permissions updated successfully');
   }
 }
 
