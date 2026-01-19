@@ -205,17 +205,15 @@ const errorHandler = (err, req, res) => {
     logger.warn('Client Error:', logData);
   }
 
-  // Build response object
+  // Build response object - FIXED: Flat structure instead of nested error object
   const response = {
     success: false,
-    error: {
-      code: error.code || 'ERROR',
-      message: error.message,
-    },
+    message: error.message,
+    code: error.code || 'ERROR',
   };
 
-  if (error.details) response.error.details = error.details;
-  if (config.node_env === 'development') response.error.stack = err.stack;
+  if (error.details) response.details = error.details;
+  if (config.node_env === 'development') response.stack = err.stack;
 
   return res.status(error.statusCode).json(response);
 };
