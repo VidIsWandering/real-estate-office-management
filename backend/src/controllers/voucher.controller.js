@@ -1,102 +1,235 @@
-/**
- * Voucher Controller - Quản lý chứng từ thu chi
- */
+// src/controllers/voucher.controller.js
 
-const { successResponse } = require('../utils/response.util');
-const { HTTP_STATUS } = require('../config/constants');
-const { asyncHandler } = require('../middlewares/error.middleware');
+const voucherService = require('../services/voucher.service');
+const auditService = require('../services/audit.service');
 
 class VoucherController {
   /**
-   * GET /vouchers
+   * GET /api/v1/vouchers
+   * Lấy danh sách vouchers
    */
-  async getAll(req, res) {
-    const { page = 1, limit = 10 } = req.query;
+  async getVouchers(req, res, next) {
+    try {
+      const filters = {
+        contractId: req.query.contractId ? parseInt(req.query.contractId) : null,
+        type: req.query.type || null,
+        status: req.query.status || null,
+        paymentMethod: req.query.paymentMethod || null,
+        fromDate: req.query.fromDate || null,
+        toDate: req.query.toDate || null,
+        search: req.query.search || null,
+        sortBy: req.query.sortBy || 'created_at',
+        sortOrder: req.query.sortOrder || 'desc',
+        page: parseInt(req.query.page) || 1,
+        limit: parseInt(req.query.limit) || 20
+      };
 
-    return successResponse(
-      res,
-      {
-        items: [],
-        pagination: { page: Number(page), limit: Number(limit), total: 0 },
-      },
-      'Voucher list retrieved successfully'
-    );
+      const data = await voucherService.getVouchers(filters);
+
+      res.json({
+        success: true,
+        data
+      });
+    } catch (error) {
+      next(error);
+    }
   }
 
   /**
-   * GET /vouchers/:id
+   * GET /api/v1/vouchers/:id
+   * Lấy chi tiết voucher
    */
-  async getById(req, res) {
-    const { id } = req.params;
-    return successResponse(res, { id }, 'Voucher retrieved successfully');
+  async getVoucherById(req, res, next) {
+    try {
+      const id = parseInt(req.params.id);
+      const data = await voucherService.getVoucherById(id);
+
+      res.json({
+        success: true,
+        data
+      });
+    } catch (error) {
+      next(error);
+    }
   }
 
   /**
-   * POST /vouchers
+   * POST /api/v1/vouchers
+   * Tạo voucher mới
    */
-  async create(req, res) {
-    // TODO: Implement - If contract_id, update paid_amount in Contract
-    return successResponse(
-      res,
-      { ...req.body, staff_id: req.user.staff_id, status: 'created' },
-      'Voucher created successfully',
-      HTTP_STATUS.CREATED
-    );
+  async createVoucher(req, res, next) {
+    try {
+       console.log('req.user:', req.user);  // ← Thêm dòng này
+      const staffId = req.user.staff_id;
+      const data = await voucherService.createVoucher(req.body, staffId);
+
+      // Audit log
+      await auditService.log({
+        actorId: req.user.staff_id,
+        actionType: 'create',
+        targetType: 'voucher',
+        targetId: data.id,
+        details: {
+          type: req.body.type,
+          amount: req.body.amount,
+          contractId: req.body.contractId
+        },
+        ipAddress: req.ip
+      });
+
+      res.status(201).json({
+        success: true,
+        data
+      });
+    } catch (error) {
+      next(error);
+    }
   }
 
   /**
-   * PUT /vouchers/:id
+   * PUT /api/v1/vouchers/:id
+   * Cập nhật voucher
    */
-  async update(req, res) {
-    // TODO: Implement - Only allow when status = CREATED
-    const { id } = req.params;
-    return successResponse(
-      res,
-      { id, ...req.body },
-      'Voucher updated successfully'
-    );
+  async updateVoucher(req, res, next) {
+    try {
+      const id = parseInt(req.params.id);
+      const data = await voucherService.updateVoucher(id, req.body);
+
+      // Audit log
+      await auditService.log({
+        actorId: req.user.staff_id,
+        actionType: 'update',
+        targetType: 'voucher',
+        targetId: id,
+        details: req.body,
+        ipAddress: req.ip
+      });
+
+      res.json({
+        success: true,
+        data
+      });
+    } catch (error) {
+      next(error);
+    }
   }
 
   /**
-   * PATCH /vouchers/:id/confirm
+   * DELETE /api/v1/vouchers/:id
+   * Xóa voucher
    */
-  async confirm(req, res) {
-    // TODO: Implement - Update status to CONFIRMED
-    const { id } = req.params;
+  async deleteVoucher(req, res, next) {
+    try {
+      const id = parseInt(req.params.id);
+      const data = await voucherService.deleteVoucher(id);
 
-    return successResponse(
-      res,
-      { id, status: 'confirmed' },
-      'Voucher confirmed successfully'
-    );
+      // Audit log
+      await auditService.log({
+        actorId: req.user.staff_id,
+        actionType: 'delete',
+        targetType: 'voucher',
+        targetId: id,
+        details: {},
+        ipAddress: req.ip
+      });
+
+      res.json({
+        success: true,
+        data
+      });
+    } catch (error) {
+      next(error);
+    }
   }
 
   /**
-   * GET /debts
-   * Lấy danh sách công nợ (contracts với remaining_amount > 0)
+   * PATCH /api/v1/vouchers/:id/confirm
+   * Xác nhận voucher
    */
-  async getDebts(req, res) {
-    const { page = 1, limit = 10 } = req.query;
+  async confirmVoucher(req, res, next) {
+    try {
+      const id = parseInt(req.params.id);
+      const data = await voucherService.confirmVoucher(id);
 
-    return successResponse(
-      res,
-      {
-        items: [],
-        summary: { total_debt: 0, count: 0 },
-        pagination: { page: Number(page), limit: Number(limit), total: 0 },
-      },
-      'Debts retrieved successfully'
-    );
+      // Audit log
+      await auditService.log({
+        actorId: req.user.staff_id,
+        actionType: 'status_change',
+        targetType: 'voucher',
+        targetId: id,
+        details: { from: 'created', to: 'confirmed' },
+        ipAddress: req.ip
+      });
+
+      res.json({
+        success: true,
+        data
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * GET /api/v1/vouchers/stats
+   * Lấy thống kê vouchers
+   */
+  async getStats(req, res, next) {
+    try {
+      const filters = {
+        fromDate: req.query.fromDate || null,
+        toDate: req.query.toDate || null,
+        contractId: req.query.contractId ? parseInt(req.query.contractId) : null
+      };
+
+      const data = await voucherService.getStats(filters);
+
+      res.json({
+        success: true,
+        data
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * GET /api/v1/vouchers/by-contract/:contractId
+   * Lấy vouchers theo contract
+   */
+  async getVouchersByContract(req, res, next) {
+    try {
+      const contractId = parseInt(req.params.contractId);
+      const data = await voucherService.getVouchersByContract(contractId);
+
+      res.json({
+        success: true,
+        data
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  /**
+   * POST /api/v1/vouchers/:id/attachments
+   * Upload attachments cho voucher
+   */
+  async addAttachments(req, res, next) {
+    try {
+      const id = parseInt(req.params.id);
+      const fileIds = req.body.fileIds || [];
+
+      const data = await voucherService.addAttachments(id, fileIds);
+
+      res.json({
+        success: true,
+        data
+      });
+    } catch (error) {
+      next(error);
+    }
   }
 }
 
-const controller = new VoucherController();
-
-module.exports = {
-  getAll: asyncHandler((req, res) => controller.getAll(req, res)),
-  getById: asyncHandler((req, res) => controller.getById(req, res)),
-  create: asyncHandler((req, res) => controller.create(req, res)),
-  update: asyncHandler((req, res) => controller.update(req, res)),
-  confirm: asyncHandler((req, res) => controller.confirm(req, res)),
-  getDebts: asyncHandler((req, res) => controller.getDebts(req, res)),
-};
+module.exports = new VoucherController();
