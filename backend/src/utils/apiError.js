@@ -146,23 +146,6 @@ const ErrorCodes = {
 };
 
 /**
- * Create ApiError from error code
- * @param {string} errorCode - Key from ErrorCodes
- * @param {string} message - Custom message (optional)
- * @param {object} details - Additional details (optional)
- * @returns {ApiError}
- */
-const createError = (errorCode, message = null, details = null) => {
-  const errorDef = ErrorCodes[errorCode] || ErrorCodes.INTERNAL_ERROR;
-  return new ApiError(
-    errorDef.status,
-    message || getDefaultMessage(errorCode),
-    errorDef.code,
-    details
-  );
-};
-
-/**
  * Get default Vietnamese message for error code
  */
 const getDefaultMessage = (errorCode) => {
@@ -228,6 +211,23 @@ const getDefaultMessage = (errorCode) => {
   };
 
   return messages[errorCode] || 'Đã xảy ra lỗi';
+};
+
+/**
+ * Create ApiError from error code
+ * @param {string} errorCode - Key from ErrorCodes
+ * @param {string} message - Custom message (optional)
+ * @param {object} details - Additional details (optional)
+ * @returns {ApiError}
+ */
+const createError = (errorCode, message = null, details = null) => {
+  const errorDef = ErrorCodes[errorCode] || ErrorCodes.INTERNAL_ERROR;
+  return new ApiError(
+    errorDef.status,
+    message || getDefaultMessage(errorCode),
+    errorDef.code,
+    details
+  );
 };
 
 /**
