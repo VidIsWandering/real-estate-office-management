@@ -14,7 +14,7 @@ class VoucherService {
     // Transform items và lấy attachment files
     const transformedItems = await Promise.all(
       items.map(async (item) => {
-        const attachments = item.attachments 
+        const attachments = item.attachments
           ? await voucherRepository.getAttachmentFiles(item.attachments)
           : [];
 
@@ -35,9 +35,7 @@ class VoucherService {
             id: item.staff_id,
             fullName: item.staff_name
           },
-          status: item.status,
-          createdAt: item.created_at,
-          updatedAt: item.updated_at
+          status: item.status
         };
       })
     );
@@ -58,12 +56,12 @@ class VoucherService {
    */
   async getVoucherById(id) {
     const voucher = await voucherRepository.findById(id);
-    
+
     if (!voucher) {
       throw new ApiError(404, 'Không tìm thấy phiếu thu/chi');
     }
 
-    const attachments = voucher.attachments 
+    const attachments = voucher.attachments
       ? await voucherRepository.getAttachmentFiles(voucher.attachments)
       : [];
 
@@ -72,7 +70,7 @@ class VoucherService {
       voucherNo: generateVoucherNo(voucher.type, voucher.id, new Date(voucher.payment_time)),
       contract: {
         id: voucher.contract_id,
-        contractNo: `HD-${new Date(voucher.created_at).getFullYear()}-${String(voucher.contract_id).padStart(3, '0')}`,
+        contractNo: `HD-${new Date(voucher.payment_time).getFullYear()}-${String(voucher.contract_id).padStart(3, '0')}`,
         type: voucher.contract_type,
         totalValue: parseFloat(voucher.contract_total_value),
         paidAmount: parseFloat(voucher.contract_paid_amount),
@@ -99,9 +97,7 @@ class VoucherService {
         fullName: voucher.staff_name,
         email: voucher.staff_email
       },
-      status: voucher.status,
-      createdAt: voucher.created_at,
-      updatedAt: voucher.updated_at
+      status: voucher.status
     };
   }
 
@@ -129,8 +125,8 @@ class VoucherService {
     return {
       id: voucher.id,
       voucherNo: generateVoucherNo(voucher.type, voucher.id, new Date(voucher.payment_time)),
-      message: voucher.type === VOUCHER_TYPE.RECEIPT 
-        ? 'Tạo phiếu thu thành công' 
+      message: voucher.type === VOUCHER_TYPE.RECEIPT
+        ? 'Tạo phiếu thu thành công'
         : 'Tạo phiếu chi thành công'
     };
   }
@@ -155,7 +151,7 @@ class VoucherService {
     }
 
     const updated = await voucherRepository.update(id, data);
-    
+
     if (!updated) {
       throw new ApiError(400, 'Cập nhật thất bại');
     }
@@ -181,7 +177,7 @@ class VoucherService {
     }
 
     const deleted = await voucherRepository.delete(id);
-    
+
     if (!deleted) {
       throw new ApiError(400, 'Xóa thất bại');
     }
@@ -206,7 +202,7 @@ class VoucherService {
     }
 
     const confirmed = await voucherRepository.confirm(id);
-    
+
     if (!confirmed) {
       throw new ApiError(400, 'Xác nhận thất bại');
     }
@@ -232,7 +228,7 @@ class VoucherService {
       paymentCount: parseInt(summary.payment_count),
       confirmedCount: parseInt(summary.confirmed_count),
       pendingCount: parseInt(summary.pending_count),
-      byMonth: byMonth.map(m => ({
+      byMonth: byMonth.map((m) => ({
         month: m.month,
         receipts: parseFloat(m.receipts),
         payments: parseFloat(m.payments)
@@ -260,7 +256,7 @@ class VoucherService {
         remainingAmount: parseFloat(contract.remaining_amount),
         status: contract.status
       },
-      vouchers: vouchers.map(v => ({
+      vouchers: vouchers.map((v) => ({
         id: v.id,
         voucherNo: generateVoucherNo(v.type, v.id, new Date(v.payment_time)),
         type: v.type,
@@ -289,13 +285,17 @@ class VoucherService {
 
     // Merge existing and new attachments
     const currentAttachments = existing.attachments || [];
-    const newAttachments = [...new Set([...currentAttachments, ...fileIds])];
+    const mergedAttachments = [...new Set([...currentAttachments, ...fileIds])];
 
-    const updated = await voucherRepository.updateAttachments(id, newAttachments);
+    const updated = await voucherRepository.updateAttachments(id, mergedAttachments);
+    if (!updated) {
+      throw new ApiError(400, 'Cập nhật attachments thất bại');
+    }
+
     const files = await voucherRepository.getAttachmentFiles(fileIds);
 
     return {
-      uploadedFiles: files.map(f => ({
+      uploadedFiles: files.map((f) => ({
         id: f.id,
         url: f.url,
         name: f.name

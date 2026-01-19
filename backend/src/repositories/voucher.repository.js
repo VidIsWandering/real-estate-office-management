@@ -1,6 +1,6 @@
 // src/repositories/voucher.repository.js
 
-const pool = require('../config/database');
+const {db:pool} = require('../config/database');
 
 class VoucherRepository {
   /**
@@ -14,16 +14,16 @@ class VoucherRepository {
     fromDate,
     toDate,
     search,
-    sortBy = 'created_at',
+    sortBy = 'payment_time',
     sortOrder = 'desc',
     page = 1,
     limit = 20
   }) {
     const offset = (page - 1) * limit;
-    
+
     // Build ORDER BY clause
-    const validSortFields = ['payment_time', 'amount', 'created_at'];
-    const sortField = validSortFields.includes(sortBy) ? sortBy : 'created_at';
+    const validSortFields = ['payment_time', 'amount', 'id'];
+    const sortField = validSortFields.includes(sortBy) ? sortBy : 'payment_time';
     const order = sortOrder.toLowerCase() === 'asc' ? 'ASC' : 'DESC';
 
     const query = `
@@ -39,8 +39,6 @@ class VoucherRepository {
         v.attachments,
         v.staff_id,
         v.status,
-        v.created_at,
-        v.updated_at,
         s.full_name as staff_name,
         s.email as staff_email
       FROM voucher v
@@ -56,7 +54,7 @@ class VoucherRepository {
           v.party ILIKE '%' || $7 || '%' 
           OR v.payment_description ILIKE '%' || $7 || '%'
         ))
-      ORDER BY ${sortField} ${order}
+      ORDER BY v.${sortField} ${order}
       LIMIT $8 OFFSET $9
     `;
 
@@ -114,8 +112,6 @@ class VoucherRepository {
         v.attachments,
         v.staff_id,
         v.status,
-        v.created_at,
-        v.updated_at,
         s.id as staff_id,
         s.full_name as staff_name,
         s.email as staff_email,
@@ -198,8 +194,7 @@ class VoucherRepository {
         amount = COALESCE($4, amount),
         payment_method = COALESCE($5, payment_method),
         payment_description = COALESCE($6, payment_description),
-        attachments = COALESCE($7, attachments),
-        updated_at = NOW()
+        attachments = COALESCE($7, attachments)
       WHERE id = $1 AND status = 'created'
       RETURNING *
     `;
@@ -236,19 +231,19 @@ class VoucherRepository {
    */
   async confirm(id) {
     const client = await pool.connect();
-    
+
     try {
       await client.query('BEGIN');
 
       // Update voucher status
       const updateVoucherQuery = `
         UPDATE voucher 
-        SET status = 'confirmed', updated_at = NOW()
+        SET status = 'confirmed'
         WHERE id = $1 AND status = 'created'
         RETURNING *
       `;
       const voucherResult = await client.query(updateVoucherQuery, [id]);
-      
+
       if (voucherResult.rows.length === 0) {
         await client.query('ROLLBACK');
         return null;
@@ -262,8 +257,7 @@ class VoucherRepository {
           UPDATE contract 
           SET 
             paid_amount = paid_amount + $1,
-            remaining_amount = total_value - (paid_amount + $1),
-            updated_at = NOW()
+            remaining_amount = total_value - (paid_amount + $1)
           WHERE id = $2
         `;
         await client.query(updateContractQuery, [voucher.amount, voucher.contract_id]);
@@ -339,8 +333,7 @@ class VoucherRepository {
         v.payment_time,
         v.amount,
         v.payment_method,
-        v.status,
-        v.created_at
+        v.status
       FROM voucher v
       WHERE v.contract_id = $1
       ORDER BY v.payment_time DESC
@@ -399,7 +392,7 @@ class VoucherRepository {
   async updateAttachments(id, attachments) {
     const query = `
       UPDATE voucher 
-      SET attachments = $2, updated_at = NOW()
+      SET attachments = $2
       WHERE id = $1
       RETURNING *
     `;
@@ -412,7 +405,7 @@ class VoucherRepository {
    */
   async getAttachmentFiles(fileIds) {
     if (!fileIds || fileIds.length === 0) return [];
-    
+
     const query = `
       SELECT id, url, name, type
       FROM file

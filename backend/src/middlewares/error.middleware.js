@@ -5,7 +5,7 @@
 const logger = require('../utils/logger.util');
 const { HTTP_STATUS } = require('../config/constants');
 const config = require('../config/environment');
-const { ApiError, ErrorCodes, isOperationalError } = require('../utils/apiError');
+const { ApiError } = require('../utils/apiError');
 
 /**
  * Not Found Handler - 404
@@ -19,7 +19,7 @@ const notFoundHandler = (req, res, next) => {
   next(error);
 };
 
-
+/**
  * Convert known errors to ApiError
  */
 const normalizeError = (err) => {
@@ -27,25 +27,6 @@ const normalizeError = (err) => {
   if (err instanceof ApiError) {
     return err;
   }
-
- * Global Error Handler
- * Note: Express requires 4 parameters (err, req, res, next) to identify error handlers
- */
-// eslint-disable-next-line no-unused-vars
-const errorHandler = (err, req, res, next) => {
-  // Log error
-  logger.error('Error:', {
-    message: err.message,
-    stack: err.stack,
-    url: req.originalUrl,
-    method: req.method,
-    ip: req.ip,
-  });
-
-  // Determine status code and message
-  let statusCode = err.statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR;
-  let message = err.message || 'Internal Server Error';
-
 
   // Database errors (PostgreSQL)
   if (err.code && typeof err.code === 'string') {
@@ -164,7 +145,7 @@ const errorHandler = (err, req, res, next) => {
     );
   }
 
-
+  // Default: unknown error
   return new ApiError(
     HTTP_STATUS.INTERNAL_SERVER_ERROR,
     config.node_env === 'production' ? 'Lỗi hệ thống' : err.message,
@@ -177,7 +158,7 @@ const errorHandler = (err, req, res, next) => {
  */
 const extractDuplicateField = (detail) => {
   if (!detail) return null;
-  
+
   // Format: Key (email)=(test@test.com) already exists.
   const match = detail.match(/Key \(([^)]+)\)/);
   if (match) {
@@ -191,15 +172,13 @@ const extractDuplicateField = (detail) => {
     return `${fieldLabels[field] || field} đã được sử dụng`;
   }
   return null;
-
-  // Note: Custom error classes (ValidationError, NotFoundError, etc.) from error.util.js
-  // already have statusCode set, so they will use their own message and statusCode
-
+};
 
 /**
  * Global Error Handler
+ * Note: Express requires 4 parameters (err, req, res, next)
  */
-const errorHandler = (err, req, res, next) => {
+const errorHandler = (err, req, res) => {
   // Normalize error to ApiError
   const error = normalizeError(err);
 
@@ -214,7 +193,6 @@ const errorHandler = (err, req, res, next) => {
     userId: req.user?.staffId || req.user?.accountId || null,
   };
 
-  // Log stack trace for server errors or in development
   if (error.statusCode >= 500 || config.node_env === 'development') {
     logData.stack = err.stack;
     logData.originalError = err.message;
@@ -236,63 +214,45 @@ const errorHandler = (err, req, res, next) => {
     },
   };
 
-  // Include details if present
-  if (error.details) {
-    response.error.details = error.details;
-  }
-
-  // Include stack trace in development
-  if (config.node_env === 'development') {
-    response.error.stack = err.stack;
-  }
+  if (error.details) response.error.details = error.details;
+  if (config.node_env === 'development') response.error.stack = err.stack;
 
   return res.status(error.statusCode).json(response);
 };
 
 /**
  * Async handler wrapper - Bắt lỗi từ async functions
- * @param {Function} fn - Async route handler
- * @returns {Function} Wrapped handler
  */
-const asyncHandler = (fn) => {
-  return (req, res, next) => {
-    Promise.resolve(fn(req, res, next)).catch(next);
-  };
+const asyncHandler = (fn) => (req, res, next) => {
+  Promise.resolve(fn(req, res, next)).catch(next);
 };
 
 /**
  * Validate request middleware factory
- * Validates req.body, req.query, or req.params with Joi schema
- * @param {Object} schema - Joi schema
- * @param {string} property - 'body' | 'query' | 'params'
  */
-const validate = (schema, property = 'body') => {
-  return (req, res, next) => {
-    const { error, value } = schema.validate(req[property], {
-      abortEarly: false,
-      stripUnknown: true,
-    });
+const validate = (schema, property = 'body') => (req, res, next) => {
+  const { error, value } = schema.validate(req[property], {
+    abortEarly: false,
+    stripUnknown: true,
+  });
 
-    if (error) {
-      const details = error.details.map((d) => ({
-        field: d.path.join('.'),
-        message: d.message,
-      }));
+  if (error) {
+    const details = error.details.map((d) => ({
+      field: d.path.join('.'),
+      message: d.message,
+    }));
+    return next(
+      new ApiError(
+        HTTP_STATUS.BAD_REQUEST,
+        'Dữ liệu không hợp lệ',
+        'VALIDATION_ERROR',
+        details
+      )
+    );
+  }
 
-      return next(
-        new ApiError(
-          HTTP_STATUS.BAD_REQUEST,
-          'Dữ liệu không hợp lệ',
-          'VALIDATION_ERROR',
-          details
-        )
-      );
-    }
-
-    // Replace with validated/sanitized value
-    req[property] = value;
-    next();
-  };
+  req[property] = value;
+  next();
 };
 
 /**
@@ -304,11 +264,10 @@ const setupGlobalErrorHandlers = () => {
       message: error.message,
       stack: error.stack,
     });
-    // Give time to log before exit
     setTimeout(() => process.exit(1), 1000);
   });
 
-  process.on('unhandledRejection', (reason, promise) => {
+  process.on('unhandledRejection', (reason) => {
     logger.error('Unhandled Rejection:', {
       reason: reason?.message || reason,
       stack: reason?.stack,

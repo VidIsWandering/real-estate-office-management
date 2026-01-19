@@ -59,12 +59,13 @@ class VoucherController {
    */
   async createVoucher(req, res, next) {
     try {
-      const staffId = req.user.staffId;
+       console.log('req.user:', req.user);  // ← Thêm dòng này
+      const staffId = req.user.staff_id;
       const data = await voucherService.createVoucher(req.body, staffId);
 
       // Audit log
       await auditService.log({
-        actorId: req.user.staffId,
+        actorId: req.user.staff_id,
         actionType: 'create',
         targetType: 'voucher',
         targetId: data.id,
@@ -96,7 +97,7 @@ class VoucherController {
 
       // Audit log
       await auditService.log({
-        actorId: req.user.staffId,
+        actorId: req.user.staff_id,
         actionType: 'update',
         targetType: 'voucher',
         targetId: id,
@@ -124,7 +125,7 @@ class VoucherController {
 
       // Audit log
       await auditService.log({
-        actorId: req.user.staffId,
+        actorId: req.user.staff_id,
         actionType: 'delete',
         targetType: 'voucher',
         targetId: id,
@@ -152,7 +153,7 @@ class VoucherController {
 
       // Audit log
       await auditService.log({
-        actorId: req.user.staffId,
+        actorId: req.user.staff_id,
         actionType: 'status_change',
         targetType: 'voucher',
         targetId: id,

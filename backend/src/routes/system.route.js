@@ -6,7 +6,7 @@ const express = require('express');
 const router = express.Router();
 
 const systemController = require('../controllers/system.controller');
-const voucherController = require('../controllers/voucher.controller');
+// const voucherController = require('../controllers/voucher.controller');
 const { authenticate, authorize } = require('../middlewares/auth.middleware');
 const { validate } = require('../middlewares/validate.middleware');
 const { updateConfigSchema } = require('../validators/system.validator');
