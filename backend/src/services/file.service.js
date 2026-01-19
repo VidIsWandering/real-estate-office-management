@@ -14,7 +14,7 @@ class FileService {
         file: file.toJSON(),
       };
     } catch (error) {
-      throw new Error('ERROR: FileService - createFile');
+      throw new Error(error.message);
     }
   }
 
@@ -30,7 +30,7 @@ class FileService {
         items: files.map((file) => file.toJSON()),
       };
     } catch (error) {
-      throw new Error('ERROR: FileService - getAllFiles');
+      throw new Error(error.message);
     }
   }
 
@@ -50,7 +50,7 @@ class FileService {
         file: file.toJSON(),
       };
     } catch (error) {
-      throw new Error('ERROR: FileService - getFileById');
+      throw new Error(error.message);
     }
   }
 
@@ -71,7 +71,7 @@ class FileService {
         file: file.toJSON(),
       };
     } catch (error) {
-      throw new Error('ERROR: FileService - updateFile');
+      throw new Error(error.message);
     }
   }
 
@@ -91,7 +91,7 @@ class FileService {
         message: 'File deleted successfully',
       };
     } catch (error) {
-      throw new Error('ERROR: FileService - deleteFile');
+      throw new Error(error.message);
     }
   }
 
@@ -113,8 +113,13 @@ class FileService {
         items: createdFiles,
       };
     } catch (error) {
-      throw new Error('ERROR: FileService - createManyFiles');
+      throw new Error(error.message);
     }
+  }
+
+  async getFilesByIds(ids) {
+    const files = await fileRepository.findByIds(ids);
+    return files.map((file) => file.toJSON());
   }
 }
 

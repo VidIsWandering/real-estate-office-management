@@ -27,10 +27,12 @@ class ClientNoteRepository {
    * @returns {Promise<{items: ClientNote[], total: number}>}
    */
   async findAll(query = {}) {
-    const { client_id, from, to } = query;
+    const { client_id, from, to, page = 1, limit = 10 } = query;
+
     const conditions = [];
     const values = [];
 
+    // Filters
     if (client_id) {
       values.push(client_id);
       conditions.push(`client_id = $${values.length}`);
@@ -46,20 +48,48 @@ class ClientNoteRepository {
       conditions.push(`created_at <= $${values.length}`);
     }
 
-    const whereSQL =
-      conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+    const whereSQL = conditions.length
+      ? `WHERE ${conditions.join(' AND ')}`
+      : '';
 
-    const sql = `
-      SELECT *
-      FROM client_note
-      ${whereSQL}
-      ORDER BY created_at DESC;
-    `;
+    // Pagination
+    const offset = (page - 1) * limit;
 
-    const result = await db.query(sql, values);
+    // Query data
+    values.push(limit);
+    values.push(offset);
+
+    const dataSQL = `
+    SELECT *
+    FROM client_note
+    ${whereSQL}
+    ORDER BY created_at DESC
+    LIMIT $${values.length - 1}
+    OFFSET $${values.length};
+  `;
+
+    // Query total
+    const countSQL = `
+    SELECT COUNT(*)::int AS total
+    FROM client_note
+    ${whereSQL};
+  `;
+
+    const [dataResult, countResult] = await Promise.all([
+      db.query(dataSQL, values),
+      db.query(countSQL, values.slice(0, values.length - 2)),
+    ]);
+
+    const total = countResult.rows[0].total;
+
     return {
-      items: result.rows.map((row) => new ClientNote(row)),
-      total: result.rows.length,
+      items: dataResult.rows.map((row) => new ClientNote(row)),
+      pagination: {
+        page: Number(page),
+        limit: Number(limit),
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
     };
   }
 

@@ -22,8 +22,7 @@
  *       - in: query
  *         name: position
  *         schema:
- *           type: string
- *           enum: [agent, legal_officer, accountant, manager]
+ *           $ref: '#/components/schemas/StaffPosition'
  *       - in: query
  *         name: status
  *         schema:
@@ -90,9 +89,8 @@
  *               assigned_area:
  *                 type: string
  *                 description: Khu vực phụ trách (cho Agent)
- *               position:
- *                 type: string
- *                 enum: [agent, legal_officer, accountant, manager]
+ *               role:
+ *                 $ref: '#/components/schemas/StaffPosition'
  *     responses:
  *       201:
  *         description: Staff created successfully
@@ -170,9 +168,8 @@
  *                 type: string
  *               assigned_area:
  *                 type: string
- *               position:
- *                 type: string
- *                 enum: [agent, legal_officer, accountant, manager]
+ *               role:
+ *                 $ref: '#/components/schemas/StaffPosition'
  *     responses:
  *       200:
  *         description: Staff updated successfully
@@ -276,9 +273,13 @@
  *             required:
  *               - position
  *             properties:
- *               position:
- *                 type: string
- *                 enum: [agent, legal_officer, accountant, manager]
+ *               role:
+ *                 $ref: '#/components/schemas/StaffPosition'
+ *               permissions:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Danh sách quyền cụ thể (optional, cho future use)
  *     responses:
  *       200:
  *         description: Permissions updated successfully

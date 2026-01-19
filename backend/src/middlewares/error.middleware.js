@@ -19,7 +19,7 @@ const notFoundHandler = (req, res, next) => {
   next(error);
 };
 
-/**
+
  * Convert known errors to ApiError
  */
 const normalizeError = (err) => {
@@ -27,6 +27,25 @@ const normalizeError = (err) => {
   if (err instanceof ApiError) {
     return err;
   }
+
+ * Global Error Handler
+ * Note: Express requires 4 parameters (err, req, res, next) to identify error handlers
+ */
+// eslint-disable-next-line no-unused-vars
+const errorHandler = (err, req, res, next) => {
+  // Log error
+  logger.error('Error:', {
+    message: err.message,
+    stack: err.stack,
+    url: req.originalUrl,
+    method: req.method,
+    ip: req.ip,
+  });
+
+  // Determine status code and message
+  let statusCode = err.statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR;
+  let message = err.message || 'Internal Server Error';
+
 
   // Database errors (PostgreSQL)
   if (err.code && typeof err.code === 'string') {
@@ -145,7 +164,7 @@ const normalizeError = (err) => {
     );
   }
 
-  // Default: unknown error
+
   return new ApiError(
     HTTP_STATUS.INTERNAL_SERVER_ERROR,
     config.node_env === 'production' ? 'Lỗi hệ thống' : err.message,
@@ -172,7 +191,10 @@ const extractDuplicateField = (detail) => {
     return `${fieldLabels[field] || field} đã được sử dụng`;
   }
   return null;
-};
+
+  // Note: Custom error classes (ValidationError, NotFoundError, etc.) from error.util.js
+  // already have statusCode set, so they will use their own message and statusCode
+
 
 /**
  * Global Error Handler

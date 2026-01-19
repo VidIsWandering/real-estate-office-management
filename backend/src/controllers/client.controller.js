@@ -2,28 +2,31 @@
  * Client Controller - Quản lý khách hàng
  */
 
-const { successResponse } = require('../utils/response.util');
+const {
+  successResponse,
+  errorResponse,
+  successResponseWithPagination,
+} = require('../utils/response.util');
 const { HTTP_STATUS } = require('../config/constants');
 const { asyncHandler } = require('../middlewares/error.middleware');
 const clientService = require('../services/client.service');
-const clientNoteRepository = require('../repositories/client-note.repository');
-const { query } = require('winston');
 
 class ClientController {
   /**
    * GET /clients
    */
   async getAll(req, res) {
-    const result = await clientService.getAll(req.query);
-
-    return successResponse(
-      res,
-      {
-        items: result.items.map((c) => c.toJSON()),
-        pagination: result.pagination,
-      },
-      'Client list retrieved successfully'
-    );
+    try {
+      const result = await clientService.getAll(req.query, req.user);
+      return successResponseWithPagination(
+        res,
+        result.items.map((c) => c.toJSON()),
+        result.pagination,
+        'Client list retrieved successfully'
+      );
+    } catch (error) {
+      return errorResponse(res, error.message);
+    }
   }
 
   /**
@@ -31,8 +34,16 @@ class ClientController {
    */
   async getById(req, res) {
     const { id } = req.params;
-    const result = await clientService.getById(id);
-    return successResponse(res, { ...result }, 'Client retrieved successfully');
+    try {
+      const result = await clientService.getById(id, req.user);
+      return successResponse(
+        res,
+        { ...result },
+        'Client retrieved successfully'
+      );
+    } catch (error) {
+      return errorResponse(res, error.message);
+    }
   }
 
   /**
@@ -43,13 +54,17 @@ class ClientController {
 
     const clientData = { ...rawClientData, staff_id: req.user.staff_id };
 
-    const result = await clientService.create(clientData);
-    return successResponse(
-      res,
-      { ...result },
-      'Client created successfully',
-      HTTP_STATUS.CREATED
-    );
+    try {
+      const result = await clientService.create(clientData);
+      return successResponse(
+        res,
+        { ...result },
+        'Client created successfully',
+        HTTP_STATUS.CREATED
+      );
+    } catch (error) {
+      return errorResponse(res, error.message);
+    }
   }
 
   /**
@@ -57,10 +72,14 @@ class ClientController {
    */
   async update(req, res) {
     // TODO: Implement
-    const { id } = req.params;
-    const updateData = req.body;
-    const result = await clientService.update(id, updateData);
-    return successResponse(res, { ...result }, 'Client updated successfully');
+    try {
+      const { id } = req.params;
+      const updateData = req.body;
+      const result = await clientService.update(id, updateData, req.user);
+      return successResponse(res, { ...result }, 'Client updated successfully');
+    } catch (error) {
+      return errorResponse(res, error.message);
+    }
   }
 
   /**
@@ -68,46 +87,60 @@ class ClientController {
    */
   async delete(req, res) {
     // TODO: Implement (soft delete)
-    const { id } = req.params;
-    const result = await clientService.delete(id);
-    return successResponse(
-      res,
-      { deleted: result },
-      'Client deleted successfully'
-    );
+    try {
+      const { id } = req.params;
+      const result = await clientService.delete(id, req.user);
+      return successResponse(
+        res,
+        { deleted: result },
+        'Client deleted successfully'
+      );
+    } catch (error) {
+      return errorResponse(res, error.message);
+    }
   }
 
   /**
    * GET /clients/:id/notes
    */
   async getNotes(req, res) {
-    // TODO: Implement
-    const { id } = req.params;
-    const { from, to } = req.query;
-    const query = { client_id: id, from, to };
-    const result = await clientNoteRepository.findAll(query);
-    return successResponse(
-      res,
-      { client_id: id, notes: result },
-      'Notes retrieved successfully'
-    );
+    try {
+      // TODO: Implement
+      const { id } = req.params;
+      const { from, to } = req.query;
+      const query = { client_id: id, from, to };
+      const result = await clientService.getNotes(query, req.user);
+      return successResponseWithPagination(
+        res,
+        { client_id: id, notes: result.items },
+        result.pagination,
+
+        'Notes retrieved successfully'
+      );
+    } catch (error) {
+      return errorResponse(res, error.message);
+    }
   }
 
   /**
    * POST /clients/:id/notes
    */
   async addNote(req, res) {
-    // TODO: Implement
-    const { id } = req.params;
-    const { content } = req.body;
-    const data = { client_id: id, staff_id: req.user.staff_id, content };
-    const result = await clientService.addNote(data);
-    return successResponse(
-      res,
-      { ...result },
-      'Note added successfully',
-      HTTP_STATUS.CREATED
-    );
+    try {
+      // TODO: Implement
+      const { id } = req.params;
+      const { content } = req.body;
+      const data = { client_id: id, staff_id: req.user.staff_id, content };
+      const result = await clientService.addNote(data, req.user);
+      return successResponse(
+        res,
+        { ...result },
+        'Note added successfully',
+        HTTP_STATUS.CREATED
+      );
+    } catch (error) {
+      return errorResponse(res, error.message);
+    }
   }
 }
 

@@ -1,3 +1,4 @@
+const { STAFF_ROLES } = require('../config/constants');
 const clientNoteRepository = require('../repositories/client-note.repository');
 const clientRepository = require('../repositories/client.repository');
 const staffRepository = require('../repositories/staff.repository');
@@ -18,44 +19,73 @@ class ClientService {
     };
   }
 
-  async getAll(query) {
+  async getAll(query, user) {
+    if (user.position != STAFF_ROLES.MANAGER) {
+      query.staff_id = user.staff_id;
+    }
     return await clientRepository.findAll(query);
   }
 
-  async getById(clientId) {
+  async getById(clientId, user) {
     const client = await clientRepository.findById(clientId);
+    const staff = await clientRepository.findById(client.staff_id);
 
-    const staff = await staffRepository.findById(client.staff_id);
+    if (
+      client.staff_id != user.staff_id &&
+      user.position != STAFF_ROLES.MANAGER
+    ) {
+      throw new Error('You do not have permission to manage this customer');
+    }
     return {
       client: client?.toJSON(),
       staff: staff?.toJSON(),
     };
   }
 
-  async update(clientId, updateData) {
+  async update(clientId, updateData, user) {
+    const client = await clientRepository.findById(clientId);
+    const staff = await clientRepository.findById(client.staff_id);
+    if (
+      client.staff_id != user.staff_id &&
+      user.position != STAFF_ROLES.MANAGER
+    ) {
+      throw new Error('You do not have permission to manage this customer');
+    }
     const updatedClient = await clientRepository.updateById(
       clientId,
       updateData
     );
-
-    const staff = await staffRepository.findById(updatedClient.staff_id);
-
     return {
       updated_client: updatedClient?.toJSON(),
       staff: staff?.toJSON(),
     };
   }
 
-  async delete(clientId) {
+  async delete(clientId, user) {
+    const client = await clientRepository.findById(clientId);
+
+    if (
+      client.staff_id != user.staff_id &&
+      user.position != STAFF_ROLES.MANAGER
+    ) {
+      throw new Error('You do not have permission to manage this customer');
+    }
     const res = await clientRepository.delete(clientId);
 
     return res ? true : false;
   }
 
-  async addNote(data) {
-    const res = await clientNoteRepository.create(data);
+  async addNote(data, user) {
     const client = await clientRepository.findById(data.client_id);
     const staff = await staffRepository.findById(data.staff_id);
+
+    if (
+      client.staff_id != user.staff_id &&
+      user.position != STAFF_ROLES.MANAGER
+    ) {
+      throw new Error('You do not have permission to manage this customer');
+    }
+    const res = await clientNoteRepository.create(data);
     return {
       client_note: res.toJSON(),
       client: client.toJSON(),
@@ -63,7 +93,14 @@ class ClientService {
     };
   }
 
-  async getNotes(query) {
+  async getNotes(query, user) {
+    const client = await clientRepository.findById(query.client_id);
+    if (
+      client.staff_id != user.staff_id &&
+      user.position != STAFF_ROLES.MANAGER
+    ) {
+      throw new Error('You do not have permission to manage this customer');
+    }
     const res = await clientNoteRepository.findAll(query);
     return res;
   }

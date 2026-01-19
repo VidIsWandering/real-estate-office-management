@@ -8,6 +8,8 @@ const router = express.Router();
 const systemController = require('../controllers/system.controller');
 const voucherController = require('../controllers/voucher.controller');
 const { authenticate, authorize } = require('../middlewares/auth.middleware');
+const { validate } = require('../middlewares/validate.middleware');
+const { updateConfigSchema } = require('../validators/system.validator');
 const { STAFF_ROLES } = require('../config/constants');
 
 // ============================================================================
@@ -57,6 +59,18 @@ router.get(
 );
 
 /**
+ * @route   GET /api/v1/system/configs
+ * @desc    Get all system configurations as array
+ * @access  Private (Manager/Admin only)
+ */
+router.get(
+  '/system/configs',
+  authenticate,
+  authorize([STAFF_ROLES.MANAGER, STAFF_ROLES.ADMIN]),
+  systemController.getAllConfigs
+);
+
+/**
  * @route   PUT /api/v1/system/config
  * @desc    Update system configuration
  * @access  Private (Admin only)
@@ -65,7 +79,21 @@ router.put(
   '/system/config',
   authenticate,
   authorize([STAFF_ROLES.ADMIN]),
+  ...updateConfigSchema,
+  validate,
   systemController.updateConfig
+);
+
+/**
+ * @route   PUT /api/v1/system/configs/:key
+ * @desc    Update individual system configuration
+ * @access  Private (Manager/Admin only)
+ */
+router.put(
+  '/system/configs/:key',
+  authenticate,
+  authorize([STAFF_ROLES.MANAGER, STAFF_ROLES.ADMIN]),
+  systemController.updateSingleConfig
 );
 
 /**

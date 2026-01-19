@@ -79,7 +79,9 @@ class AppointmentRepository {
       conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
 
     // 🔹 Pagination
-    const offset = (Number(page) - 1) * Number(limit);
+    const currentPage = Number(page);
+    const pageSize = Number(limit);
+    const offset = (currentPage - 1) * pageSize;
 
     // 🔹 Query data
     const dataSQL = `
@@ -98,14 +100,20 @@ class AppointmentRepository {
     ${whereSQL};
   `;
 
-    const dataResult = await db.query(dataSQL, [...values, limit, offset]);
+    const dataResult = await db.query(dataSQL, [...values, pageSize, offset]);
 
     const countResult = await db.query(countSQL, values);
 
+    const total = Number(countResult.rows[0].total);
+
     return {
       items: dataResult.rows.map((row) => new Appointment(row)),
-
-      total: Number(countResult.rows[0].total),
+      pagination: {
+        page: currentPage,
+        limit: pageSize,
+        total,
+        totalPages: Math.ceil(total / pageSize),
+      },
     };
   }
 

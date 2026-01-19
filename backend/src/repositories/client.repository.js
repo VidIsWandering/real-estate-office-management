@@ -55,7 +55,7 @@ class ClientRepository {
       phone_number,
       address,
       type,
-      staff_id, // 🔹 Thêm staff_id
+      staff_id,
     } = query;
 
     const conditions = [];
@@ -84,6 +84,12 @@ class ClientRepository {
     if (type) {
       values.push(type);
       conditions.push(`type = $${values.length}`);
+    }
+
+    if (staff_id) {
+      // 🔹 Filter staff_id
+      values.push(staff_id);
+      conditions.push(`staff_id = $${values.length}`);
     }
 
     if (staff_id) {

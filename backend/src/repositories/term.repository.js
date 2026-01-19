@@ -7,12 +7,12 @@ class TermRepository {
    */
   async create(data) {
     const sql = `
-      INSERT INTO term (title, description)
+      INSERT INTO term (name, content)
       VALUES ($1, $2)
       RETURNING *;
     `;
 
-    const result = await db.query(sql, [data.title, data.description || null]);
+    const result = await db.query(sql, [data.name, data.content || null]);
 
     return new Term(result.rows[0]);
   }
@@ -48,14 +48,13 @@ class TermRepository {
     const sql = `
       UPDATE term
       SET
-        title = COALESCE($1, title),
-        description = COALESCE($2, description),
-        updated_at = now()
+        name = COALESCE($1, name),
+       content = COALESCE($2,content)
       WHERE id = $3
       RETURNING *;
     `;
 
-    const result = await db.query(sql, [data.title, data.description, id]);
+    const result = await db.query(sql, [data.name, data.content, id]);
 
     if (result.rows.length === 0) return null;
     return new Term(result.rows[0]);

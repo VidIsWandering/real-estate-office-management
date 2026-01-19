@@ -10,26 +10,27 @@ const {
   generateRefreshToken,
 } = require('../utils/jwt.util');
 const { STAFF_ROLES } = require('../config/constants');
+const { ValidationError, NotFoundError } = require('../utils/error.util');
 
 class AuthService {
   /**
    * Register new account + staff
    */
   async register(registerData) {
-    const { username, password, full_name, email, phone_number, position } =
+    const { username, password, full_name, email, phone_number, role } =
       registerData;
 
     // Check username đã tồn tại chưa
     const existingAccount = await accountRepository.findByUsername(username);
     if (existingAccount) {
-      throw new Error('Username already exists');
+      throw new ValidationError('Username already exists');
     }
 
     // Check email đã tồn tại chưa (nếu có)
     if (email) {
       const emailExists = await staffRepository.existsByEmail(email);
       if (emailExists) {
-        throw new Error('Email already exists');
+        throw new ValidationError('Email already exists');
       }
     }
 
@@ -45,7 +46,7 @@ class AuthService {
       full_name,
       email,
       phone_number,
-      position: position || STAFF_ROLES.STAFF,
+      position: role || STAFF_ROLES.AGENT,
       status: 'working',
     };
 
@@ -64,24 +65,24 @@ class AuthService {
     // Find account
     const account = await accountRepository.findByUsername(username);
     if (!account) {
-      throw new Error('Invalid username or password');
+      throw new ValidationError('Invalid username or password');
     }
 
     // Compare password
     const isPasswordValid = await comparePassword(password, account.password);
     if (!isPasswordValid) {
-      throw new Error('Invalid username or password');
+      throw new ValidationError('Invalid username or password');
     }
 
     // Get staff info
     const staff = await staffRepository.findByAccountId(account.id);
     if (!staff) {
-      throw new Error('Staff profile not found');
+      throw new NotFoundError('Staff profile not found');
     }
 
     // Check staff status
     if (staff.status !== 'working') {
-      throw new Error('Account is not active');
+      throw new ValidationError('Account is not active');
     }
 
     // Generate tokens
@@ -125,21 +126,52 @@ class AuthService {
     };
   }
 
-  async updateProfile(accountId, newProfile) {
-    try {
-      const currentStaff = await staffRepository.findByAccountId(accountId);
-      if (!currentStaff) {
-        throw new Error('Staff profile not found');
-      }
-      await staffRepository.update(currentStaff.id, newProfile);
+  /**
+   * Update profile
+   */
+  async updateProfile(accountId, updateData) {
+    const {
+      full_name,
+      email,
+      phone_number,
+      address,
+      assigned_area,
+      preferences,
+    } = updateData;
 
-      const updatedProfile = this.getProfile(accountId);
-
-      return updatedProfile;
-    } catch (error) {
-      console.log(error);
-      throw new Error('ERROR: Update profile');
+    // Get current staff profile
+    const staff = await staffRepository.findByAccountId(accountId);
+    if (!staff) {
+      throw new Error('Staff profile not found');
     }
+
+    // Check if email is being changed and already exists
+    if (email && email !== staff.email) {
+      const emailExists = await staffRepository.existsByEmail(email);
+      if (emailExists) {
+        throw new Error('Email already exists');
+      }
+    }
+
+    // Update staff profile
+    const staffData = {
+      full_name,
+      email,
+      phone_number,
+      address,
+      assigned_area,
+      preferences,
+    };
+
+    const updatedStaff = await staffRepository.update(staff.id, staffData);
+
+    // Get updated account info
+    const account = await accountRepository.findById(accountId);
+
+    return {
+      account: account.toJSON(),
+      staff: updatedStaff.toJSON(),
+    };
   }
 
   /**
@@ -149,7 +181,7 @@ class AuthService {
     // Get account
     const account = await accountRepository.findById(accountId);
     if (!account) {
-      throw new Error('Account not found');
+      throw new NotFoundError('Account not found');
     }
 
     // Verify old password
@@ -158,7 +190,7 @@ class AuthService {
       account.password
     );
     if (!isPasswordValid) {
-      throw new Error('Current password is incorrect');
+      throw new ValidationError('Current password is incorrect');
     }
 
     // Hash new password

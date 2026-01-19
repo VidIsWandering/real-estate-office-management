@@ -2,7 +2,11 @@
  * Transaction Controller - Quản lý giao dịch
  */
 
-const { successResponse } = require('../utils/response.util');
+const {
+  successResponse,
+  errorResponse,
+  successResponseWithPagination,
+} = require('../utils/response.util');
 const { HTTP_STATUS } = require('../config/constants');
 const { asyncHandler } = require('../middlewares/error.middleware');
 const transactionService = require('../services/transaction.service');
@@ -12,24 +16,45 @@ class TransactionController {
    * GET /transactions
    */
   async getAll(req, res) {
-    const { page = 1, limit = 10 } = req.query;
+    try {
+      const result = await transactionService.getAll(req.query, req.user);
 
-    return successResponse(
-      res,
-      {
-        items: [],
-        pagination: { page: Number(page), limit: Number(limit), total: 0 },
-      },
-      'Transaction list retrieved successfully'
-    );
+      return successResponseWithPagination(
+        res,
+
+        result.items,
+        result.pagination,
+        'Transaction list retrieved successfully'
+      );
+    } catch (error) {
+      return errorResponse(
+        res,
+        error.message || 'Failed to retrieve transaction list',
+        error.statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR
+      );
+    }
   }
 
   /**
    * GET /transactions/:id
    */
   async getById(req, res) {
-    const { id } = req.params;
-    return successResponse(res, { id }, 'Transaction retrieved successfully');
+    try {
+      const { id } = req.params;
+      const result = await transactionService.getById(id, req.user);
+
+      return successResponse(
+        res,
+        { ...result },
+        'Transaction retrieved successfully'
+      );
+    } catch (error) {
+      return errorResponse(
+        res,
+        error.message || 'Failed to retrieve transaction',
+        error.statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR
+      );
+    }
   }
 
   /**
@@ -37,27 +62,48 @@ class TransactionController {
    * Precondition: Client phải có lịch hẹn COMPLETED cho BĐS này
    */
   async create(req, res) {
-    // TODO: Implement - Check precondition, update real estate status to NEGOTIATING
-    const transaction = await transactionService.create(req.body, req.user);
-    return successResponse(
-      res,
-      { ...transaction },
-      'Transaction created successfully',
-      HTTP_STATUS.CREATED
-    );
+    try {
+      // TODO: Implement - Check precondition, update real estate status to NEGOTIATING
+      const transaction = await transactionService.create(req.body, req.user);
+
+      return successResponse(
+        res,
+        { ...transaction },
+        'Transaction created successfully',
+        HTTP_STATUS.CREATED
+      );
+    } catch (error) {
+      return errorResponse(
+        res,
+        error.message || 'Failed to create transaction',
+        error.statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR
+      );
+    }
   }
 
   /**
    * PUT /transactions/:id
    */
   async update(req, res) {
-    // TODO: Implement - Only allow when status = NEGOTIATING
-    const { id } = req.params;
-    return successResponse(
-      res,
-      { id, ...req.body },
-      'Transaction updated successfully'
-    );
+    try {
+      // TODO: Implement - Only allow when status = NEGOTIATING
+      const transaction = await transactionService.update(
+        req.params.id,
+        req.body
+      );
+
+      return successResponse(
+        res,
+        { ...transaction },
+        'Transaction updated successfully'
+      );
+    } catch (error) {
+      return errorResponse(
+        res,
+        error.message || 'Failed to update transaction',
+        error.statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR
+      );
+    }
   }
 
   /**
@@ -65,28 +111,47 @@ class TransactionController {
    * Hoàn tất đàm phán, chuyển sang giai đoạn hợp đồng
    */
   async finalize(req, res) {
-    // TODO: Implement - Update status to PENDING, notify Legal Officer
-    const { id } = req.params;
-    return successResponse(
-      res,
-      { id, status: 'pending', ...req.body },
-      'Transaction finalized successfully'
-    );
+    try {
+      // TODO: Implement - Update status to PENDING, notify Legal Officer
+      const { id } = req.params;
+      const result = await transactionService.finalize(id);
+
+      return successResponse(
+        res,
+        { ...result },
+        'Transaction finalized successfully'
+      );
+    } catch (error) {
+      return errorResponse(
+        res,
+        error.message || 'Failed to finalize transaction',
+        error.statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR
+      );
+    }
   }
 
   /**
    * PUT /transactions/:id/cancel
    */
   async cancel(req, res) {
-    // TODO: Implement - Update status to CANCELLED, real estate back to LISTED
-    const { id } = req.params;
-    const { reason } = req.body;
+    try {
+      // TODO: Implement - Update status to CANCELLED, real estate back to LISTED
+      const { id } = req.params;
+      const { reason } = req.body;
+      const result = await transactionService.cancel(id, reason, req.user);
 
-    return successResponse(
-      res,
-      { id, status: 'cancelled', cancellation_reason: reason },
-      'Transaction cancelled successfully'
-    );
+      return successResponse(
+        res,
+        { ...result },
+        'Transaction cancelled successfully'
+      );
+    } catch (error) {
+      return errorResponse(
+        res,
+        error.message || 'Failed to cancel transaction',
+        error.statusCode || HTTP_STATUS.INTERNAL_SERVER_ERROR
+      );
+    }
   }
 }
 

@@ -26,7 +26,7 @@ class StaffRepository {
       staffData.phone_number || null,
       staffData.address || null,
       staffData.assigned_area || null,
-      staffData.position || 'staff',
+      staffData.position || 'agent',
       staffData.status || 'working',
     ];
 
@@ -114,19 +114,21 @@ class StaffRepository {
         address = COALESCE($4, address),
         assigned_area = COALESCE($5, assigned_area),
         position = COALESCE($6, position),
-        status = COALESCE($7, status)
-      WHERE id = $8
+        status = COALESCE($7, status),
+        preferences = COALESCE($8, preferences)
+      WHERE id = $9
       RETURNING *
     `;
 
     const values = [
-      staffData?.full_name,
-      staffData?.email,
-      staffData?.phone_number,
-      staffData?.address,
-      staffData?.assigned_area,
-      staffData?.position,
-      staffData?.status,
+      staffData.full_name,
+      staffData.email,
+      staffData.phone_number,
+      staffData.address,
+      staffData.assigned_area,
+      staffData.position,
+      staffData.status,
+      staffData.preferences ? JSON.stringify(staffData.preferences) : null,
       id,
     ];
 

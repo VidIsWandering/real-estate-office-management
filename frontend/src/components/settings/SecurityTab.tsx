@@ -1,111 +1,228 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-
-type TwoFAMethod = "email" | "authenticator";
+  Loader2,
+  AlertCircle,
+  CheckCircle2,
+  Monitor,
+  Smartphone,
+  Globe,
+  Eye,
+  EyeOff,
+} from "lucide-react";
+import {
+  changePassword,
+  getLoginHistory,
+  getActiveSessions,
+  revokeSession,
+  revokeAllSessions,
+  type LoginHistory,
+  type ActiveSession,
+} from "@/lib/api";
+import { ApiError } from "@/lib/api/client";
 
 export function SecurityTab() {
   /* ================= CHANGE PASSWORD ================= */
   const [showChangePassword, setShowChangePassword] = useState(false);
-
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
     newPassword: "",
     confirmPassword: "",
   });
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [passwordSuccess, setPasswordSuccess] = useState(false);
+  const [changingPassword, setChangingPassword] = useState(false);
+  const [showPasswords, setShowPasswords] = useState({
+    current: false,
+    new: false,
+    confirm: false,
+  });
 
-  const [error, setError] = useState<string | null>(null);
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/;
 
-  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
-
-  const handlePasswordChange = () => {
-    setError(null);
+  const handlePasswordChange = async () => {
+    setPasswordError(null);
 
     if (
       !passwordData.currentPassword ||
       !passwordData.newPassword ||
       !passwordData.confirmPassword
     ) {
-      setError("Please fill in all fields");
+      setPasswordError("Please fill in all fields");
       return;
     }
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      setError("Passwords do not match");
+      setPasswordError("Passwords do not match");
       return;
     }
 
     if (!passwordRegex.test(passwordData.newPassword)) {
-      setError(
-        "Password must be at least 8 characters and include uppercase, lowercase, and a number",
+      setPasswordError(
+        "Password must be at least 6 characters and include uppercase, lowercase, and a number",
       );
       return;
     }
 
-    console.log("CHANGE PASSWORD:", passwordData);
-    setShowChangePassword(false);
-  };
+    try {
+      setChangingPassword(true);
+      setPasswordError(null);
+      await changePassword({
+        current_password: passwordData.currentPassword,
+        new_password: passwordData.newPassword,
+        confirm_password: passwordData.confirmPassword,
+      });
 
-  /* ================= TWO FACTOR AUTH ================= */
-  const [twoFAEnabled, setTwoFAEnabled] = useState(false);
-  const [twoFAPending, setTwoFAPending] = useState(false);
-  const [twoFAMethod, setTwoFAMethod] = useState<TwoFAMethod | null>(null);
-  const [show2FAVerify, setShow2FAVerify] = useState(false);
-  const [otp, setOtp] = useState("");
-
-  const handleToggle2FA = (checked: boolean) => {
-    if (checked) {
-      // Start enable flow
-      setTwoFAPending(true);
-    } else {
-      if (confirm("Disable Two-Factor Authentication?")) {
-        setTwoFAEnabled(false);
-        setTwoFAPending(false);
-        setTwoFAMethod(null);
-        console.log("2FA DISABLED");
+      setPasswordSuccess(true);
+      setShowChangePassword(false);
+      setPasswordData({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+      setShowPasswords({ current: false, new: false, confirm: false });
+      setTimeout(() => setPasswordSuccess(false), 3000);
+    } catch (err: unknown) {
+      // Log error details for debugging
+      if (process.env.NODE_ENV === "development") {
+        console.error("Change password error:", err);
       }
+
+      if (err instanceof ApiError) {
+        // Check if we have a meaningful message
+        const errorMessage =
+          err.message && !err.message.startsWith("HTTP ")
+            ? err.message
+            : err.status === 400
+              ? "Current password is incorrect or validation failed"
+              : "Failed to change password";
+        setPasswordError(errorMessage);
+      } else if (err instanceof Error) {
+        setPasswordError(err.message);
+      } else {
+        setPasswordError("Failed to change password");
+      }
+    } finally {
+      setChangingPassword(false);
     }
   };
 
-  const startEnable2FA = (method: TwoFAMethod) => {
-    setTwoFAMethod(method);
-    setShow2FAVerify(true);
+  /* ================= LOGIN HISTORY ================= */
+  const [loginHistory, setLoginHistory] = useState<LoginHistory[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(true);
+  const [historyError, setHistoryError] = useState<string | null>(null);
+
+  useEffect(() => {
+    loadLoginHistory();
+  }, []);
+
+  const loadLoginHistory = async () => {
+    try {
+      setLoadingHistory(true);
+      setHistoryError(null);
+      const response = await getLoginHistory();
+      setLoginHistory(response.data.slice(0, 10)); // Last 10 logins
+    } catch (err: unknown) {
+      setHistoryError(
+        err instanceof Error ? err.message : "Failed to load login history",
+      );
+    } finally {
+      setLoadingHistory(false);
+    }
   };
 
-  const verify2FA = () => {
-    if (otp.length !== 6) {
-      alert("Invalid verification code");
+  /* ================= ACTIVE SESSIONS ================= */
+  const [activeSessions, setActiveSessions] = useState<ActiveSession[]>([]);
+  const [loadingSessions, setLoadingSessions] = useState(true);
+  const [sessionsError, setSessionsError] = useState<string | null>(null);
+  const [revokingSession, setRevokingSession] = useState<string | null>(null);
+
+  useEffect(() => {
+    loadActiveSessions();
+  }, []);
+
+  const loadActiveSessions = async () => {
+    try {
+      setLoadingSessions(true);
+      setSessionsError(null);
+      const response = await getActiveSessions();
+      setActiveSessions(response.data);
+    } catch (err: unknown) {
+      setSessionsError(
+        err instanceof Error ? err.message : "Failed to load active sessions",
+      );
+    } finally {
+      setLoadingSessions(false);
+    }
+  };
+
+  const handleRevokeSession = async (sessionId: string) => {
+    if (!confirm("Revoke this session? The user will be logged out.")) return;
+
+    try {
+      setRevokingSession(sessionId);
+      await revokeSession(sessionId);
+      setActiveSessions((sessions) =>
+        sessions.filter((s) => s.id !== sessionId),
+      );
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "Failed to revoke session");
+    } finally {
+      setRevokingSession(null);
+    }
+  };
+
+  const handleRevokeAllSessions = async () => {
+    if (
+      !confirm(
+        "Revoke all other sessions? All other devices will be logged out.",
+      )
+    )
       return;
+
+    try {
+      setRevokingSession("all");
+      await revokeAllSessions();
+      await loadActiveSessions();
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : "Failed to revoke sessions");
+    } finally {
+      setRevokingSession(null);
     }
+  };
 
-    console.log("VERIFY 2FA:", { otp, twoFAMethod });
-    // TODO: API verify
+  const formatDate = (dateStr: string) => {
+    return new Date(dateStr).toLocaleString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
 
-    setTwoFAEnabled(true);
-    setTwoFAPending(false);
-    setShow2FAVerify(false);
-    setOtp("");
+  const getDeviceIcon = (userAgent: string | null) => {
+    if (!userAgent) return <Globe className="w-4 h-4" />;
+    if (userAgent.toLowerCase().includes("mobile"))
+      return <Smartphone className="w-4 h-4" />;
+    return <Monitor className="w-4 h-4" />;
   };
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6 space-y-8 max-w-xl">
-      <h2 className="text-xl font-semibold">Security Settings</h2>
-
-      {/* ===== Change Password ===== */}
-      <div className="space-y-3">
+    <div className="space-y-8 max-w-4xl">
+      {/* ===== CHANGE PASSWORD ===== */}
+      <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6 space-y-4">
         <div className="flex justify-between items-center">
-          <p className="font-medium">Change Password</p>
+          <div>
+            <h3 className="text-lg font-semibold">Change Password</h3>
+            <p className="text-sm text-gray-500">
+              Update your account password
+            </p>
+          </div>
           <Button
             variant="ghost"
             size="sm"
@@ -115,51 +232,117 @@ export function SecurityTab() {
           </Button>
         </div>
 
+        {passwordSuccess && (
+          <div className="flex items-center gap-2 text-emerald-600 text-sm">
+            <CheckCircle2 className="w-4 h-4" />
+            <span>Password changed successfully</span>
+          </div>
+        )}
+
         {showChangePassword && (
           <div className="border rounded-lg p-4 space-y-4">
             <div>
               <Label>Current Password</Label>
-              <Input
-                type="password"
-                value={passwordData.currentPassword}
-                onChange={(e) =>
-                  setPasswordData({
-                    ...passwordData,
-                    currentPassword: e.target.value,
-                  })
-                }
-              />
+              <div className="relative">
+                <Input
+                  type={showPasswords.current ? "text" : "password"}
+                  value={passwordData.currentPassword}
+                  onChange={(e) => {
+                    setPasswordData({
+                      ...passwordData,
+                      currentPassword: e.target.value,
+                    });
+                    setPasswordError(null);
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() =>
+                    setShowPasswords((prev) => ({
+                      ...prev,
+                      current: !prev.current,
+                    }))
+                  }
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                >
+                  {showPasswords.current ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
+                </button>
+              </div>
             </div>
 
             <div>
               <Label>New Password</Label>
-              <Input
-                type="password"
-                value={passwordData.newPassword}
-                onChange={(e) =>
-                  setPasswordData({
-                    ...passwordData,
-                    newPassword: e.target.value,
-                  })
-                }
-              />
+              <div className="relative">
+                <Input
+                  type={showPasswords.new ? "text" : "password"}
+                  value={passwordData.newPassword}
+                  onChange={(e) => {
+                    setPasswordData({
+                      ...passwordData,
+                      newPassword: e.target.value,
+                    });
+                    setPasswordError(null);
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() =>
+                    setShowPasswords((prev) => ({ ...prev, new: !prev.new }))
+                  }
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                >
+                  {showPasswords.new ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
+                </button>
+              </div>
             </div>
 
             <div>
               <Label>Confirm New Password</Label>
-              <Input
-                type="password"
-                value={passwordData.confirmPassword}
-                onChange={(e) =>
-                  setPasswordData({
-                    ...passwordData,
-                    confirmPassword: e.target.value,
-                  })
-                }
-              />
+              <div className="relative">
+                <Input
+                  type={showPasswords.confirm ? "text" : "password"}
+                  value={passwordData.confirmPassword}
+                  onChange={(e) => {
+                    setPasswordData({
+                      ...passwordData,
+                      confirmPassword: e.target.value,
+                    });
+                    setPasswordError(null);
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() =>
+                    setShowPasswords((prev) => ({
+                      ...prev,
+                      confirm: !prev.confirm,
+                    }))
+                  }
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                >
+                  {showPasswords.confirm ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
+                </button>
+              </div>
             </div>
 
-            {error && <p className="text-sm text-red-500">{error}</p>}
+            {passwordError && (
+              <div className="flex items-center gap-2 text-red-600 text-sm">
+                <AlertCircle className="w-4 h-4" />
+                <span>{passwordError}</span>
+              </div>
+            )}
 
             <div className="flex justify-end gap-3">
               <Button
@@ -168,76 +351,144 @@ export function SecurityTab() {
               >
                 Cancel
               </Button>
-              <Button onClick={handlePasswordChange}>Save Password</Button>
+              <Button
+                onClick={handlePasswordChange}
+                disabled={changingPassword}
+              >
+                {changingPassword ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  "Save Password"
+                )}
+              </Button>
             </div>
           </div>
         )}
       </div>
 
-      {/* ===== Two Factor Authentication ===== */}
-      <div className="space-y-4 pt-4 border-t">
+      {/* ===== ACTIVE SESSIONS ===== */}
+      <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6 space-y-4">
         <div className="flex justify-between items-center">
           <div>
-            <p className="font-medium">Two-Factor Authentication (2FA)</p>
+            <h3 className="text-lg font-semibold">Active Sessions</h3>
             <p className="text-sm text-gray-500">
-              Add an extra layer of security
+              Manage devices with access to your account
             </p>
           </div>
-
-          <Switch
-            checked={twoFAEnabled || twoFAPending}
-            onCheckedChange={handleToggle2FA}
-          />
+          {activeSessions.length > 1 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRevokeAllSessions}
+              disabled={revokingSession === "all"}
+            >
+              {revokingSession === "all" ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Revoking...
+                </>
+              ) : (
+                "Revoke All Others"
+              )}
+            </Button>
+          )}
         </div>
 
-        {twoFAEnabled && (
-          <p className="text-sm text-green-600">
-            ✓ 2FA is enabled ({twoFAMethod})
-          </p>
-        )}
-
-        {twoFAPending && !twoFAEnabled && (
-          <div className="flex gap-3">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => startEnable2FA("email")}
-            >
-              Email OTP
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => startEnable2FA("authenticator")}
-            >
-              Authenticator App
-            </Button>
+        {loadingSessions ? (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+          </div>
+        ) : sessionsError ? (
+          <div className="flex items-center gap-2 text-red-600 py-4">
+            <AlertCircle className="w-5 h-5" />
+            <span className="text-sm">{sessionsError}</span>
+          </div>
+        ) : activeSessions.length === 0 ? (
+          <p className="text-sm text-gray-500 py-4">No active sessions</p>
+        ) : (
+          <div className="divide-y divide-gray-200">
+            {activeSessions.map((session) => (
+              <div
+                key={session.id}
+                className="py-4 flex items-center justify-between"
+              >
+                <div className="flex items-start gap-3">
+                  <div className="text-gray-500 mt-1">
+                    {getDeviceIcon(session.user_agent)}
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">
+                      {session.user_agent || "Unknown Device"}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {session.ip_address || "Unknown IP"} •{" "}
+                      {formatDate(session.login_at)}
+                    </p>
+                    <p className="text-xs text-gray-400">
+                      Last activity: {formatDate(session.last_activity)}
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleRevokeSession(session.id)}
+                  disabled={revokingSession === session.id}
+                >
+                  {revokingSession === session.id ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    "Revoke"
+                  )}
+                </Button>
+              </div>
+            ))}
           </div>
         )}
       </div>
 
-      {/* ===== Verify OTP ===== */}
-      <Dialog open={show2FAVerify} onOpenChange={setShow2FAVerify}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Verify 2FA</DialogTitle>
-          </DialogHeader>
+      {/* ===== LOGIN HISTORY ===== */}
+      <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6 space-y-4">
+        <div>
+          <h3 className="text-lg font-semibold">Login History</h3>
+          <p className="text-sm text-gray-500">
+            Recent login activity on your account
+          </p>
+        </div>
 
-          <Input
-            value={otp}
-            onChange={(e) => setOtp(e.target.value)}
-            placeholder="123456"
-            maxLength={6}
-          />
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShow2FAVerify(false)}>
-              Cancel
-            </Button>
-            <Button onClick={verify2FA}>Verify</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+        {loadingHistory ? (
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+          </div>
+        ) : historyError ? (
+          <div className="flex items-center gap-2 text-red-600 py-4">
+            <AlertCircle className="w-5 h-5" />
+            <span className="text-sm">{historyError}</span>
+          </div>
+        ) : loginHistory.length === 0 ? (
+          <p className="text-sm text-gray-500 py-4">No login history</p>
+        ) : (
+          <div className="divide-y divide-gray-200">
+            {loginHistory.map((login) => (
+              <div key={login.id} className="py-3 flex items-center gap-3">
+                <div className="text-gray-500">
+                  {getDeviceIcon(login.user_agent)}
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm">{formatDate(login.login_at)}</p>
+                  <p className="text-xs text-gray-500">
+                    {login.ip_address || "Unknown IP"} •{" "}
+                    {login.user_agent || "Unknown Device"}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
