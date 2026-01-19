@@ -18,6 +18,10 @@ const authenticate = (req, res, next) => {
     const authHeader = req.headers.authorization;
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      // Thêm vào đầu authenticate function
+      console.log('=== AUTH CHECK ===');
+      console.log('Path:', req.path);
+      console.log('Headers:', req.headers.authorization);
       return unauthorizedResponse(res, 'No token provided');
     }
 
@@ -33,6 +37,8 @@ const authenticate = (req, res, next) => {
       staff_id: decoded.staff_id,
       position: decoded.position,
     };
+
+    console.log(req.user);
 
     next();
   } catch (error) {

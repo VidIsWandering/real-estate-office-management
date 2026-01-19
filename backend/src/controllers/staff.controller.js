@@ -1,7 +1,8 @@
 /**
- * Staff Controller - Quản lý nhân viên
+ * Staff Controller - Handles HTTP requests for staff management
  */
 
+const staffService = require('../services/staff.service');
 const { successResponse } = require('../utils/response.util');
 const { HTTP_STATUS } = require('../config/constants');
 const { asyncHandler } = require('../middlewares/error.middleware');
@@ -10,7 +11,7 @@ const staffService = require('../services/staff.service');
 class StaffController {
   /**
    * GET /staff
-   * Lấy danh sách nhân viên
+   * Get list of staff with pagination and filters
    */
   async getAll(req, res) {
     const result = await staffService.getAll(req.query, req.user?.position);
@@ -29,7 +30,7 @@ class StaffController {
 
   /**
    * GET /staff/:id
-   * Lấy thông tin chi tiết nhân viên
+   * Get staff details by ID
    */
   async getById(req, res) {
     const { id } = req.params;
@@ -39,7 +40,7 @@ class StaffController {
 
   /**
    * POST /staff
-   * Tạo nhân viên mới
+   * Create new staff member
    */
   async create(req, res) {
     const staff = await staffService.create(req.body);
@@ -48,7 +49,7 @@ class StaffController {
 
   /**
    * PUT /staff/:id
-   * Cập nhật thông tin nhân viên
+   * Update staff information
    */
   async update(req, res) {
     const { id } = req.params;
@@ -58,7 +59,7 @@ class StaffController {
 
   /**
    * PATCH /staff/:id/status
-   * Kích hoạt/vô hiệu hóa nhân viên
+   * Update staff status (working/off_duty)
    */
   async updateStatus(req, res) {
     const { id } = req.params;
@@ -69,12 +70,23 @@ class StaffController {
 
   /**
    * PUT /staff/:id/permissions
-   * Cập nhật quyền hạn nhân viên
+   * Update staff position/permissions
    */
   async updatePermissions(req, res) {
     const { id } = req.params;
     const staff = await staffService.updatePermissions(id, req.body);
     return successResponse(res, staff, 'Staff permissions updated successfully');
+  }
+
+  /**
+   * DELETE /staff/:id
+   * Delete staff (soft delete by setting status to off_duty)
+   */
+  async delete(req, res) {
+    const { id } = req.params;
+    const result = await staffService.delete(id);
+
+    return successResponse(res, result, 'Staff deleted successfully');
   }
 }
 
@@ -89,4 +101,5 @@ module.exports = {
   updatePermissions: asyncHandler((req, res) =>
     controller.updatePermissions(req, res)
   ),
+  delete: asyncHandler((req, res) => controller.delete(req, res)),
 };

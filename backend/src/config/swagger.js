@@ -106,6 +106,11 @@ Authorization: Bearer <your_access_token>
         description:
           'Vị trí nhân viên (admin, manager, agent, legal_officer, accountant)',
       },
+      StaffRole: {
+        type: 'string',
+        enum: ['manager', 'agent', 'legal_officer', 'accountant'],
+        description: 'Vị trí nhân viên (per context_design.md)',
+      },
       StaffStatus: {
         type: 'string',
         enum: ['working', 'off_duty'],

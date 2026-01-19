@@ -2,7 +2,11 @@
  * Client Controller - Quản lý khách hàng
  */
 
-const { successResponse } = require('../utils/response.util');
+const {
+  successResponse,
+  errorResponse,
+  successResponseWithPagination,
+} = require('../utils/response.util');
 const { HTTP_STATUS } = require('../config/constants');
 const { asyncHandler } = require('../middlewares/error.middleware');
 const clientService = require('../services/client.service');
