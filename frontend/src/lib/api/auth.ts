@@ -73,7 +73,11 @@ export async function changePassword(data: {
   current_password: string;
   new_password: string;
   confirm_password: string;
-}): Promise<{ success: boolean; message: string }> {
+}): Promise<{
+  success: boolean;
+  message: string;
+  data?: { message?: string };
+}> {
   const token = getAuthToken();
   return put("/auth/change-password", data, token);
 }

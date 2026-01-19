@@ -16,32 +16,34 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { PartnerFormData } from "@/app/partners/page";
+import type { ClientCategory, ClientFormData, ClientStatus } from "./types";
 
-interface AddPartnerFormProps {
+interface AddClientFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: PartnerFormData) => void;
+  onSubmit: (data: ClientFormData) => Promise<void>;
   staffMembers: string[];
 }
 
-export function AddPartnerForm({
+export function AddClientForm({
   isOpen,
   onClose,
   onSubmit,
   staffMembers,
-}: AddPartnerFormProps) {
-  const [formData, setFormData] = useState<PartnerFormData>({
+}: AddClientFormProps) {
+  const [formData, setFormData] = useState<ClientFormData>({
     name: "",
     email: "",
     phone: "",
     address: "",
-    partnerType: "customer",
+    clientType: "customer",
     assignedStaff: "",
     status: "Active",
   });
 
-  const [errors, setErrors] = useState<Partial<PartnerFormData>>({});
+  const [errors, setErrors] = useState<Partial<ClientFormData>>({});
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -49,7 +51,8 @@ export function AddPartnerForm({
       ...prev,
       [name]: value,
     }));
-    if (errors[name as keyof PartnerFormData]) {
+
+    if (errors[name as keyof ClientFormData]) {
       setErrors((prev) => ({
         ...prev,
         [name]: "",
@@ -65,45 +68,51 @@ export function AddPartnerForm({
   };
 
   const validateForm = (): boolean => {
-    const newErrors: Partial<PartnerFormData> = {};
+    const newErrors: Partial<ClientFormData> = {};
 
     if (!formData.name.trim()) {
-      newErrors.name = "Partner name is required";
+      newErrors.name = "Client name is required";
     }
-    if (!formData.email.trim()) {
-      newErrors.email = "Email is required";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+
+    if (
+      formData.email.trim() &&
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)
+    ) {
       newErrors.email = "Invalid email format";
-    }
-    if (!formData.phone.trim()) {
-      newErrors.phone = "Phone number is required";
-    }
-    if (!formData.address.trim()) {
-      newErrors.address = "Address is required";
-    }
-    if (!formData.assignedStaff) {
-      newErrors.assignedStaff = "Assigned staff is required";
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (validateForm()) {
-      onSubmit(formData);
+    if (isSubmitting) return;
+    setSubmitError(null);
+
+    if (!validateForm()) return;
+
+    setIsSubmitting(true);
+    try {
+      await onSubmit(formData);
       setFormData({
         name: "",
         email: "",
         phone: "",
         address: "",
-        partnerType: "customer",
+        clientType: "customer",
         assignedStaff: "",
         status: "Active",
       });
+      setErrors({});
       onClose();
+    } catch (err) {
+      setSubmitError(
+        err instanceof Error ? err.message : "Failed to create client",
+      );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -118,7 +127,10 @@ export function AddPartnerForm({
           onSubmit={handleSubmit}
           className="space-y-6 max-h-[70vh] overflow-y-auto"
         >
-          {/* Partner Name */}
+          {submitError && (
+            <div className="text-sm text-red-600">{submitError}</div>
+          )}
+
           <div className="space-y-2">
             <Label htmlFor="name">Client Name *</Label>
             <Input
@@ -134,9 +146,8 @@ export function AddPartnerForm({
             )}
           </div>
 
-          {/* Email */}
           <div className="space-y-2">
-            <Label htmlFor="email">Email *</Label>
+            <Label htmlFor="email">Email</Label>
             <Input
               id="email"
               name="email"
@@ -151,9 +162,8 @@ export function AddPartnerForm({
             )}
           </div>
 
-          {/* Phone */}
           <div className="space-y-2">
-            <Label htmlFor="phone">Phone *</Label>
+            <Label htmlFor="phone">Phone</Label>
             <Input
               id="phone"
               name="phone"
@@ -167,9 +177,8 @@ export function AddPartnerForm({
             )}
           </div>
 
-          {/* Address */}
           <div className="space-y-2">
-            <Label htmlFor="address">Address *</Label>
+            <Label htmlFor="address">Address</Label>
             <Input
               id="address"
               name="address"
@@ -183,13 +192,12 @@ export function AddPartnerForm({
             )}
           </div>
 
-          {/* Partner Type */}
           <div className="space-y-2">
-            <Label htmlFor="partnerType">Client Type *</Label>
+            <Label htmlFor="clientType">Client Type *</Label>
             <Select
-              value={formData.partnerType}
+              value={formData.clientType}
               onValueChange={(value) =>
-                handleSelectChange("partnerType", value as "owner" | "customer")
+                handleSelectChange("clientType", value as ClientCategory)
               }
             >
               <SelectTrigger>
@@ -202,14 +210,14 @@ export function AddPartnerForm({
             </Select>
           </div>
 
-          {/* Assigned Staff */}
           <div className="space-y-2">
-            <Label htmlFor="assignedStaff">Assigned Staff *</Label>
+            <Label htmlFor="assignedStaff">Assigned Staff</Label>
             <Select
               value={formData.assignedStaff}
               onValueChange={(value) =>
                 handleSelectChange("assignedStaff", value)
               }
+              disabled={staffMembers.length === 0}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select staff member" />
@@ -222,18 +230,14 @@ export function AddPartnerForm({
                 ))}
               </SelectContent>
             </Select>
-            {errors.assignedStaff && (
-              <p className="text-red-500 text-xs">{errors.assignedStaff}</p>
-            )}
           </div>
 
-          {/* Status */}
           <div className="space-y-2">
             <Label htmlFor="status">Status</Label>
             <Select
               value={formData.status}
               onValueChange={(value) =>
-                handleSelectChange("status", value as "Active" | "Inactive")
+                handleSelectChange("status", value as ClientStatus)
               }
             >
               <SelectTrigger>
@@ -245,14 +249,21 @@ export function AddPartnerForm({
               </SelectContent>
             </Select>
           </div>
-        </form>
 
-        <DialogFooter className="gap-2">
-          <Button variant="outline" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button onClick={handleSubmit}>Add Client</Button>
-        </DialogFooter>
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              onClick={onClose}
+              type="button"
+              disabled={isSubmitting}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? "Adding…" : "Add Client"}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );
