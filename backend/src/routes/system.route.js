@@ -26,11 +26,11 @@ router.get('/terms', authenticate, systemController.getTerms);
 // ============================================================================
 
 /**
- * @route   GET /api/v1/debts
- * @desc    Get outstanding debts
- * @access  Private
- */
-router.get('/debts', authenticate, voucherController.getDebts);
+//  * @route   GET /api/v1/debts
+//  * @desc    Get outstanding debts
+//  * @access  Private
+//  */
+// router.get('/debts', authenticate, voucherController.getDebts);
 
 /**
  * @route   GET /api/v1/logs

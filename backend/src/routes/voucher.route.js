@@ -1,62 +1,127 @@
-/**
- * Voucher Routes
- */
+// src/routes/voucher.routes.js
 
 const express = require('express');
 const router = express.Router();
-
 const voucherController = require('../controllers/voucher.controller');
 const { authenticate, authorize } = require('../middlewares/auth.middleware');
-const { STAFF_ROLES } = require('../config/constants');
+const {
+  validateListVouchers,
+  validateCreateVoucher,
+  validateUpdateVoucher,
+  validateStats,
+  validateIdParam,
+  validateContractIdParam
+} = require('../validators/voucher.validator');
 
-// All routes require authentication
+/**
+ * Tất cả routes đều yêu cầu authentication
+ */
 router.use(authenticate);
 
 /**
- * @route   GET /api/v1/vouchers
- * @desc    Get all vouchers
- * @access  Private
+ * Tất cả routes chỉ cho phép manager và accountant
  */
-router.get('/', voucherController.getAll);
+router.use(authorize('manager', 'accountant'));
+
+/**
+ * @route   GET /api/v1/vouchers/stats
+ * @desc    Lấy thống kê vouchers
+ * @access  Manager, Accountant
+ */
+router.get(
+  '/stats',
+  validateStats,
+  voucherController.getStats
+);
+
+/**
+ * @route   GET /api/v1/vouchers/by-contract/:contractId
+ * @desc    Lấy vouchers theo contract
+ * @access  Manager, Accountant
+ */
+router.get(
+  '/by-contract/:contractId',
+  validateContractIdParam,
+  voucherController.getVouchersByContract
+);
+
+/**
+ * @route   GET /api/v1/vouchers
+ * @desc    Lấy danh sách vouchers
+ * @access  Manager, Accountant
+ */
+router.get(
+  '/',
+  validateListVouchers,
+  voucherController.getVouchers
+);
 
 /**
  * @route   GET /api/v1/vouchers/:id
- * @desc    Get voucher by ID
- * @access  Private
+ * @desc    Lấy chi tiết voucher
+ * @access  Manager, Accountant
  */
-router.get('/:id', voucherController.getById);
+router.get(
+  '/:id',
+  validateIdParam,
+  voucherController.getVoucherById
+);
 
 /**
  * @route   POST /api/v1/vouchers
- * @desc    Create new voucher
- * @access  Private (Accountant/Staff only)
+ * @desc    Tạo voucher mới
+ * @access  Manager, Accountant
  */
 router.post(
   '/',
-  authorize([STAFF_ROLES.STAFF, STAFF_ROLES.MANAGER, STAFF_ROLES.ADMIN]),
-  voucherController.create
+  validateCreateVoucher,
+  voucherController.createVoucher
 );
 
 /**
  * @route   PUT /api/v1/vouchers/:id
- * @desc    Update voucher
- * @access  Private (Accountant/Staff only)
+ * @desc    Cập nhật voucher
+ * @access  Manager, Accountant
  */
 router.put(
   '/:id',
-  authorize([STAFF_ROLES.STAFF, STAFF_ROLES.MANAGER, STAFF_ROLES.ADMIN]),
-  voucherController.update
+  validateIdParam,
+  validateUpdateVoucher,
+  voucherController.updateVoucher
+);
+
+/**
+ * @route   DELETE /api/v1/vouchers/:id
+ * @desc    Xóa voucher
+ * @access  Manager only
+ */
+router.delete(
+  '/:id',
+  authorize('manager'), // Override to manager only
+  validateIdParam,
+  voucherController.deleteVoucher
 );
 
 /**
  * @route   PATCH /api/v1/vouchers/:id/confirm
- * @desc    Confirm voucher
- * @access  Private (Accountant/Staff only)
+ * @desc    Xác nhận voucher
+ * @access  Manager, Accountant
  */
 router.patch(
   '/:id/confirm',
-  authorize([STAFF_ROLES.STAFF, STAFF_ROLES.MANAGER, STAFF_ROLES.ADMIN]),
-  voucherController.confirm
+  validateIdParam,
+  voucherController.confirmVoucher
+);
+
+/**
+ * @route   POST /api/v1/vouchers/:id/attachments
+ * @desc    Thêm attachments cho voucher
+ * @access  Manager, Accountant
+ */
+router.post(
+  '/:id/attachments',
+  validateIdParam,
+  voucherController.addAttachments
 );
 
 module.exports = router;
