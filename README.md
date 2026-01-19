@@ -12,7 +12,7 @@
 
 > **Đề tài:** Phần mềm quản lý văn phòng bất động sản  
 > **Phương pháp phát triển:** Lập trình hướng đối tượng (Object-Oriented Programming)  
-> **Môn học:** SE100 - Phần mềm hướng đối tượng
+> **Môn học:** SE100 - Phương pháp phát triển phần mềm hướng đối tượng
 
 ---
 
