@@ -2,23 +2,23 @@
 
 /**
  * Voucher Model - Phiếu thu/chi
- * 
+ *
  * Database table: voucher
  */
 
 const VOUCHER_TYPE = {
-  RECEIPT: 'receipt',   // Phiếu thu
-  PAYMENT: 'payment'    // Phiếu chi
+  RECEIPT: 'receipt', // Phiếu thu
+  PAYMENT: 'payment', // Phiếu chi
 };
 
 const VOUCHER_STATUS = {
-  CREATED: 'created',     // Mới tạo
-  CONFIRMED: 'confirmed'  // Đã xác nhận
+  CREATED: 'created', // Mới tạo
+  CONFIRMED: 'confirmed', // Đã xác nhận
 };
 
 const PAYMENT_METHOD = {
   BANK_TRANSFER: 'bank_transfer',
-  CASH: 'cash'
+  CASH: 'cash',
 };
 
 /**
@@ -48,7 +48,7 @@ const getTypeLabel = (type) => {
 const getStatusLabel = (status) => {
   const labels = {
     [VOUCHER_STATUS.CREATED]: 'Mới tạo',
-    [VOUCHER_STATUS.CONFIRMED]: 'Đã xác nhận'
+    [VOUCHER_STATUS.CONFIRMED]: 'Đã xác nhận',
   };
   return labels[status] || status;
 };
@@ -59,7 +59,7 @@ const getStatusLabel = (status) => {
 const getPaymentMethodLabel = (method) => {
   const labels = {
     [PAYMENT_METHOD.BANK_TRANSFER]: 'Chuyển khoản',
-    [PAYMENT_METHOD.CASH]: 'Tiền mặt'
+    [PAYMENT_METHOD.CASH]: 'Tiền mặt',
   };
   return labels[method] || method;
 };
@@ -71,5 +71,5 @@ module.exports = {
   generateVoucherNo,
   getTypeLabel,
   getStatusLabel,
-  getPaymentMethodLabel
+  getPaymentMethodLabel,
 };

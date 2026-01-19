@@ -230,30 +230,32 @@ const asyncHandler = (fn) => (req, res, next) => {
 /**
  * Validate request middleware factory
  */
-const validate = (schema, property = 'body') => (req, res, next) => {
-  const { error, value } = schema.validate(req[property], {
-    abortEarly: false,
-    stripUnknown: true,
-  });
+const validate =
+  (schema, property = 'body') =>
+  (req, res, next) => {
+    const { error, value } = schema.validate(req[property], {
+      abortEarly: false,
+      stripUnknown: true,
+    });
 
-  if (error) {
-    const details = error.details.map((d) => ({
-      field: d.path.join('.'),
-      message: d.message,
-    }));
-    return next(
-      new ApiError(
-        HTTP_STATUS.BAD_REQUEST,
-        'Dữ liệu không hợp lệ',
-        'VALIDATION_ERROR',
-        details
-      )
-    );
-  }
+    if (error) {
+      const details = error.details.map((d) => ({
+        field: d.path.join('.'),
+        message: d.message,
+      }));
+      return next(
+        new ApiError(
+          HTTP_STATUS.BAD_REQUEST,
+          'Dữ liệu không hợp lệ',
+          'VALIDATION_ERROR',
+          details
+        )
+      );
+    }
 
-  req[property] = value;
-  next();
-};
+    req[property] = value;
+    next();
+  };
 
 /**
  * Handle uncaught exceptions and unhandled rejections

@@ -11,7 +11,9 @@ class VoucherController {
   async getVouchers(req, res, next) {
     try {
       const filters = {
-        contractId: req.query.contractId ? parseInt(req.query.contractId) : null,
+        contractId: req.query.contractId
+          ? parseInt(req.query.contractId)
+          : null,
         type: req.query.type || null,
         status: req.query.status || null,
         paymentMethod: req.query.paymentMethod || null,
@@ -21,14 +23,14 @@ class VoucherController {
         sortBy: req.query.sortBy || 'created_at',
         sortOrder: req.query.sortOrder || 'desc',
         page: parseInt(req.query.page) || 1,
-        limit: parseInt(req.query.limit) || 20
+        limit: parseInt(req.query.limit) || 20,
       };
 
       const data = await voucherService.getVouchers(filters);
 
       res.json({
         success: true,
-        data
+        data,
       });
     } catch (error) {
       next(error);
@@ -46,7 +48,7 @@ class VoucherController {
 
       res.json({
         success: true,
-        data
+        data,
       });
     } catch (error) {
       next(error);
@@ -59,7 +61,7 @@ class VoucherController {
    */
   async createVoucher(req, res, next) {
     try {
-       console.log('req.user:', req.user);  // ← Thêm dòng này
+      console.log('req.user:', req.user); // ← Thêm dòng này
       const staffId = req.user.staff_id;
       const data = await voucherService.createVoucher(req.body, staffId);
 
@@ -72,14 +74,14 @@ class VoucherController {
         details: {
           type: req.body.type,
           amount: req.body.amount,
-          contractId: req.body.contractId
+          contractId: req.body.contractId,
         },
-        ipAddress: req.ip
+        ipAddress: req.ip,
       });
 
       res.status(201).json({
         success: true,
-        data
+        data,
       });
     } catch (error) {
       next(error);
@@ -102,12 +104,12 @@ class VoucherController {
         targetType: 'voucher',
         targetId: id,
         details: req.body,
-        ipAddress: req.ip
+        ipAddress: req.ip,
       });
 
       res.json({
         success: true,
-        data
+        data,
       });
     } catch (error) {
       next(error);
@@ -130,12 +132,12 @@ class VoucherController {
         targetType: 'voucher',
         targetId: id,
         details: {},
-        ipAddress: req.ip
+        ipAddress: req.ip,
       });
 
       res.json({
         success: true,
-        data
+        data,
       });
     } catch (error) {
       next(error);
@@ -158,12 +160,12 @@ class VoucherController {
         targetType: 'voucher',
         targetId: id,
         details: { from: 'created', to: 'confirmed' },
-        ipAddress: req.ip
+        ipAddress: req.ip,
       });
 
       res.json({
         success: true,
-        data
+        data,
       });
     } catch (error) {
       next(error);
@@ -179,14 +181,16 @@ class VoucherController {
       const filters = {
         fromDate: req.query.fromDate || null,
         toDate: req.query.toDate || null,
-        contractId: req.query.contractId ? parseInt(req.query.contractId) : null
+        contractId: req.query.contractId
+          ? parseInt(req.query.contractId)
+          : null,
       };
 
       const data = await voucherService.getStats(filters);
 
       res.json({
         success: true,
-        data
+        data,
       });
     } catch (error) {
       next(error);
@@ -204,7 +208,7 @@ class VoucherController {
 
       res.json({
         success: true,
-        data
+        data,
       });
     } catch (error) {
       next(error);
@@ -224,7 +228,7 @@ class VoucherController {
 
       res.json({
         success: true,
-        data
+        data,
       });
     } catch (error) {
       next(error);

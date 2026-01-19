@@ -11,18 +11,26 @@ const listVouchersSchema = Joi.object({
   contractId: Joi.number().integer().positive().optional().allow('', null),
   type: Joi.string().valid('receipt', 'payment').optional().allow('', null),
   status: Joi.string().valid('created', 'confirmed').optional().allow('', null),
-  paymentMethod: Joi.string().valid('bank_transfer', 'cash').optional().allow('', null),
+  paymentMethod: Joi.string()
+    .valid('bank_transfer', 'cash')
+    .optional()
+    .allow('', null),
   fromDate: Joi.date().iso().optional().allow('', null),
-  toDate: Joi.date().iso().optional().allow('', null)
+  toDate: Joi.date()
+    .iso()
+    .optional()
+    .allow('', null)
     .when('fromDate', {
       is: Joi.exist(),
       then: Joi.date().min(Joi.ref('fromDate')).messages({
-        'date.min': 'toDate phải sau fromDate'
-      })
+        'date.min': 'toDate phải sau fromDate',
+      }),
     }),
   search: Joi.string().max(100).optional().allow('', null),
-  sortBy: Joi.string().valid('payment_time', 'amount', 'created_at').default('created_at'),
-  sortOrder: Joi.string().valid('asc', 'desc').default('desc')
+  sortBy: Joi.string()
+    .valid('payment_time', 'amount', 'created_at')
+    .default('created_at'),
+  sortOrder: Joi.string().valid('asc', 'desc').default('desc'),
 });
 
 /**
@@ -32,30 +40,33 @@ const createVoucherSchema = Joi.object({
   contractId: Joi.number().integer().positive().required().messages({
     'any.required': 'contractId là bắt buộc',
     'number.base': 'contractId phải là số',
-    'number.positive': 'contractId phải là số dương'
+    'number.positive': 'contractId phải là số dương',
   }),
   type: Joi.string().valid('receipt', 'payment').required().messages({
     'any.required': 'type là bắt buộc',
-    'any.only': 'type phải là receipt hoặc payment'
+    'any.only': 'type phải là receipt hoặc payment',
   }),
   party: Joi.string().max(200).required().messages({
     'any.required': 'party là bắt buộc',
-    'string.max': 'party không được quá 200 ký tự'
+    'string.max': 'party không được quá 200 ký tự',
   }),
   paymentTime: Joi.date().iso().required().messages({
     'any.required': 'paymentTime là bắt buộc',
-    'date.format': 'paymentTime phải đúng định dạng ISO'
+    'date.format': 'paymentTime phải đúng định dạng ISO',
   }),
   amount: Joi.number().positive().required().messages({
     'any.required': 'amount là bắt buộc',
-    'number.positive': 'amount phải lớn hơn 0'
+    'number.positive': 'amount phải lớn hơn 0',
   }),
-  paymentMethod: Joi.string().valid('bank_transfer', 'cash').required().messages({
-    'any.required': 'paymentMethod là bắt buộc',
-    'any.only': 'paymentMethod phải là bank_transfer hoặc cash'
-  }),
+  paymentMethod: Joi.string()
+    .valid('bank_transfer', 'cash')
+    .required()
+    .messages({
+      'any.required': 'paymentMethod là bắt buộc',
+      'any.only': 'paymentMethod phải là bank_transfer hoặc cash',
+    }),
   paymentDescription: Joi.string().max(500).optional().allow('', null),
-  attachments: Joi.array().items(Joi.number().integer().positive()).optional()
+  attachments: Joi.array().items(Joi.number().integer().positive()).optional(),
 });
 
 /**
@@ -65,14 +76,16 @@ const updateVoucherSchema = Joi.object({
   party: Joi.string().max(200).optional(),
   paymentTime: Joi.date().iso().optional(),
   amount: Joi.number().positive().optional().messages({
-    'number.positive': 'amount phải lớn hơn 0'
+    'number.positive': 'amount phải lớn hơn 0',
   }),
   paymentMethod: Joi.string().valid('bank_transfer', 'cash').optional(),
   paymentDescription: Joi.string().max(500).optional().allow('', null),
-  attachments: Joi.array().items(Joi.number().integer().positive()).optional()
-}).min(1).messages({
-  'object.min': 'Phải có ít nhất một trường để cập nhật'
-});
+  attachments: Joi.array().items(Joi.number().integer().positive()).optional(),
+})
+  .min(1)
+  .messages({
+    'object.min': 'Phải có ít nhất một trường để cập nhật',
+  });
 
 /**
  * Schema cho thống kê
@@ -80,7 +93,7 @@ const updateVoucherSchema = Joi.object({
 const statsSchema = Joi.object({
   fromDate: Joi.date().iso().optional().allow('', null),
   toDate: Joi.date().iso().optional().allow('', null),
-  contractId: Joi.number().integer().positive().optional().allow('', null)
+  contractId: Joi.number().integer().positive().optional().allow('', null),
 });
 
 /**
@@ -90,8 +103,8 @@ const idParamSchema = Joi.object({
   id: Joi.number().integer().positive().required().messages({
     'any.required': 'ID là bắt buộc',
     'number.base': 'ID phải là số',
-    'number.positive': 'ID phải là số dương'
-  })
+    'number.positive': 'ID phải là số dương',
+  }),
 });
 
 /**
@@ -101,8 +114,8 @@ const contractIdParamSchema = Joi.object({
   contractId: Joi.number().integer().positive().required().messages({
     'any.required': 'contractId là bắt buộc',
     'number.base': 'contractId phải là số',
-    'number.positive': 'contractId phải là số dương'
-  })
+    'number.positive': 'contractId phải là số dương',
+  }),
 });
 
 /**
@@ -110,18 +123,22 @@ const contractIdParamSchema = Joi.object({
  */
 const validate = (schema, property = 'query') => {
   return (req, res, next) => {
-    const dataToValidate = property === 'params' ? req.params : 
-                          property === 'body' ? req.body : req.query;
-    
+    const dataToValidate =
+      property === 'params'
+        ? req.params
+        : property === 'body'
+          ? req.body
+          : req.query;
+
     const { error, value } = schema.validate(dataToValidate, {
       abortEarly: false,
-      stripUnknown: true
+      stripUnknown: true,
     });
 
     if (error) {
-      const errors = error.details.map(detail => ({
+      const errors = error.details.map((detail) => ({
         field: detail.path.join('.'),
-        message: detail.message
+        message: detail.message,
       }));
 
       return res.status(400).json({
@@ -129,8 +146,8 @@ const validate = (schema, property = 'query') => {
         error: {
           code: 'VALIDATION_ERROR',
           message: 'Dữ liệu không hợp lệ',
-          details: errors
-        }
+          details: errors,
+        },
       });
     }
 
@@ -153,5 +170,5 @@ module.exports = {
   validateUpdateVoucher: validate(updateVoucherSchema, 'body'),
   validateStats: validate(statsSchema, 'query'),
   validateIdParam: validate(idParamSchema, 'params'),
-  validateContractIdParam: validate(contractIdParamSchema, 'params')
+  validateContractIdParam: validate(contractIdParamSchema, 'params'),
 };
