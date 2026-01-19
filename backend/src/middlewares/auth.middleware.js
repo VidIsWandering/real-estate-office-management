@@ -34,6 +34,8 @@ const authenticate = (req, res, next) => {
       position: decoded.position,
     };
 
+    console.log(req.user);
+
     next();
   } catch (error) {
     return unauthorizedResponse(res, error.message);
