@@ -89,6 +89,10 @@ const transactions: Transaction[] = [
   },
 ];
 
+interface TransactionsTableProps {
+  onSelect: (id: string) => void;
+}
+
 export function TransactionsTable() {
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<Transaction | null>(null);

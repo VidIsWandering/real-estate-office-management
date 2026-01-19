@@ -6,12 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export interface AccountFormData {
-  name: string;
-  username: string;
-  password: string;
+  full_name: string;
   email: string;
-  phone: string;
-  status: "Active" | "Inactive";
+  phone_number: string;
+  address: string;
 }
 
 interface Props {
@@ -26,11 +24,10 @@ const editableFields: Array<{
   disabled?: boolean;
   type?: string;
 }> = [
-  { key: "name", label: "Name" },
-  { key: "username", label: "Username", disabled: true },
-  { key: "password", label: "Password", type: "password" },
+  { key: "full_name", label: "Full Name" },
   { key: "email", label: "Email", type: "email" },
-  { key: "phone", label: "Phone" },
+  { key: "phone_number", label: "Phone Number" },
+  { key: "address", label: "Address" },
 ];
 
 export function AccountEditForm({ initialData, onSubmit, onCancel }: Props) {
