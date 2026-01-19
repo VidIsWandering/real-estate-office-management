@@ -1,6 +1,6 @@
 // src/repositories/voucher.repository.js
 
-const {db:pool} = require('../config/database');
+const { db: pool } = require('../config/database');
 
 class VoucherRepository {
   /**
@@ -17,13 +17,15 @@ class VoucherRepository {
     sortBy = 'payment_time',
     sortOrder = 'desc',
     page = 1,
-    limit = 20
+    limit = 20,
   }) {
     const offset = (page - 1) * limit;
 
     // Build ORDER BY clause
     const validSortFields = ['payment_time', 'amount', 'id'];
-    const sortField = validSortFields.includes(sortBy) ? sortBy : 'payment_time';
+    const sortField = validSortFields.includes(sortBy)
+      ? sortBy
+      : 'payment_time';
     const order = sortOrder.toLowerCase() === 'asc' ? 'ASC' : 'DESC';
 
     const query = `
@@ -81,17 +83,17 @@ class VoucherRepository {
       paymentMethod || null,
       fromDate || null,
       toDate || null,
-      search || null
+      search || null,
     ];
 
     const [itemsResult, countResult] = await Promise.all([
       pool.query(query, [...params, limit, offset]),
-      pool.query(countQuery, params)
+      pool.query(countQuery, params),
     ]);
 
     return {
       items: itemsResult.rows,
-      total: parseInt(countResult.rows[0].total)
+      total: parseInt(countResult.rows[0].total),
     };
   }
 
@@ -149,7 +151,7 @@ class VoucherRepository {
     paymentMethod,
     paymentDescription,
     attachments,
-    staffId
+    staffId,
   }) {
     const query = `
       INSERT INTO voucher (
@@ -169,7 +171,7 @@ class VoucherRepository {
       paymentMethod,
       paymentDescription || null,
       attachments || null,
-      staffId
+      staffId,
     ]);
 
     return result.rows[0];
@@ -178,14 +180,17 @@ class VoucherRepository {
   /**
    * Cập nhật voucher
    */
-  async update(id, {
-    party,
-    paymentTime,
-    amount,
-    paymentMethod,
-    paymentDescription,
-    attachments
-  }) {
+  async update(
+    id,
+    {
+      party,
+      paymentTime,
+      amount,
+      paymentMethod,
+      paymentDescription,
+      attachments,
+    }
+  ) {
     const query = `
       UPDATE voucher 
       SET 
@@ -206,7 +211,7 @@ class VoucherRepository {
       amount || null,
       paymentMethod || null,
       paymentDescription,
-      attachments || null
+      attachments || null,
     ]);
 
     return result.rows[0] || null;
@@ -260,7 +265,10 @@ class VoucherRepository {
             remaining_amount = total_value - (paid_amount + $1)
           WHERE id = $2
         `;
-        await client.query(updateContractQuery, [voucher.amount, voucher.contract_id]);
+        await client.query(updateContractQuery, [
+          voucher.amount,
+          voucher.contract_id,
+        ]);
       }
 
       await client.query('COMMIT');
@@ -312,12 +320,12 @@ class VoucherRepository {
 
     const [summaryResult, byMonthResult] = await Promise.all([
       pool.query(summaryQuery, params),
-      pool.query(byMonthQuery, params)
+      pool.query(byMonthQuery, params),
     ]);
 
     return {
       summary: summaryResult.rows[0],
-      byMonth: byMonthResult.rows
+      byMonth: byMonthResult.rows,
     };
   }
 
@@ -363,13 +371,13 @@ class VoucherRepository {
     const [vouchersResult, contractResult, summaryResult] = await Promise.all([
       pool.query(vouchersQuery, [contractId]),
       pool.query(contractQuery, [contractId]),
-      pool.query(summaryQuery, [contractId])
+      pool.query(summaryQuery, [contractId]),
     ]);
 
     return {
       contract: contractResult.rows[0] || null,
       vouchers: vouchersResult.rows,
-      summary: summaryResult.rows[0]
+      summary: summaryResult.rows[0],
     };
   }
 

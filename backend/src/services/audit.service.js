@@ -27,7 +27,7 @@ class AuditService {
         targetType,
         targetId,
         JSON.stringify(details || {}),
-        ipAddress || null
+        ipAddress || null,
       ]);
 
       return result.rows[0];

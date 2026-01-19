@@ -20,9 +20,13 @@ class VoucherService {
 
         return {
           id: item.id,
-          voucherNo: generateVoucherNo(item.type, item.id, new Date(item.payment_time)),
+          voucherNo: generateVoucherNo(
+            item.type,
+            item.id,
+            new Date(item.payment_time)
+          ),
           contract: {
-            id: item.contract_id
+            id: item.contract_id,
           },
           type: item.type,
           party: item.party,
@@ -33,9 +37,9 @@ class VoucherService {
           attachments,
           createdBy: {
             id: item.staff_id,
-            fullName: item.staff_name
+            fullName: item.staff_name,
           },
-          status: item.status
+          status: item.status,
         };
       })
     );
@@ -46,8 +50,8 @@ class VoucherService {
         page: filters.page || 1,
         limit: filters.limit || 20,
         totalItems: total,
-        totalPages: Math.ceil(total / (filters.limit || 20))
-      }
+        totalPages: Math.ceil(total / (filters.limit || 20)),
+      },
     };
   }
 
@@ -67,7 +71,11 @@ class VoucherService {
 
     return {
       id: voucher.id,
-      voucherNo: generateVoucherNo(voucher.type, voucher.id, new Date(voucher.payment_time)),
+      voucherNo: generateVoucherNo(
+        voucher.type,
+        voucher.id,
+        new Date(voucher.payment_time)
+      ),
       contract: {
         id: voucher.contract_id,
         contractNo: `HD-${new Date(voucher.payment_time).getFullYear()}-${String(voucher.contract_id).padStart(3, '0')}`,
@@ -78,12 +86,12 @@ class VoucherService {
         status: voucher.contract_status,
         partyA: {
           id: voucher.party_a_id,
-          fullName: voucher.party_a_name
+          fullName: voucher.party_a_name,
         },
         partyB: {
           id: voucher.party_b_id,
-          fullName: voucher.party_b_name
-        }
+          fullName: voucher.party_b_name,
+        },
       },
       type: voucher.type,
       party: voucher.party,
@@ -95,9 +103,9 @@ class VoucherService {
       createdBy: {
         id: voucher.staff_id,
         fullName: voucher.staff_name,
-        email: voucher.staff_email
+        email: voucher.staff_email,
       },
-      status: voucher.status
+      status: voucher.status,
     };
   }
 
@@ -106,7 +114,9 @@ class VoucherService {
    */
   async createVoucher(data, staffId) {
     // Validate contract exists
-    const contract = await voucherRepository.checkContractExists(data.contractId);
+    const contract = await voucherRepository.checkContractExists(
+      data.contractId
+    );
     if (!contract) {
       throw new ApiError(400, 'Hợp đồng không tồn tại hoặc đã bị hủy');
     }
@@ -119,15 +129,20 @@ class VoucherService {
     // Create voucher
     const voucher = await voucherRepository.create({
       ...data,
-      staffId
+      staffId,
     });
 
     return {
       id: voucher.id,
-      voucherNo: generateVoucherNo(voucher.type, voucher.id, new Date(voucher.payment_time)),
-      message: voucher.type === VOUCHER_TYPE.RECEIPT
-        ? 'Tạo phiếu thu thành công'
-        : 'Tạo phiếu chi thành công'
+      voucherNo: generateVoucherNo(
+        voucher.type,
+        voucher.id,
+        new Date(voucher.payment_time)
+      ),
+      message:
+        voucher.type === VOUCHER_TYPE.RECEIPT
+          ? 'Tạo phiếu thu thành công'
+          : 'Tạo phiếu chi thành công',
     };
   }
 
@@ -158,7 +173,7 @@ class VoucherService {
 
     return {
       id: updated.id,
-      message: 'Cập nhật phiếu thành công'
+      message: 'Cập nhật phiếu thành công',
     };
   }
 
@@ -183,7 +198,7 @@ class VoucherService {
     }
 
     return {
-      message: 'Xóa phiếu thành công'
+      message: 'Xóa phiếu thành công',
     };
   }
 
@@ -210,7 +225,7 @@ class VoucherService {
     return {
       id: confirmed.id,
       status: confirmed.status,
-      message: 'Xác nhận phiếu thành công'
+      message: 'Xác nhận phiếu thành công',
     };
   }
 
@@ -223,7 +238,8 @@ class VoucherService {
     return {
       totalReceipts: parseFloat(summary.total_receipts),
       totalPayments: parseFloat(summary.total_payments),
-      netAmount: parseFloat(summary.total_receipts) - parseFloat(summary.total_payments),
+      netAmount:
+        parseFloat(summary.total_receipts) - parseFloat(summary.total_payments),
       receiptCount: parseInt(summary.receipt_count),
       paymentCount: parseInt(summary.payment_count),
       confirmedCount: parseInt(summary.confirmed_count),
@@ -231,8 +247,8 @@ class VoucherService {
       byMonth: byMonth.map((m) => ({
         month: m.month,
         receipts: parseFloat(m.receipts),
-        payments: parseFloat(m.payments)
-      }))
+        payments: parseFloat(m.payments),
+      })),
     };
   }
 
@@ -240,7 +256,8 @@ class VoucherService {
    * Lấy vouchers theo contract
    */
   async getVouchersByContract(contractId) {
-    const { contract, vouchers, summary } = await voucherRepository.findByContractId(contractId);
+    const { contract, vouchers, summary } =
+      await voucherRepository.findByContractId(contractId);
 
     if (!contract) {
       throw new ApiError(404, 'Không tìm thấy hợp đồng');
@@ -254,7 +271,7 @@ class VoucherService {
         totalValue: parseFloat(contract.total_value),
         paidAmount: parseFloat(contract.paid_amount),
         remainingAmount: parseFloat(contract.remaining_amount),
-        status: contract.status
+        status: contract.status,
       },
       vouchers: vouchers.map((v) => ({
         id: v.id,
@@ -264,13 +281,13 @@ class VoucherService {
         amount: parseFloat(v.amount),
         paymentTime: v.payment_time,
         paymentMethod: v.payment_method,
-        status: v.status
+        status: v.status,
       })),
       summary: {
         totalReceipts: parseFloat(summary.total_receipts),
         totalPayments: parseFloat(summary.total_payments),
-        voucherCount: parseInt(summary.voucher_count)
-      }
+        voucherCount: parseInt(summary.voucher_count),
+      },
     };
   }
 
@@ -287,7 +304,10 @@ class VoucherService {
     const currentAttachments = existing.attachments || [];
     const mergedAttachments = [...new Set([...currentAttachments, ...fileIds])];
 
-    const updated = await voucherRepository.updateAttachments(id, mergedAttachments);
+    const updated = await voucherRepository.updateAttachments(
+      id,
+      mergedAttachments
+    );
     if (!updated) {
       throw new ApiError(400, 'Cập nhật attachments thất bại');
     }
@@ -298,8 +318,8 @@ class VoucherService {
       uploadedFiles: files.map((f) => ({
         id: f.id,
         url: f.url,
-        name: f.name
-      }))
+        name: f.name,
+      })),
     };
   }
 }

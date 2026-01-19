@@ -10,7 +10,7 @@ const {
   validateUpdateVoucher,
   validateStats,
   validateIdParam,
-  validateContractIdParam
+  validateContractIdParam,
 } = require('../validators/voucher.validator');
 
 /**
@@ -28,11 +28,7 @@ router.use(authorize('manager', 'accountant'));
  * @desc    Lấy thống kê vouchers
  * @access  Manager, Accountant
  */
-router.get(
-  '/stats',
-  validateStats,
-  voucherController.getStats
-);
+router.get('/stats', validateStats, voucherController.getStats);
 
 /**
  * @route   GET /api/v1/vouchers/by-contract/:contractId
@@ -50,33 +46,21 @@ router.get(
  * @desc    Lấy danh sách vouchers
  * @access  Manager, Accountant
  */
-router.get(
-  '/',
-  validateListVouchers,
-  voucherController.getVouchers
-);
+router.get('/', validateListVouchers, voucherController.getVouchers);
 
 /**
  * @route   GET /api/v1/vouchers/:id
  * @desc    Lấy chi tiết voucher
  * @access  Manager, Accountant
  */
-router.get(
-  '/:id',
-  validateIdParam,
-  voucherController.getVoucherById
-);
+router.get('/:id', validateIdParam, voucherController.getVoucherById);
 
 /**
  * @route   POST /api/v1/vouchers
  * @desc    Tạo voucher mới
  * @access  Manager, Accountant
  */
-router.post(
-  '/',
-  validateCreateVoucher,
-  voucherController.createVoucher
-);
+router.post('/', validateCreateVoucher, voucherController.createVoucher);
 
 /**
  * @route   PUT /api/v1/vouchers/:id
@@ -107,11 +91,7 @@ router.delete(
  * @desc    Xác nhận voucher
  * @access  Manager, Accountant
  */
-router.patch(
-  '/:id/confirm',
-  validateIdParam,
-  voucherController.confirmVoucher
-);
+router.patch('/:id/confirm', validateIdParam, voucherController.confirmVoucher);
 
 /**
  * @route   POST /api/v1/vouchers/:id/attachments
