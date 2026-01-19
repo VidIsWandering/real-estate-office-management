@@ -28,6 +28,16 @@ const normalizeError = (err) => {
     return err;
   }
 
+  // AppError from error.util.js (ValidationError, NotFoundError, etc.)
+  // Những error có statusCode property (từ custom error classes)
+  if (err.statusCode && typeof err.statusCode === 'number') {
+    return new ApiError(
+      err.statusCode,
+      err.message,
+      err.name ? err.name.replace('Error', '').toUpperCase() : 'ERROR'
+    );
+  }
+
   // Database errors (PostgreSQL)
   if (err.code && typeof err.code === 'string') {
     switch (err.code) {
@@ -115,7 +125,7 @@ const normalizeError = (err) => {
     }));
     return new ApiError(
       HTTP_STATUS.BAD_REQUEST,
-      'Dữ liệu không hợp lệ',
+      err.message || 'Dữ liệu không hợp lệ',
       'VALIDATION_ERROR',
       details
     );
@@ -205,21 +215,29 @@ const errorHandler = (err, req, res) => {
     logger.warn('Client Error:', logData);
   }
 
-  // Build response object - FIXED: Flat structure instead of nested error object
+  // Build response object - consistent với response.util.js
   const response = {
     success: false,
     message: error.message,
     code: error.code || 'ERROR',
   };
 
-  if (error.details) response.details = error.details;
-  if (config.node_env === 'development') response.stack = err.stack;
+  // Thêm details nếu có (validation errors, etc.)
+  if (error.details) {
+    response.errors = error.details;
+  }
+
+  // Thêm stack trace trong development mode
+  if (config.node_env === 'development') {
+    response.stack = err.stack;
+  }
 
   return res.status(error.statusCode).json(response);
 };
 
 /**
  * Async handler wrapper - Bắt lỗi từ async functions
+ * QUAN TRỌNG: Phải có để catch errors từ async controller methods
  */
 const asyncHandler = (fn) => (req, res, next) => {
   Promise.resolve(fn(req, res, next)).catch(next);
