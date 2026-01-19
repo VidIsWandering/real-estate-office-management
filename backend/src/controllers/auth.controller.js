@@ -71,11 +71,11 @@ class AuthController {
   }
 
   async changePassword(req, res) {
-    const { current_password, new_password } = req.body;
+    const { new_password, confirm_password } = req.body;
     const result = await authService.changePassword(
       req.user.id,
-      current_password,
-      new_password
+      new_password,
+      confirm_password
     );
 
     return successResponse(res, result, 'Password changed successfully');

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useServerInsertedHTML } from "next/navigation";
+import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   Home,
@@ -12,20 +12,17 @@ import {
   BarChart3,
   Settings,
   ChevronRight,
-  ShoppingCart,
-  ShoppingBag,
   FileText,
   Wallet,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSidebar } from "@/lib/context/SidebarProvider";
-import Partners from "@/app/partners/page";
 
 const navItems = [
   { name: "Dashboard", path: "/", icon: LayoutDashboard },
   { name: "Properties", path: "/properties", icon: Home },
   { name: "Staffs", path: "/staff", icon: Users },
-  { name: "Client", path: "/partners", icon: UserCheck },
+  { name: "Clients", path: "/clients", icon: UserCheck },
   { name: "Transactions", path: "/transactions", icon: ScrollText },
   { name: "Contracts", path: "/contracts", icon: FileText },
   { name: "Payments", path: "/payments", icon: Wallet },

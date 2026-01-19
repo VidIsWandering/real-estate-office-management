@@ -16,22 +16,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Staff, StaffFormData } from "@/app/staff/page";
+import type { Staff, StaffRole, StaffStatus } from "@/lib/api";
+import { UpdateStaffFormData } from "./types";
 
 interface EditStaffFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: StaffFormData) => void;
+  onSubmit: (data: UpdateStaffFormData) => void;
   initialData: Staff;
 }
 
-const positions = [
-  "Agent",
-  "Senior Agent",
-  "Junior Agent",
-  "Sales Manager",
-  "Property Manager",
-  "Team Lead",
+const roles: Array<{ value: StaffRole; label: string }> = [
+  { value: "admin", label: "Admin" },
+  { value: "manager", label: "Manager" },
+  { value: "agent", label: "Agent" },
+  { value: "legal_officer", label: "Legal officer" },
+  { value: "accountant", label: "Accountant" },
 ];
 
 const areas = [
@@ -50,18 +50,18 @@ export function EditStaffForm({
   onSubmit,
   initialData,
 }: EditStaffFormProps) {
-  const [formData, setFormData] = useState<StaffFormData>({
-    name: initialData.name,
-    username: initialData.username,
-    password: initialData.password,
-    email: initialData.email,
-    phone: initialData.phone,
-    position: initialData.position,
-    assignedArea: initialData.assignedArea,
+  const [formData, setFormData] = useState<UpdateStaffFormData>({
+    full_name: initialData.full_name,
+    email: "email" in initialData ? initialData.email || "" : "",
+    phone_number:
+      "phone_number" in initialData ? initialData.phone_number || "" : "",
+    address: "address" in initialData ? initialData.address || "" : "",
+    assigned_area: initialData.assigned_area || "",
+    role: initialData.position,
     status: initialData.status,
   });
 
-  const [errors, setErrors] = useState<Partial<StaffFormData>>({});
+  const [errors, setErrors] = useState<Partial<UpdateStaffFormData>>({});
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -69,7 +69,7 @@ export function EditStaffForm({
       ...prev,
       [name]: value,
     }));
-    if (errors[name as keyof StaffFormData]) {
+    if (errors[name as keyof UpdateStaffFormData]) {
       setErrors((prev) => ({
         ...prev,
         [name]: "",
@@ -85,27 +85,22 @@ export function EditStaffForm({
   };
 
   const validateForm = (): boolean => {
-    const newErrors: Partial<StaffFormData> = {};
+    const newErrors: Partial<UpdateStaffFormData> = {};
 
-    if (!formData.name.trim()) {
-      newErrors.name = "Staff name is required";
+    if (!formData.full_name.trim()) {
+      newErrors.full_name = "Full name is required";
     }
-    if (!formData.username.trim()) {
-      newErrors.username = "Username is required";
-    }
-    if (!formData.password.trim()) {
-      newErrors.password = "Password is required";
-    }
-    if (!formData.email.trim()) {
-      newErrors.email = "Email is required";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+    if (
+      formData.email.trim() &&
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)
+    ) {
       newErrors.email = "Invalid email format";
     }
-    if (!formData.phone.trim()) {
-      newErrors.phone = "Phone number is required";
+    if (!formData.phone_number.trim()) {
+      newErrors.phone_number = "Phone number is required";
     }
-    if (!formData.assignedArea) {
-      newErrors.assignedArea = "Assigned area is required";
+    if (!formData.assigned_area) {
+      newErrors.assigned_area = "Assigned area is required";
     }
 
     setErrors(newErrors);
@@ -134,56 +129,23 @@ export function EditStaffForm({
         >
           {/* Staff Name */}
           <div className="space-y-2">
-            <Label htmlFor="name">Staff Name *</Label>
+            <Label htmlFor="full_name">Full name *</Label>
             <Input
-              id="name"
-              name="name"
-              value={formData.name}
+              id="full_name"
+              name="full_name"
+              value={formData.full_name}
               onChange={handleChange}
               placeholder="e.g., John Doe"
-              className={errors.name ? "border-red-500" : ""}
+              className={errors.full_name ? "border-red-500" : ""}
             />
-            {errors.name && (
-              <p className="text-xs text-red-500">{errors.name}</p>
-            )}
-          </div>
-
-          {/* Username */}
-          <div className="space-y-2">
-            <Label htmlFor="username">Username *</Label>
-            <Input
-              id="username"
-              name="username"
-              value={formData.username}
-              onChange={handleChange}
-              placeholder="e.g., john.doe"
-              className={errors.username ? "border-red-500" : ""}
-            />
-            {errors.username && (
-              <p className="text-xs text-red-500">{errors.username}</p>
-            )}
-          </div>
-
-          {/* Password */}
-          <div className="space-y-2">
-            <Label htmlFor="password">Password *</Label>
-            <Input
-              id="password"
-              name="password"
-              type="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="Enter password"
-              className={errors.password ? "border-red-500" : ""}
-            />
-            {errors.password && (
-              <p className="text-xs text-red-500">{errors.password}</p>
+            {errors.full_name && (
+              <p className="text-xs text-red-500">{errors.full_name}</p>
             )}
           </div>
 
           {/* Email */}
           <div className="space-y-2">
-            <Label htmlFor="email">Email *</Label>
+            <Label htmlFor="email">Email</Label>
             <Input
               id="email"
               name="email"
@@ -200,34 +162,48 @@ export function EditStaffForm({
 
           {/* Phone */}
           <div className="space-y-2">
-            <Label htmlFor="phone">Phone *</Label>
+            <Label htmlFor="phone_number">Phone *</Label>
             <Input
-              id="phone"
-              name="phone"
-              value={formData.phone}
+              id="phone_number"
+              name="phone_number"
+              value={formData.phone_number}
               onChange={handleChange}
               placeholder="e.g., 5551234567"
-              className={errors.phone ? "border-red-500" : ""}
+              className={errors.phone_number ? "border-red-500" : ""}
             />
-            {errors.phone && (
-              <p className="text-xs text-red-500">{errors.phone}</p>
+            {errors.phone_number && (
+              <p className="text-xs text-red-500">{errors.phone_number}</p>
             )}
           </div>
 
-          {/* Position */}
+          {/* Address */}
           <div className="space-y-2">
-            <Label htmlFor="position">Position</Label>
+            <Label htmlFor="address">Address</Label>
+            <Input
+              id="address"
+              name="address"
+              value={formData.address}
+              onChange={handleChange}
+              placeholder="e.g., 123 Main St"
+            />
+          </div>
+
+          {/* Role */}
+          <div className="space-y-2">
+            <Label htmlFor="role">Role</Label>
             <Select
-              value={formData.position}
-              onValueChange={(value) => handleSelectChange("position", value)}
+              value={formData.role}
+              onValueChange={(value) =>
+                handleSelectChange("role", value as StaffRole)
+              }
             >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {positions.map((pos) => (
-                  <SelectItem key={pos} value={pos}>
-                    {pos}
+                {roles.map((r) => (
+                  <SelectItem key={r.value} value={r.value}>
+                    {r.label}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -236,11 +212,11 @@ export function EditStaffForm({
 
           {/* Assigned Area */}
           <div className="space-y-2">
-            <Label htmlFor="assignedArea">Assigned Area *</Label>
+            <Label htmlFor="assigned_area">Assigned Area *</Label>
             <Select
-              value={formData.assignedArea}
+              value={formData.assigned_area}
               onValueChange={(value) =>
-                handleSelectChange("assignedArea", value)
+                handleSelectChange("assigned_area", value)
               }
             >
               <SelectTrigger>
@@ -254,8 +230,8 @@ export function EditStaffForm({
                 ))}
               </SelectContent>
             </Select>
-            {errors.assignedArea && (
-              <p className="text-xs text-red-500">{errors.assignedArea}</p>
+            {errors.assigned_area && (
+              <p className="text-xs text-red-500">{errors.assigned_area}</p>
             )}
           </div>
 
@@ -265,15 +241,15 @@ export function EditStaffForm({
             <Select
               value={formData.status}
               onValueChange={(value) =>
-                handleSelectChange("status", value as "Active" | "Inactive")
+                handleSelectChange("status", value as StaffStatus)
               }
             >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Active">Active</SelectItem>
-                <SelectItem value="Inactive">Inactive</SelectItem>
+                <SelectItem value="working">Working</SelectItem>
+                <SelectItem value="off_duty">Off duty</SelectItem>
               </SelectContent>
             </Select>
           </div>

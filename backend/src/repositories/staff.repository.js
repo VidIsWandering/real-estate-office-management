@@ -102,6 +102,20 @@ class StaffRepository {
   }
 
   /**
+   * Check email đã tồn tại chưa (loại trừ một staff id)
+   */
+  async existsByEmailExcludingId(email, staffId) {
+    const sql = `
+      SELECT EXISTS(
+        SELECT 1 FROM staff
+        WHERE email = $1 AND id <> $2
+      ) as exists
+    `;
+    const result = await db.query(sql, [email, staffId]);
+    return result.rows[0].exists;
+  }
+
+  /**
    * Update staff
    */
   async update(id, staffData) {

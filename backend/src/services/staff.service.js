@@ -1,297 +1,193 @@
 /**
- * Staff Service - Business logic for staff management
+ * Staff Service - Business logic cho quản lý nhân viên
  */
 
-const staffRepository = require('../repositories/staff.repository');
 const accountRepository = require('../repositories/account.repository');
-const { AppError } = require('../utils/error.util');
-const { HTTP_STATUS } = require('../config/constants');
-const bcrypt = require('bcryptjs');
+const staffRepository = require('../repositories/staff.repository');
+const { hashPassword } = require('../utils/bcrypt.util');
+const { STAFF_ROLES, PAGINATION } = require('../config/constants');
+const {
+  ValidationError,
+  NotFoundError,
+  ConflictError,
+} = require('../utils/error.util');
+
+const isPrivilegedRole = (position) =>
+  position === STAFF_ROLES.ADMIN || position === STAFF_ROLES.MANAGER;
+
+const toBasicStaff = (row) => ({
+  id: row.id,
+  full_name: row.full_name,
+  assigned_area: row.assigned_area,
+  position: row.position,
+  status: row.status,
+});
+
+const toFullStaff = (row) => ({
+  id: row.id,
+  account_id: row.account_id,
+  username: row.username,
+  full_name: row.full_name,
+  email: row.email,
+  phone_number: row.phone_number,
+  address: row.address,
+  assigned_area: row.assigned_area,
+  position: row.position,
+  status: row.status,
+  preferences: row.preferences,
+  created_at: row.created_at,
+  updated_at: row.updated_at,
+});
 
 class StaffService {
-  /**
-   * Get all staff with pagination and filters
-   */
-  async getAll(query) {
-    const { page = 1, limit = 10, position, status, search } = query;
+  async getAll(query, requesterPosition) {
+    const page = Math.max(parseInt(query.page || PAGINATION.DEFAULT_PAGE, 10), 1);
+    const limit = Math.min(
+      Math.max(parseInt(query.limit || PAGINATION.DEFAULT_LIMIT, 10), 1),
+      PAGINATION.MAX_LIMIT
+    );
 
-    // Validate pagination
-    const pageNum = Math.max(1, parseInt(page));
-    const limitNum = Math.min(100, Math.max(1, parseInt(limit)));
+    const filters = {
+      position: query.role,
+      status: query.status,
+      search: query.search,
+    };
 
-    const filters = {};
-    if (position) filters.position = position;
-    if (status) filters.status = status;
-    if (search) filters.search = search;
+    const { data, total } = await staffRepository.findAll(page, limit, filters);
 
-    const result = await staffRepository.findAll(pageNum, limitNum, filters);
+    const canSeeAll = isPrivilegedRole(requesterPosition);
+    const items = data.map((row) => (canSeeAll ? toFullStaff(row) : toBasicStaff(row)));
 
     return {
-      items: result.data,
+      items,
       pagination: {
-        page: pageNum,
-        limit: limitNum,
-        total: result.total,
-        totalPages: Math.ceil(result.total / limitNum),
+        page,
+        limit,
+        total,
       },
     };
   }
 
-  /**
-   * Get staff by ID
-   */
-  async getById(id) {
+  async getById(id, requesterPosition) {
     const staff = await staffRepository.findByIdWithAccount(id);
-
     if (!staff) {
-      throw new AppError('Staff not found', HTTP_STATUS.NOT_FOUND);
+      throw new NotFoundError('Staff not found');
     }
 
-    // Remove sensitive data
-    delete staff.password;
-
-    return staff;
+    return isPrivilegedRole(requesterPosition) ? toFullStaff(staff) : toBasicStaff(staff);
   }
 
-  /**
-   * Create new staff
-   */
-  async create(staffData) {
-    const {
-      username,
-      password,
-      full_name,
-      email,
-      phone_number,
-      address,
-      assigned_area,
-      position = 'staff',
-      status = 'working',
-    } = staffData;
+  async create(data) {
+    const { username, password, full_name, email, role } = data;
 
-    // Validate required fields
-    if (!username || !password || !full_name) {
-      throw new AppError(
-        'Username, password, and full_name are required',
-        HTTP_STATUS.BAD_REQUEST
-      );
+    if (!username || typeof username !== 'string' || username.trim().length < 3) {
+      throw new ValidationError('Username is required (min 3 characters)');
     }
 
-    // Validate position
-    const validPositions = ['agent', 'legal_officer', 'accountant', 'manager'];
-    if (!validPositions.includes(position)) {
-      throw new AppError('Invalid position', HTTP_STATUS.BAD_REQUEST);
+    if (!password || typeof password !== 'string' || password.length < 6) {
+      throw new ValidationError('Password is required (min 6 characters)');
     }
 
-    // Validate status
-    const validStatuses = ['working', 'off_duty'];
-    if (!validStatuses.includes(status)) {
-      throw new AppError('Invalid status', HTTP_STATUS.BAD_REQUEST);
+    if (!full_name || typeof full_name !== 'string' || !full_name.trim()) {
+      throw new ValidationError('Full name is required');
     }
 
-    // Check if username already exists
+    if (!role || typeof role !== 'string') {
+      throw new ValidationError('Role is required');
+    }
+
     const existingAccount = await accountRepository.findByUsername(username);
     if (existingAccount) {
-      throw new AppError('Username already exists', HTTP_STATUS.CONFLICT);
+      throw new ConflictError('Username already exists');
     }
 
-    // Check if email already exists (if provided)
     if (email) {
       const emailExists = await staffRepository.existsByEmail(email);
       if (emailExists) {
-        throw new AppError('Email already exists', HTTP_STATUS.CONFLICT);
+        throw new ConflictError('Email already exists');
       }
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await hashPassword(password);
+    const account = await accountRepository.create(username.trim(), hashedPassword);
 
-    // Create account first - TRUYỀN 2 THAM SỐ RIÊNG
-    const account = await accountRepository.create(username, hashedPassword);
+    const staffData = {
+      account_id: account.id,
+      full_name: full_name.trim(),
+      email: data.email,
+      phone_number: data.phone_number,
+      address: data.address,
+      assigned_area: data.assigned_area,
+      position: data.role,
+      status: data.status || 'working',
+    };
 
-    // Create staff
-    try {
-      const staff = await staffRepository.create({
-        account_id: account.id,
-        full_name,
-        email,
-        phone_number,
-        address,
-        assigned_area,
-        position,
-        status,
-      });
+    const staff = await staffRepository.create(staffData);
+    const staffWithAccount = await staffRepository.findByIdWithAccount(staff.id);
 
-      // Get full staff info with account
-      const fullStaff = await staffRepository.findByIdWithAccount(staff.id);
-      delete fullStaff.password;
-
-      return fullStaff;
-    } catch (error) {
-      // Rollback: delete account if staff creation fails
-      await accountRepository.delete(account.id);
-      throw error;
-    }
+    return toFullStaff(staffWithAccount);
   }
 
-  /**
-   * Update staff information
-   */
-  async update(id, updateData) {
-    // Check if staff exists
-    const existingStaff = await staffRepository.findById(id);
-    if (!existingStaff) {
-      throw new AppError('Staff not found', HTTP_STATUS.NOT_FOUND);
+  async update(id, data) {
+    const current = await staffRepository.findById(id);
+    if (!current) {
+      throw new NotFoundError('Staff not found');
     }
 
-    const {
-      full_name,
-      email,
-      phone_number,
-      address,
-      assigned_area,
-      position,
-      status,
-    } = updateData;
-
-    // Validate position if provided
-    if (position) {
-      const validPositions = [
-        'agent',
-        'legal_officer',
-        'accountant',
-        'manager',
-      ];
-      if (!validPositions.includes(position)) {
-        throw new AppError('Invalid position', HTTP_STATUS.BAD_REQUEST);
-      }
-    }
-
-    // Validate status if provided
-    if (status) {
-      const validStatuses = ['working', 'off_duty'];
-      if (!validStatuses.includes(status)) {
-        throw new AppError('Invalid status', HTTP_STATUS.BAD_REQUEST);
-      }
-    }
-
-    // Check if email is being changed and if it already exists
-    if (email && email !== existingStaff.email) {
-      const emailExists = await staffRepository.existsByEmail(email);
+    if (data.email && data.email !== current.email) {
+      const emailExists = await staffRepository.existsByEmailExcludingId(
+        data.email,
+        id
+      );
       if (emailExists) {
-        throw new AppError('Email already exists', HTTP_STATUS.CONFLICT);
+        throw new ConflictError('Email already exists');
       }
     }
 
-    // Update staff
-    const updatedStaff = await staffRepository.update(id, {
-      full_name,
-      email,
-      phone_number,
-      address,
-      assigned_area,
-      position,
-      status,
-    });
+    const staffData = {
+      full_name: data.full_name,
+      email: data.email,
+      phone_number: data.phone_number,
+      address: data.address,
+      assigned_area: data.assigned_area,
+      position: data.role,
+      status: data.status,
+    };
 
-    // Get full staff info with account
-    const fullStaff = await staffRepository.findByIdWithAccount(
-      updatedStaff.id
-    );
-    delete fullStaff.password;
+    const updated = await staffRepository.update(id, staffData);
+    const staffWithAccount = await staffRepository.findByIdWithAccount(updated.id);
 
-    return fullStaff;
+    return toFullStaff(staffWithAccount);
   }
 
-  /**
-   * Update staff status
-   */
   async updateStatus(id, status) {
-    // Validate status
-    const validStatuses = ['working', 'off_duty'];
-    if (!validStatuses.includes(status)) {
-      throw new AppError('Invalid status', HTTP_STATUS.BAD_REQUEST);
+    if (!status || typeof status !== 'string') {
+      throw new ValidationError('Status is required');
     }
 
-    // Check if staff exists
-    const existingStaff = await staffRepository.findById(id);
-    if (!existingStaff) {
-      throw new AppError('Staff not found', HTTP_STATUS.NOT_FOUND);
+    const updated = await staffRepository.update(id, { status });
+    if (!updated) {
+      throw new NotFoundError('Staff not found');
     }
 
-    // Update status
-    const updatedStaff = await staffRepository.update(id, { status });
-
-    // Get full staff info with account
-    const fullStaff = await staffRepository.findByIdWithAccount(
-      updatedStaff.id
-    );
-    delete fullStaff.password;
-
-    return fullStaff;
+    const staffWithAccount = await staffRepository.findByIdWithAccount(updated.id);
+    return toFullStaff(staffWithAccount);
   }
 
-  /**
-   * Update staff permissions (position)
-   */
-  async updatePermissions(id, permissionsData) {
-    const { position } = permissionsData;
-
-    if (!position) {
-      throw new AppError('Position is required', HTTP_STATUS.BAD_REQUEST);
+  async updatePermissions(id, payload) {
+    // Currently only supports role update. "permissions" is reserved for future use.
+    const role = payload?.role;
+    if (!role || typeof role !== 'string') {
+      throw new ValidationError('role is required');
     }
 
-    // Validate position
-    const validPositions = ['agent', 'legal_officer', 'accountant', 'manager'];
-    if (!validPositions.includes(position)) {
-      throw new AppError('Invalid position', HTTP_STATUS.BAD_REQUEST);
+    const updated = await staffRepository.update(id, { position: role });
+    if (!updated) {
+      throw new NotFoundError('Staff not found');
     }
 
-    // Check if staff exists
-    const existingStaff = await staffRepository.findById(id);
-    if (!existingStaff) {
-      throw new AppError('Staff not found', HTTP_STATUS.NOT_FOUND);
-    }
-
-    // Update position
-    const updatedStaff = await staffRepository.update(id, { position });
-
-    // Get full staff info with account
-    const fullStaff = await staffRepository.findByIdWithAccount(
-      updatedStaff.id
-    );
-    delete fullStaff.password;
-
-    return fullStaff;
-  }
-
-  /**
-   * Delete staff (soft delete by changing status)
-   */
-  async delete(id) {
-    // Check if staff exists
-    const existingStaff = await staffRepository.findById(id);
-    if (!existingStaff) {
-      throw new AppError('Staff not found', HTTP_STATUS.NOT_FOUND);
-    }
-
-    // Set status to off_duty instead of hard delete
-    await staffRepository.update(id, { status: 'off_duty' });
-
-    return { message: 'Staff deleted successfully' };
-  }
-
-  /**
-   * Get staff by account ID
-   */
-  async getByAccountId(accountId) {
-    const staff = await staffRepository.findByAccountId(accountId);
-
-    if (!staff) {
-      throw new AppError('Staff not found', HTTP_STATUS.NOT_FOUND);
-    }
-
-    return staff;
+    const staffWithAccount = await staffRepository.findByIdWithAccount(updated.id);
+    return toFullStaff(staffWithAccount);
   }
 }
 

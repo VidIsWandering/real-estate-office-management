@@ -42,7 +42,8 @@ export function SecurityTab() {
     confirm: false,
   });
 
-  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/;
+  // Keep validation aligned with backend: only requires min length 6
+  const passwordRegex = /^.{6,}$/;
 
   const handlePasswordChange = async () => {
     setPasswordError(null);
@@ -62,9 +63,7 @@ export function SecurityTab() {
     }
 
     if (!passwordRegex.test(passwordData.newPassword)) {
-      setPasswordError(
-        "Password must be at least 6 characters and include uppercase, lowercase, and a number",
-      );
+      setPasswordError("Password must be at least 6 characters");
       return;
     }
 

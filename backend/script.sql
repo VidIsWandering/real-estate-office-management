@@ -77,6 +77,9 @@ CREATE TABLE client (
     referral_src TEXT,
     requirement TEXT,
     staff_id BIGINT,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     
     CONSTRAINT fk_client_staff 
         FOREIGN KEY (staff_id) 

@@ -16,17 +16,19 @@ class ClientController {
    * GET /clients
    */
   async getAll(req, res) {
-    try {
-      const result = await clientService.getAll(req.query, req.user);
-      return successResponseWithPagination(
-        res,
-        result.items.map((c) => c.toJSON()),
-        result.pagination,
-        'Client list retrieved successfully'
-      );
-    } catch (error) {
-      return errorResponse(res, error.message);
-    }
+    const result = await clientService.getAll(req.query);
+
+    return res.status(HTTP_STATUS.OK).json({
+      success: true,
+      message: 'Client list retrieved successfully',
+      data: result.items,
+      pagination: {
+        page: result.pagination.page,
+        limit: result.pagination.limit,
+        total: result.pagination.total,
+        totalPages: Math.ceil(result.pagination.total / result.pagination.limit),
+      },
+    });
   }
 
   /**
@@ -34,113 +36,63 @@ class ClientController {
    */
   async getById(req, res) {
     const { id } = req.params;
-    try {
-      const result = await clientService.getById(id, req.user);
-      return successResponse(
-        res,
-        { ...result },
-        'Client retrieved successfully'
-      );
-    } catch (error) {
-      return errorResponse(res, error.message);
-    }
+    const client = await clientService.getById(id);
+    return successResponse(res, client, 'Client retrieved successfully');
   }
 
   /**
    * POST /clients
    */
   async create(req, res) {
-    const rawClientData = req.body;
-
-    const clientData = { ...rawClientData, staff_id: req.user.staff_id };
-
-    try {
-      const result = await clientService.create(clientData);
-      return successResponse(
-        res,
-        { ...result },
-        'Client created successfully',
-        HTTP_STATUS.CREATED
-      );
-    } catch (error) {
-      return errorResponse(res, error.message);
-    }
+    const client = await clientService.create(req.body, req.user);
+    return successResponse(res, client, 'Client created successfully', HTTP_STATUS.CREATED);
   }
 
   /**
    * PUT /clients/:id
    */
   async update(req, res) {
-    // TODO: Implement
-    try {
-      const { id } = req.params;
-      const updateData = req.body;
-      const result = await clientService.update(id, updateData, req.user);
-      return successResponse(res, { ...result }, 'Client updated successfully');
-    } catch (error) {
-      return errorResponse(res, error.message);
-    }
+    const { id } = req.params;
+    const client = await clientService.update(id, req.body, req.user);
+    return successResponse(res, client, 'Client updated successfully');
   }
 
   /**
    * DELETE /clients/:id
    */
   async delete(req, res) {
-    // TODO: Implement (soft delete)
-    try {
-      const { id } = req.params;
-      const result = await clientService.delete(id, req.user);
-      return successResponse(
-        res,
-        { deleted: result },
-        'Client deleted successfully'
-      );
-    } catch (error) {
-      return errorResponse(res, error.message);
-    }
+    const { id } = req.params;
+    const client = await clientService.delete(id);
+    return successResponse(res, client, 'Client deleted successfully');
   }
 
   /**
    * GET /clients/:id/notes
    */
   async getNotes(req, res) {
-    try {
-      // TODO: Implement
-      const { id } = req.params;
-      const { from, to } = req.query;
-      const query = { client_id: id, from, to };
-      const result = await clientService.getNotes(query, req.user);
-      return successResponseWithPagination(
-        res,
-        { client_id: id, notes: result.items },
-        result.pagination,
+    const { id } = req.params;
+    const result = await clientService.getNotes(id, req.query);
 
-        'Notes retrieved successfully'
-      );
-    } catch (error) {
-      return errorResponse(res, error.message);
-    }
+    return res.status(HTTP_STATUS.OK).json({
+      success: true,
+      message: 'Notes retrieved successfully',
+      data: result.items,
+      pagination: {
+        page: result.pagination.page,
+        limit: result.pagination.limit,
+        total: result.pagination.total,
+        totalPages: Math.ceil(result.pagination.total / result.pagination.limit),
+      },
+    });
   }
 
   /**
    * POST /clients/:id/notes
    */
   async addNote(req, res) {
-    try {
-      // TODO: Implement
-      const { id } = req.params;
-      const { content } = req.body;
-      const data = { client_id: id, staff_id: req.user.staff_id, content };
-      const result = await clientService.addNote(data, req.user);
-      return successResponse(
-        res,
-        { ...result },
-        'Note added successfully',
-        HTTP_STATUS.CREATED
-      );
-    } catch (error) {
-      return errorResponse(res, error.message);
-    }
+    const { id } = req.params;
+    const note = await clientService.addNote(id, req.body, req.user);
+    return successResponse(res, note, 'Note added successfully', HTTP_STATUS.CREATED);
   }
 }
 

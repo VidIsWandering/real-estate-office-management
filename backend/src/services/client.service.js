@@ -1,108 +1,191 @@
-const { STAFF_ROLES } = require('../config/constants');
-const clientNoteRepository = require('../repositories/client-note.repository');
+/**
+ * Client Service - Business logic cho quản lý khách hàng
+ */
+
 const clientRepository = require('../repositories/client.repository');
-const staffRepository = require('../repositories/staff.repository');
+const { PAGINATION, STAFF_ROLES } = require('../config/constants');
+const {
+  ValidationError,
+  NotFoundError,
+  ConflictError,
+} = require('../utils/error.util');
+
+const isPrivilegedRole = (position) =>
+  position === STAFF_ROLES.ADMIN || position === STAFF_ROLES.MANAGER;
 
 class ClientService {
-  async create(data) {
-    const existingEmail = await clientRepository.findByEmail(data.email);
-    if (existingEmail) throw new Error('Email already exists');
-
-    const existingPhoneNumber = await clientRepository.findByPhoneNumber(
-      data.phone_number
+  async getAll(query) {
+    const page = Math.max(parseInt(query.page || PAGINATION.DEFAULT_PAGE, 10), 1);
+    const limit = Math.min(
+      Math.max(parseInt(query.limit || PAGINATION.DEFAULT_LIMIT, 10), 1),
+      PAGINATION.MAX_LIMIT
     );
-    if (existingPhoneNumber) throw new Error('Phone number already exists');
 
-    const res = await clientRepository.create(data);
+    const filters = {
+      type: query.type,
+      staff_id: query.staff_id ? Number(query.staff_id) : undefined,
+      search: query.search,
+    };
+
+    // Optional filter to include inactive
+    if (query.is_active === 'true') filters.is_active = true;
+    if (query.is_active === 'false') filters.is_active = false;
+
+    const { data, total } = await clientRepository.findAll(page, limit, filters);
+
     return {
-      client: res?.toJSON(),
+      items: data,
+      pagination: { page, limit, total },
     };
   }
 
-  async getAll(query, user) {
-    if (user.position != STAFF_ROLES.MANAGER) {
-      query.staff_id = user.staff_id;
+  async getById(id) {
+    const client = await clientRepository.findById(id);
+    if (!client) {
+      throw new NotFoundError('Client not found');
     }
-    return await clientRepository.findAll(query);
+    return client;
   }
 
-  async getById(clientId, user) {
+  async create(payload, user) {
+    const full_name = payload?.full_name;
+    const type = payload?.type;
+
+    if (!full_name || typeof full_name !== 'string' || !full_name.trim()) {
+      throw new ValidationError('full_name is required');
+    }
+
+    if (!type || typeof type !== 'string') {
+      throw new ValidationError('type is required');
+    }
+
+    if (payload?.email) {
+      const exists = await clientRepository.existsByEmail(payload.email);
+      if (exists) throw new ConflictError('Email already exists');
+    }
+
+    if (payload?.phone_number) {
+      const exists = await clientRepository.existsByPhone(payload.phone_number);
+      if (exists) throw new ConflictError('Phone number already exists');
+    }
+
+    const staffId =
+      isPrivilegedRole(user?.position) && payload?.staff_id
+        ? Number(payload.staff_id)
+        : user?.staff_id;
+
+    if (!staffId) {
+      throw new ValidationError('staff_id is required');
+    }
+
+    return clientRepository.create({
+      full_name: full_name.trim(),
+      email: payload.email,
+      phone_number: payload.phone_number,
+      address: payload.address,
+      type,
+      referral_src: payload.referral_src,
+      requirement: payload.requirement,
+      staff_id: staffId,
+      is_active:
+        typeof payload.is_active === 'boolean'
+          ? payload.is_active
+          : payload.status
+            ? String(payload.status).toLowerCase() === 'active'
+            : undefined,
+    });
+  }
+
+  async update(id, payload, user) {
+    const current = await clientRepository.findById(id);
+    if (!current) {
+      throw new NotFoundError('Client not found');
+    }
+
+    if (payload?.email && payload.email !== current.email) {
+      const exists = await clientRepository.existsByEmailExcludingId(
+        payload.email,
+        id
+      );
+      if (exists) throw new ConflictError('Email already exists');
+    }
+
+    if (payload?.phone_number && payload.phone_number !== current.phone_number) {
+      const exists = await clientRepository.existsByPhoneExcludingId(
+        payload.phone_number,
+        id
+      );
+      if (exists) throw new ConflictError('Phone number already exists');
+    }
+
+    const staffId =
+      isPrivilegedRole(user?.position) && payload?.staff_id
+        ? Number(payload.staff_id)
+        : undefined;
+
+    const isActive =
+      typeof payload.is_active === 'boolean'
+        ? payload.is_active
+        : payload.status
+          ? String(payload.status).toLowerCase() === 'active'
+          : undefined;
+
+    const updated = await clientRepository.update(id, {
+      full_name: payload.full_name,
+      email: payload.email,
+      phone_number: payload.phone_number,
+      address: payload.address,
+      type: payload.type,
+      referral_src: payload.referral_src,
+      requirement: payload.requirement,
+      staff_id: staffId,
+      is_active: isActive,
+    });
+
+    if (!updated) {
+      throw new NotFoundError('Client not found');
+    }
+
+    return clientRepository.findById(id);
+  }
+
+  async delete(id) {
+    const deleted = await clientRepository.softDelete(id);
+    if (!deleted) {
+      throw new NotFoundError('Client not found');
+    }
+    return deleted;
+  }
+
+  async getNotes(clientId, query) {
     const client = await clientRepository.findById(clientId);
-    const staff = await clientRepository.findById(client.staff_id);
+    if (!client) throw new NotFoundError('Client not found');
 
-    if (
-      client.staff_id != user.staff_id &&
-      user.position != STAFF_ROLES.MANAGER
-    ) {
-      throw new Error('You do not have permission to manage this customer');
-    }
+    const page = Math.max(parseInt(query.page || 1, 10), 1);
+    const limit = Math.min(Math.max(parseInt(query.limit || 20, 10), 1), 100);
+
+    const { data, total } = await clientRepository.findNotes(clientId, page, limit);
+
     return {
-      client: client?.toJSON(),
-      staff: staff?.toJSON(),
+      items: data,
+      pagination: { page, limit, total },
     };
   }
 
-  async update(clientId, updateData, user) {
+  async addNote(clientId, payload, user) {
+    const content = payload?.content;
+    if (!content || typeof content !== 'string' || !content.trim()) {
+      throw new ValidationError('content is required');
+    }
+
     const client = await clientRepository.findById(clientId);
-    const staff = await clientRepository.findById(client.staff_id);
-    if (
-      client.staff_id != user.staff_id &&
-      user.position != STAFF_ROLES.MANAGER
-    ) {
-      throw new Error('You do not have permission to manage this customer');
+    if (!client) throw new NotFoundError('Client not found');
+
+    if (!user?.staff_id) {
+      throw new ValidationError('staff_id is required');
     }
-    const updatedClient = await clientRepository.updateById(
-      clientId,
-      updateData
-    );
-    return {
-      updated_client: updatedClient?.toJSON(),
-      staff: staff?.toJSON(),
-    };
-  }
 
-  async delete(clientId, user) {
-    const client = await clientRepository.findById(clientId);
-
-    if (
-      client.staff_id != user.staff_id &&
-      user.position != STAFF_ROLES.MANAGER
-    ) {
-      throw new Error('You do not have permission to manage this customer');
-    }
-    const res = await clientRepository.delete(clientId);
-
-    return res ? true : false;
-  }
-
-  async addNote(data, user) {
-    const client = await clientRepository.findById(data.client_id);
-    const staff = await staffRepository.findById(data.staff_id);
-
-    if (
-      client.staff_id != user.staff_id &&
-      user.position != STAFF_ROLES.MANAGER
-    ) {
-      throw new Error('You do not have permission to manage this customer');
-    }
-    const res = await clientNoteRepository.create(data);
-    return {
-      client_note: res.toJSON(),
-      client: client.toJSON(),
-      staff: staff.toJSON(),
-    };
-  }
-
-  async getNotes(query, user) {
-    const client = await clientRepository.findById(query.client_id);
-    if (
-      client.staff_id != user.staff_id &&
-      user.position != STAFF_ROLES.MANAGER
-    ) {
-      throw new Error('You do not have permission to manage this customer');
-    }
-    const res = await clientNoteRepository.findAll(query);
-    return res;
+    return clientRepository.addNote(clientId, user.staff_id, content.trim());
   }
 }
 
