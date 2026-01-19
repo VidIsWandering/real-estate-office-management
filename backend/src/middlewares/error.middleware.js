@@ -189,9 +189,8 @@ const extractDuplicateField = (detail) => {
  * Note: Express requires 4 parameters (err, req, res, next)
  */
 const errorHandler = (err, req, res) => {
-
-    console.log('=== ERROR HANDLER CALLED ===');  // Thêm dòng này
-  console.log('Error:', err.message);   
+  console.log('=== ERROR HANDLER CALLED ==='); // Thêm dòng này
+  console.log('Error:', err.message);
   // Normalize error to ApiError
   const error = normalizeError(err);
 
