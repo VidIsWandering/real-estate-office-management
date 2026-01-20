@@ -21,13 +21,13 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { OwnerInfoModal } from "@/components/properties/OwnerInfoModal";
+import { getProfile } from "@/lib/api";
 import {
   getRealEstateById,
-  getProfile,
   legalCheckRealEstate,
   type RealEstate,
   type RealEstateStatus,
-} from "@/lib/api";
+} from "@/lib/api/real-estates";
 
 interface Property {
   id: string;

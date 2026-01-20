@@ -7,17 +7,16 @@ import {
   AddPropertyForm,
   type PropertyFormData,
 } from "@/components/properties/AddPropertyForm";
+import { getClientOptions, getStaffList } from "@/lib/api";
 import {
   createRealEstate,
-  getClientOptions,
   getRealEstateById,
   getRealEstatesList,
-  getStaffList,
   updateRealEstateById,
   updateRealEstateStatus,
   type RealEstate,
   type RealEstateStatus,
-} from "@/lib/api";
+} from "@/lib/api/real-estates";
 import { Search, Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 
