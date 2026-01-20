@@ -2,7 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { ContractsHeader } from "@/components/contracts/ContractsHeader";
-import { ContractsFilter, ContractsFilterValues } from "@/components/contracts/ContractsFilter";
+import {
+  ContractsFilter,
+  ContractsFilterValues,
+} from "@/components/contracts/ContractsFilter";
 import { ContractsTable } from "@/components/contracts/ContractsTable";
 import { ContractsStats } from "@/components/contracts/ContractsStats";
 import { ContractForm } from "@/components/contracts/ContractForm";
@@ -12,7 +15,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { getContracts, Contract, ContractType, ContractStatus } from "@/lib/api/contract";
+import {
+  getContracts,
+  Contract,
+  ContractType,
+  ContractStatus,
+} from "@/lib/api/contract";
 
 function getStatusLabel(status: string): string {
   const map: Record<string, string> = {
@@ -21,7 +29,7 @@ function getStatusLabel(status: string): string {
     signed: "Signed",
     notarized: "Notarized",
     finalized: "Liquidated",
-    cancelled: "Cancelled"
+    cancelled: "Cancelled",
   };
   return map[status] || status;
 }
@@ -30,19 +38,24 @@ function getTypeLabel(type: string): string {
   const map: Record<string, string> = {
     deposit: "Deposit agreement",
     purchase: "Sale & purchase",
-    lease: "Lease agreement"
+    lease: "Lease agreement",
   };
   return map[type] || type;
 }
 
-function getStatusColor(status: string): "gray" | "yellow" | "blue" | "green" | "purple" | "red" {
-  const map: Record<string, "gray" | "yellow" | "blue" | "green" | "purple" | "red"> = {
+function getStatusColor(
+  status: string,
+): "gray" | "yellow" | "blue" | "green" | "purple" | "red" {
+  const map: Record<
+    string,
+    "gray" | "yellow" | "blue" | "green" | "purple" | "red"
+  > = {
     draft: "gray",
     pending_signature: "yellow",
     signed: "blue",
     notarized: "green",
     finalized: "purple",
-    cancelled: "red"
+    cancelled: "red",
   };
   return map[status] || "gray";
 }
@@ -51,7 +64,7 @@ function getTypeColor(type: string): "deposit" | "sale" | "lease" {
   const map: Record<string, "deposit" | "sale" | "lease"> = {
     deposit: "deposit",
     purchase: "sale",
-    lease: "lease"
+    lease: "lease",
   };
   return map[type] || "deposit";
 }
@@ -93,11 +106,11 @@ export default function ContractsPage() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [contracts, setContracts] = useState<UIContract[]>([]);
   const [loading, setLoading] = useState(false);
-  
+
   const [filters, setFilters] = useState<ContractsFilterValues>({
     search: "",
     type: "all",
-    status: "all"
+    status: "all",
   });
 
   const loadContracts = async () => {
@@ -109,7 +122,7 @@ export default function ContractsPage() {
         type?: ContractType;
         status?: ContractStatus;
       } = { page: 1, limit: 50 };
-      
+
       if (filters.type !== "all") {
         params.type = filters.type as ContractType;
       }
@@ -118,7 +131,7 @@ export default function ContractsPage() {
       }
 
       const res = await getContracts(params);
-      
+
       if (res.success && res.data) {
         let items = res.data.map((c: Contract) => ({
           id: `HD${String(c.id).padStart(3, "0")}`,
@@ -134,17 +147,18 @@ export default function ContractsPage() {
           legalStaff: `Legal: Staff ${c.staff_id}`,
           status: getStatusLabel(c.status),
           statusColor: getStatusColor(c.status),
-          hasFile: false
+          hasFile: false,
         }));
-        
+
         // Client-side search
         if (filters.search.trim()) {
           const searchLower = filters.search.toLowerCase();
-          items = items.filter((c: UIContract) => 
-            c.id.toLowerCase().includes(searchLower) ||
-            c.transactionId.toLowerCase().includes(searchLower) ||
-            c.partyA.toLowerCase().includes(searchLower) ||
-            c.partyB.toLowerCase().includes(searchLower)
+          items = items.filter(
+            (c: UIContract) =>
+              c.id.toLowerCase().includes(searchLower) ||
+              c.transactionId.toLowerCase().includes(searchLower) ||
+              c.partyA.toLowerCase().includes(searchLower) ||
+              c.partyB.toLowerCase().includes(searchLower),
           );
         }
 
@@ -166,7 +180,7 @@ export default function ContractsPage() {
     <div className="flex-1 space-y-4 md:space-y-6 min-w-0">
       <ContractsHeader />
 
-      <ContractsFilter 
+      <ContractsFilter
         onCreate={() => setShowCreateForm(true)}
         filters={filters}
         onFilterChange={setFilters}
