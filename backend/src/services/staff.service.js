@@ -251,7 +251,7 @@ class StaffService {
     const position =
       typeof permissionsData === 'string'
         ? permissionsData
-        : permissionsData?.position ?? permissionsData?.role;
+        : (permissionsData?.position ?? permissionsData?.role);
 
     if (!position) {
       throw new AppError('Position is required', HTTP_STATUS.BAD_REQUEST);

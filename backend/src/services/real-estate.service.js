@@ -60,12 +60,10 @@ class RealEstateService {
     if (!realEstate) throw new Error('Real estate not found');
 
     const canManageAll =
-      user.position === STAFF_ROLES.MANAGER || user.position === STAFF_ROLES.ADMIN;
+      user.position === STAFF_ROLES.MANAGER ||
+      user.position === STAFF_ROLES.ADMIN;
 
-    if (
-      realEstate.staff_id != user.staff_id &&
-      !canManageAll
-    ) {
+    if (realEstate.staff_id != user.staff_id && !canManageAll) {
       throw new Error('You do not have permission to manage this real estate');
     }
     const mediaFilesPromise = realEstate.media_files.map((item) =>
@@ -93,7 +91,8 @@ class RealEstateService {
     if (!existingRealEstate) throw new Error('Real estate not found');
 
     const canManageAll =
-      user.position === STAFF_ROLES.MANAGER || user.position === STAFF_ROLES.ADMIN;
+      user.position === STAFF_ROLES.MANAGER ||
+      user.position === STAFF_ROLES.ADMIN;
 
     if (existingRealEstate.staff_id != user.staff_id && !canManageAll) {
       throw new Error('You do not have permission to manage this real estate');
@@ -116,16 +115,16 @@ class RealEstateService {
     // 3️⃣ Upload media files và legal docs (only when provided)
     let mediaFileIds;
     if (Array.isArray(updateData.media_files)) {
-      mediaFileIds = (await fileService.createManyFiles(updateData.media_files)).items.map(
-        (item) => item.id
-      );
+      mediaFileIds = (
+        await fileService.createManyFiles(updateData.media_files)
+      ).items.map((item) => item.id);
     }
 
     let legalDocIds;
     if (Array.isArray(updateData.legal_docs)) {
-      legalDocIds = (await fileService.createManyFiles(updateData.legal_docs)).items.map(
-        (item) => item.id
-      );
+      legalDocIds = (
+        await fileService.createManyFiles(updateData.legal_docs)
+      ).items.map((item) => item.id);
     }
 
     const updateFields = { ...updateData };
@@ -192,7 +191,8 @@ class RealEstateService {
     if (!realEstate) throw new Error('Real estate not found');
 
     const canManageAll =
-      user.position === STAFF_ROLES.MANAGER || user.position === STAFF_ROLES.ADMIN;
+      user.position === STAFF_ROLES.MANAGER ||
+      user.position === STAFF_ROLES.ADMIN;
 
     if (realEstate.staff_id != user.staff_id && !canManageAll) {
       throw new Error('You do not have permission to manage this real estate');

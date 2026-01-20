@@ -7,9 +7,17 @@ const router = express.Router();
 
 const clientController = require('../controllers/client.controller');
 const { authenticate } = require('../middlewares/auth.middleware');
-const { createValidator, updateValidator, idParamValidator } = require('../validators/client.validator');
-const { addClientNoteValidator } = require('../validators/client-note.validator');
-const { clientOptionsValidator } = require('../validators/client-options.validator');
+const {
+  createValidator,
+  updateValidator,
+  idParamValidator,
+} = require('../validators/client.validator');
+const {
+  addClientNoteValidator,
+} = require('../validators/client-note.validator');
+const {
+  clientOptionsValidator,
+} = require('../validators/client-options.validator');
 const { validate } = require('../middlewares/validate.middleware');
 
 // All routes require authentication
@@ -27,7 +35,12 @@ router.get('/', clientController.getAll);
  * @desc    Lightweight client options for dropdowns
  * @access  Private
  */
-router.get('/options', clientOptionsValidator, validate, clientController.getOptions);
+router.get(
+  '/options',
+  clientOptionsValidator,
+  validate,
+  clientController.getOptions
+);
 
 /**
  * @route   GET /api/v1/clients/:id
@@ -63,6 +76,11 @@ router.delete('/:id', clientController.delete);
  * @access  Private
  */
 router.get('/:id/notes', idParamValidator, validate, clientController.getNotes);
-router.post('/:id/notes', addClientNoteValidator, validate, clientController.addNote);
+router.post(
+  '/:id/notes',
+  addClientNoteValidator,
+  validate,
+  clientController.addNote
+);
 
 module.exports = router;

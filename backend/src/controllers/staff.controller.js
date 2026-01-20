@@ -37,7 +37,10 @@ class StaffController {
   async create(req, res) {
     // Frontend may send `role` while backend uses `position`
     const requestedPosition = req.body?.position ?? req.body?.role;
-    if (requestedPosition === STAFF_ROLES.ADMIN && req.user?.position !== STAFF_ROLES.ADMIN) {
+    if (
+      requestedPosition === STAFF_ROLES.ADMIN &&
+      req.user?.position !== STAFF_ROLES.ADMIN
+    ) {
       throw new AppError(
         'Only admin can create admin staff',
         HTTP_STATUS.FORBIDDEN

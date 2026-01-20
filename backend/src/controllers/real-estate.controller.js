@@ -100,7 +100,8 @@ class RealEstateController {
       const { id } = req.params;
 
       const media_files =
-        Array.isArray(req.files?.media_files) && req.files.media_files.length > 0
+        Array.isArray(req.files?.media_files) &&
+        req.files.media_files.length > 0
           ? formatUploadedFiles(req.files.media_files)
           : undefined;
       const legal_docs =

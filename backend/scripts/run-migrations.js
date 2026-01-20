@@ -16,30 +16,11 @@ const path = require('path');
 const { Pool } = require('pg');
 require('dotenv').config();
 
-function buildConnectionConfig() {
-  const ssl = process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false;
-
-  // Prefer DATABASE_URL when provided (production/staging)
-  if (process.env.DATABASE_URL) {
-    return {
-      connectionString: process.env.DATABASE_URL,
-      ssl,
-    };
-  }
-
-  // Fallback to DB_* variables (local dev)
-  return {
-    host: process.env.DB_HOST || 'localhost',
-    port: Number(process.env.DB_PORT || 5432),
-    user: process.env.DB_USER || 'postgres',
-    password: process.env.DB_PASSWORD || undefined,
-    database: process.env.DB_NAME || 'postgres',
-    ssl,
-  };
-}
-
 // Database configuration
-const pool = new Pool(buildConnectionConfig());
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
+});
 
 /**
  * Run all migrations in order

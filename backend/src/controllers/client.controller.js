@@ -21,7 +21,8 @@ class ClientController {
     try {
       const page = req.query.page ? Number(req.query.page) : 1;
       const limit = req.query.limit ? Number(req.query.limit) : 50;
-      const search = typeof req.query.search === 'string' ? req.query.search : '';
+      const search =
+        typeof req.query.search === 'string' ? req.query.search : '';
 
       const query = {
         page,
@@ -165,7 +166,10 @@ class ClientController {
       );
 
       const notes = result.items.map((note) => ({
-        id: note.id !== undefined && note.id !== null ? Number(note.id) : undefined,
+        id:
+          note.id !== undefined && note.id !== null
+            ? Number(note.id)
+            : undefined,
         content: note.content,
         created_at: note.created_at,
         created_by:
@@ -202,7 +206,10 @@ class ClientController {
       return successResponse(
         res,
         {
-          id: note?.id !== undefined && note?.id !== null ? Number(note.id) : undefined,
+          id:
+            note?.id !== undefined && note?.id !== null
+              ? Number(note.id)
+              : undefined,
           content: note?.content,
           created_at: note?.created_at,
           created_by:

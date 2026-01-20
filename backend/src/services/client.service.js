@@ -36,7 +36,8 @@ class ClientService {
 
   async getAll(query, user) {
     const canSeeAll =
-      user.position === STAFF_ROLES.MANAGER || user.position === STAFF_ROLES.ADMIN;
+      user.position === STAFF_ROLES.MANAGER ||
+      user.position === STAFF_ROLES.ADMIN;
 
     if (!canSeeAll) {
       query.staff_id = user.staff_id;
@@ -51,7 +52,8 @@ class ClientService {
       : null;
 
     const canManageAll =
-      user.position === STAFF_ROLES.MANAGER || user.position === STAFF_ROLES.ADMIN;
+      user.position === STAFF_ROLES.MANAGER ||
+      user.position === STAFF_ROLES.ADMIN;
 
     if (!canManageAll && client.staff_id != user.staff_id) {
       throw new Error('You do not have permission to manage this customer');
@@ -69,11 +71,9 @@ class ClientService {
       : null;
 
     const canManageAll =
-      user.position === STAFF_ROLES.MANAGER || user.position === STAFF_ROLES.ADMIN;
-    if (
-      !canManageAll &&
-      client.staff_id != user.staff_id
-    ) {
+      user.position === STAFF_ROLES.MANAGER ||
+      user.position === STAFF_ROLES.ADMIN;
+    if (!canManageAll && client.staff_id != user.staff_id) {
       throw new Error('You do not have permission to manage this customer');
     }
     const updatedClient = await clientRepository.updateById(
@@ -90,7 +90,8 @@ class ClientService {
     const client = await clientRepository.findById(clientId);
 
     const canManageAll =
-      user.position === STAFF_ROLES.MANAGER || user.position === STAFF_ROLES.ADMIN;
+      user.position === STAFF_ROLES.MANAGER ||
+      user.position === STAFF_ROLES.ADMIN;
 
     if (!canManageAll && client.staff_id != user.staff_id) {
       throw new Error('You do not have permission to manage this customer');
@@ -105,7 +106,8 @@ class ClientService {
     const staff = await staffRepository.findById(data.staff_id);
 
     const canManageAll =
-      user.position === STAFF_ROLES.MANAGER || user.position === STAFF_ROLES.ADMIN;
+      user.position === STAFF_ROLES.MANAGER ||
+      user.position === STAFF_ROLES.ADMIN;
 
     if (!canManageAll && client.staff_id != user.staff_id) {
       throw new Error('You do not have permission to manage this customer');
@@ -122,7 +124,8 @@ class ClientService {
     const client = await clientRepository.findById(query.client_id);
 
     const canManageAll =
-      user.position === STAFF_ROLES.MANAGER || user.position === STAFF_ROLES.ADMIN;
+      user.position === STAFF_ROLES.MANAGER ||
+      user.position === STAFF_ROLES.ADMIN;
 
     if (!canManageAll && client.staff_id != user.staff_id) {
       throw new Error('You do not have permission to manage this customer');
