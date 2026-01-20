@@ -142,7 +142,7 @@ export function ContractsTable({
   contracts = [],
   onEdit,
   onDelete,
-  onViewFiles
+  onViewFiles,
 }: {
   contracts?: Contract[];
   onEdit?: (contract: Contract) => void;

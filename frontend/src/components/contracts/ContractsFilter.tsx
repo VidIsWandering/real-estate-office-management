@@ -16,11 +16,11 @@ export interface ContractsFilterValues {
   status: string;
 }
 
-export function ContractsFilter({ 
+export function ContractsFilter({
   onCreate,
   filters,
-  onFilterChange 
-}: { 
+  onFilterChange,
+}: {
   onCreate: () => void;
   filters?: ContractsFilterValues;
   onFilterChange?: (filters: ContractsFilterValues) => void;
@@ -28,10 +28,13 @@ export function ContractsFilter({
   const currentFilters = filters || {
     search: "",
     type: "all",
-    status: "all"
+    status: "all",
   };
 
-  const handleFilterChange = (key: keyof ContractsFilterValues, value: string) => {
+  const handleFilterChange = (
+    key: keyof ContractsFilterValues,
+    value: string,
+  ) => {
     if (onFilterChange) {
       onFilterChange({ ...currentFilters, [key]: value });
     }
@@ -50,7 +53,10 @@ export function ContractsFilter({
           />
         </div>
 
-        <Select value={currentFilters.type} onValueChange={(v) => handleFilterChange("type", v)}>
+        <Select
+          value={currentFilters.type}
+          onValueChange={(v) => handleFilterChange("type", v)}
+        >
           <SelectTrigger className="w-40">
             <SelectValue placeholder="Contract type" />
           </SelectTrigger>
@@ -62,14 +68,19 @@ export function ContractsFilter({
           </SelectContent>
         </Select>
 
-        <Select value={currentFilters.status} onValueChange={(v) => handleFilterChange("status", v)}>
+        <Select
+          value={currentFilters.status}
+          onValueChange={(v) => handleFilterChange("status", v)}
+        >
           <SelectTrigger className="w-40">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All</SelectItem>
             <SelectItem value="draft">Draft</SelectItem>
-            <SelectItem value="pending_signature">Awaiting signature</SelectItem>
+            <SelectItem value="pending_signature">
+              Awaiting signature
+            </SelectItem>
             <SelectItem value="signed">Signed</SelectItem>
             <SelectItem value="notarized">Notarized</SelectItem>
             <SelectItem value="finalized">Liquidated</SelectItem>
