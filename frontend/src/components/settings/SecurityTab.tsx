@@ -42,7 +42,8 @@ export function SecurityTab() {
     confirm: false,
   });
 
-  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{6,}$/;
+  // Keep validation aligned with backend: only requires min length 6
+  const passwordRegex = /^.{6,}$/;
 
   const handlePasswordChange = async () => {
     setPasswordError(null);
@@ -62,9 +63,7 @@ export function SecurityTab() {
     }
 
     if (!passwordRegex.test(passwordData.newPassword)) {
-      setPasswordError(
-        "Password must be at least 6 characters and include uppercase, lowercase, and a number",
-      );
+      setPasswordError("Password must be at least 6 characters");
       return;
     }
 
@@ -124,7 +123,7 @@ export function SecurityTab() {
     try {
       setLoadingHistory(true);
       setHistoryError(null);
-      const response = await getLoginHistory();
+      const response = await getLoginHistory({ limit: 50 });
       setLoginHistory(response.data.slice(0, 10)); // Last 10 logins
     } catch (err: unknown) {
       setHistoryError(
@@ -139,7 +138,7 @@ export function SecurityTab() {
   const [activeSessions, setActiveSessions] = useState<ActiveSession[]>([]);
   const [loadingSessions, setLoadingSessions] = useState(true);
   const [sessionsError, setSessionsError] = useState<string | null>(null);
-  const [revokingSession, setRevokingSession] = useState<string | null>(null);
+  const [revokingSession, setRevokingSession] = useState<number | null>(null);
 
   useEffect(() => {
     loadActiveSessions();
@@ -160,7 +159,7 @@ export function SecurityTab() {
     }
   };
 
-  const handleRevokeSession = async (sessionId: string) => {
+  const handleRevokeSession = async (sessionId: number) => {
     if (!confirm("Revoke this session? The user will be logged out.")) return;
 
     try {
@@ -185,8 +184,9 @@ export function SecurityTab() {
       return;
 
     try {
-      setRevokingSession("all");
-      await revokeAllSessions();
+      setRevokingSession(-1); // Special value for "all"
+      const currentSession = activeSessions.find((s) => s.is_current);
+      await revokeAllSessions(currentSession?.id);
       await loadActiveSessions();
     } catch (err: unknown) {
       alert(err instanceof Error ? err.message : "Failed to revoke sessions");
@@ -383,9 +383,9 @@ export function SecurityTab() {
               variant="outline"
               size="sm"
               onClick={handleRevokeAllSessions}
-              disabled={revokingSession === "all"}
+              disabled={revokingSession === -1}
             >
-              {revokingSession === "all" ? (
+              {revokingSession === -1 ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                   Revoking...
@@ -420,15 +420,25 @@ export function SecurityTab() {
                     {getDeviceIcon(session.user_agent)}
                   </div>
                   <div>
-                    <p className="text-sm font-medium">
-                      {session.user_agent || "Unknown Device"}
-                    </p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-medium">
+                        {session.user_agent || "Unknown Device"}
+                      </p>
+                      {session.is_current && (
+                        <span className="px-2 py-0.5 text-xs bg-emerald-100 text-emerald-700 rounded-full">
+                          Current
+                        </span>
+                      )}
+                    </div>
                     <p className="text-xs text-gray-500">
                       {session.ip_address || "Unknown IP"} •{" "}
-                      {formatDate(session.login_at)}
+                      {formatDate(session.created_at)}
                     </p>
                     <p className="text-xs text-gray-400">
                       Last activity: {formatDate(session.last_activity)}
+                    </p>
+                    <p className="text-xs text-gray-400">
+                      Expires: {formatDate(session.expires_at)}
                     </p>
                   </div>
                 </div>
@@ -436,10 +446,19 @@ export function SecurityTab() {
                   variant="ghost"
                   size="sm"
                   onClick={() => handleRevokeSession(session.id)}
-                  disabled={revokingSession === session.id}
+                  disabled={
+                    revokingSession === session.id || session.is_current
+                  }
+                  title={
+                    session.is_current
+                      ? "Cannot revoke current session"
+                      : "Revoke session"
+                  }
                 >
                   {revokingSession === session.id ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : session.is_current ? (
+                    "Current"
                   ) : (
                     "Revoke"
                   )}
@@ -478,7 +497,18 @@ export function SecurityTab() {
                   {getDeviceIcon(login.user_agent)}
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm">{formatDate(login.login_at)}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm">{formatDate(login.created_at)}</p>
+                    <span
+                      className={`text-xs px-2 py-0.5 rounded-full ${
+                        login.status === "success"
+                          ? "bg-emerald-100 text-emerald-700"
+                          : "bg-red-100 text-red-700"
+                      }`}
+                    >
+                      {login.action_type}
+                    </span>
+                  </div>
                   <p className="text-xs text-gray-500">
                     {login.ip_address || "Unknown IP"} •{" "}
                     {login.user_agent || "Unknown Device"}

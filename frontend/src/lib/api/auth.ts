@@ -24,19 +24,22 @@ export interface UserProfile {
 
 export interface LoginHistory {
   id: number;
-  staff_id: number;
-  login_at: string;
-  ip_address: string | null;
-  user_agent: string | null;
+  action_type: string;
+  ip_address: string;
+  user_agent: string;
+  status: string;
+  created_at: string;
 }
 
 export interface ActiveSession {
-  id: string;
-  staff_id: number;
-  login_at: string;
+  id: number;
+  ip_address: string;
+  user_agent: string;
+  device_info: Record<string, unknown>;
   last_activity: string;
-  ip_address: string | null;
-  user_agent: string | null;
+  expires_at: string;
+  is_current: boolean;
+  created_at: string;
 }
 
 // ==================== PROFILE APIs ====================
@@ -73,7 +76,11 @@ export async function changePassword(data: {
   current_password: string;
   new_password: string;
   confirm_password: string;
-}): Promise<{ success: boolean; message: string }> {
+}): Promise<{
+  success: boolean;
+  message: string;
+  data?: { message?: string };
+}> {
   const token = getAuthToken();
   return put("/auth/change-password", data, token);
 }
@@ -81,21 +88,26 @@ export async function changePassword(data: {
 // ==================== SECURITY APIs ====================
 
 /**
- * Get login history
+ * GET /auth/login-history - Get login history
  */
-export async function getLoginHistory(): Promise<{
+export async function getLoginHistory(params?: { limit?: number }): Promise<{
   success: boolean;
+  message: string;
   data: LoginHistory[];
 }> {
   const token = getAuthToken();
-  return get("/auth/login-history", token);
+  const query = new URLSearchParams();
+  if (params?.limit) query.set("limit", String(params.limit));
+  const qs = query.toString();
+  return get(`/auth/login-history${qs ? `?${qs}` : ""}`, token);
 }
 
 /**
- * Get active sessions
+ * GET /auth/sessions - Get active sessions
  */
 export async function getActiveSessions(): Promise<{
   success: boolean;
+  message: string;
   data: ActiveSession[];
 }> {
   const token = getAuthToken();
@@ -103,41 +115,48 @@ export async function getActiveSessions(): Promise<{
 }
 
 /**
- * Revoke session
+ * DELETE /auth/sessions/{id} - Revoke session
  */
-export async function revokeSession(
-  sessionId: string,
-): Promise<{ success: boolean; message: string }> {
+export async function revokeSession(sessionId: number): Promise<{
+  success: boolean;
+  message: string;
+  data: { revoked: boolean };
+}> {
   const token = getAuthToken();
   return del(`/auth/sessions/${sessionId}`, token);
 }
 
 /**
- * Revoke all sessions except current
+ * POST /auth/sessions/revoke-all - Revoke all sessions except current
  */
-export async function revokeAllSessions(): Promise<{
+export async function revokeAllSessions(currentSessionId?: number): Promise<{
   success: boolean;
   message: string;
+  data: { revoked_count: number };
 }> {
   const token = getAuthToken();
-  return post("/auth/sessions/revoke-all", {}, token);
+  const payload = currentSessionId
+    ? { current_session_id: currentSessionId }
+    : {};
+  return post("/auth/sessions/revoke-all", payload, token);
 }
 
 // ==================== 2FA APIs (Placeholder) ====================
 
 /**
- * Enable 2FA (Not implemented in backend yet)
+ * POST /auth/2fa/enable - Enable 2FA (Not implemented in backend yet)
  */
 export async function enable2FA(): Promise<{
   success: boolean;
-  data: { qr_code: string; secret: string };
+  message: string;
+  data?: { qr_code: string; secret: string };
 }> {
   const token = getAuthToken();
   return post("/auth/2fa/enable", {}, token);
 }
 
 /**
- * Disable 2FA (Not implemented in backend yet)
+ * POST /auth/2fa/disable - Disable 2FA (Not implemented in backend yet)
  */
 export async function disable2FA(data: {
   password: string;
@@ -147,10 +166,10 @@ export async function disable2FA(data: {
 }
 
 /**
- * Verify 2FA (Not implemented in backend yet)
+ * POST /auth/2fa/verify - Verify 2FA (Not implemented in backend yet)
  */
 export async function verify2FA(data: {
-  code: string;
+  token: string;
 }): Promise<{ success: boolean; message: string }> {
   const token = getAuthToken();
   return post("/auth/2fa/verify", data, token);

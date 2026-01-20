@@ -10,7 +10,11 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 
-export function TransactionsFilter({ onCreate }: { onCreate: () => void }) {
+interface TransactionsFilterProps {
+  onCreate?: () => void;
+}
+
+export function TransactionsFilter({ onCreate }: TransactionsFilterProps) {
   return (
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-2">

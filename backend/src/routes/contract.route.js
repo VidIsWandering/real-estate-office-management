@@ -8,6 +8,7 @@ const router = express.Router();
 const contractController = require('../controllers/contract.controller');
 const { authenticate, authorize } = require('../middlewares/auth.middleware');
 const { STAFF_ROLES } = require('../config/constants');
+const upload = require('../middlewares/upload.middleware');
 
 // All routes require authentication
 router.use(authenticate);
@@ -33,7 +34,7 @@ router.get('/:id', contractController.getById);
  */
 router.post(
   '/',
-  authorize([STAFF_ROLES.STAFF, STAFF_ROLES.MANAGER, STAFF_ROLES.ADMIN]),
+  authorize([STAFF_ROLES.AGENT, STAFF_ROLES.MANAGER, STAFF_ROLES.ADMIN]),
   contractController.create
 );
 
@@ -44,7 +45,7 @@ router.post(
  */
 router.put(
   '/:id',
-  authorize([STAFF_ROLES.STAFF, STAFF_ROLES.MANAGER, STAFF_ROLES.ADMIN]),
+  authorize([STAFF_ROLES.AGENT, STAFF_ROLES.MANAGER, STAFF_ROLES.ADMIN]),
   contractController.update
 );
 
@@ -55,7 +56,7 @@ router.put(
  */
 router.patch(
   '/:id/status',
-  authorize([STAFF_ROLES.STAFF, STAFF_ROLES.MANAGER, STAFF_ROLES.ADMIN]),
+  authorize([STAFF_ROLES.AGENT, STAFF_ROLES.MANAGER, STAFF_ROLES.ADMIN]),
   contractController.updateStatus
 );
 
@@ -64,7 +65,11 @@ router.patch(
  * @desc    Upload contract files
  * @access  Private
  */
-router.post('/:id/files', contractController.uploadFiles);
+router.post(
+  '/:id/files',
+  upload.fields([{ name: 'attachments', maxCount: 10 }]),
+  contractController.uploadFiles
+);
 
 /**
  * @route   GET /api/v1/contracts/:id/files

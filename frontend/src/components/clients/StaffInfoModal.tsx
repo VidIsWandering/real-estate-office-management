@@ -4,14 +4,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Mail,
-  Phone,
-  MapPin,
-  Briefcase,
-  Badge as BadgeIcon,
-} from "lucide-react";
-import { Staff } from "@/app/staff/page";
+import { Mail, Phone, MapPin, Briefcase } from "lucide-react";
+import type { Staff } from "@/lib/api";
 import { Badge } from "@/components/ui/badge";
 
 interface StaffInfoModalProps {
@@ -27,6 +21,18 @@ export function StaffInfoModal({
 }: StaffInfoModalProps) {
   if (!staff) return null;
 
+  const name = staff.full_name;
+  const email = "email" in staff ? staff.email : null;
+  const phone = "phone_number" in staff ? staff.phone_number : null;
+  const username = "username" in staff ? staff.username : null;
+  const assignedArea = staff.assigned_area;
+
+  const statusLabel = staff.status === "working" ? "Working" : "Off duty";
+  const statusClass =
+    staff.status === "working"
+      ? "bg-green-100 text-green-800"
+      : "bg-gray-100 text-gray-800";
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[500px]">
@@ -35,21 +41,19 @@ export function StaffInfoModal({
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* Header */}
           <div className="flex items-center gap-4 pb-4 border-b border-gray-200">
             <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center text-2xl font-bold text-white">
-              {staff.name
+              {name
                 .split(" ")
                 .map((n) => n[0])
                 .join("")}
             </div>
             <div>
-              <h3 className="text-lg font-bold text-gray-900">{staff.name}</h3>
-              <p className="text-sm text-gray-500">{staff.id}</p>
+              <h3 className="text-lg font-bold text-gray-900">{name}</h3>
+              <p className="text-sm text-gray-500">S{staff.id}</p>
             </div>
           </div>
 
-          {/* Basic Information */}
           <div>
             <h4 className="text-sm font-semibold text-gray-900 mb-3">
               Position & Area
@@ -71,13 +75,12 @@ export function StaffInfoModal({
                 </p>
                 <div className="flex items-center gap-2">
                   <MapPin className="w-4 h-4 text-gray-400" />
-                  <p className="text-sm text-gray-900">{staff.assignedArea}</p>
+                  <p className="text-sm text-gray-900">{assignedArea ?? "-"}</p>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Contact Information */}
           <div>
             <h4 className="text-sm font-semibold text-gray-900 mb-3">
               Contact Information
@@ -89,7 +92,7 @@ export function StaffInfoModal({
                 </p>
                 <div className="flex items-center gap-2">
                   <Mail className="w-4 h-4 text-gray-400" />
-                  <p className="text-sm text-gray-900">{staff.email}</p>
+                  <p className="text-sm text-gray-900">{email ?? "-"}</p>
                 </div>
               </div>
 
@@ -99,13 +102,12 @@ export function StaffInfoModal({
                 </p>
                 <div className="flex items-center gap-2">
                   <Phone className="w-4 h-4 text-gray-400" />
-                  <p className="text-sm text-gray-900">{staff.phone}</p>
+                  <p className="text-sm text-gray-900">{phone ?? "-"}</p>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Account Information */}
           <div>
             <h4 className="text-sm font-semibold text-gray-900 mb-3">
               Account Information
@@ -115,22 +117,14 @@ export function StaffInfoModal({
                 <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
                   Username
                 </p>
-                <p className="text-sm text-gray-900">{staff.username}</p>
+                <p className="text-sm text-gray-900">{username ?? "-"}</p>
               </div>
 
               <div>
                 <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
                   Status
                 </p>
-                <Badge
-                  className={
-                    staff.status === "Active"
-                      ? "bg-green-100 text-green-800"
-                      : "bg-gray-100 text-gray-800"
-                  }
-                >
-                  {staff.status}
-                </Badge>
+                <Badge className={statusClass}>{statusLabel}</Badge>
               </div>
             </div>
           </div>

@@ -138,7 +138,19 @@ const contracts: Contract[] = [
   },
 ];
 
-export function ContractsTable() {
+interface ContractsTableProps {
+  contracts?: Contract[];
+  onEdit?: (contract: Contract) => void;
+  onDelete?: (contract: Contract) => void;
+  onViewFiles?: (contract: Contract) => void;
+}
+
+export function ContractsTable({
+  contracts = [],
+  onEdit,
+  onDelete,
+  onViewFiles,
+}: ContractsTableProps) {
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<Contract | null>(null);
 

@@ -8,6 +8,12 @@ const router = express.Router();
 const realEstateController = require('../controllers/real-estate.controller');
 const { authenticate, authorize } = require('../middlewares/auth.middleware');
 const { STAFF_ROLES } = require('../config/constants');
+const upload = require('../middlewares/upload.middleware');
+const {
+  createRealEstateValidator,
+  updateRealEstateValidator,
+} = require('../validators/real-estate.validator');
+const { validate } = require('../middlewares/validate.middleware');
 
 // All routes require authentication
 router.use(authenticate);
@@ -17,7 +23,7 @@ router.use(authenticate);
  * @desc    Get all real estates
  * @access  Private
  */
-router.get('/', realEstateController.getAll);
+router.get('/', authenticate, realEstateController.getAll);
 
 /**
  * @route   GET /api/v1/real-estates/:id
@@ -34,6 +40,14 @@ router.get('/:id', realEstateController.getById);
 router.post(
   '/',
   authorize([STAFF_ROLES.AGENT, STAFF_ROLES.MANAGER, STAFF_ROLES.ADMIN]),
+
+  upload.fields([
+    { name: 'media_files', maxCount: 10 },
+    { name: 'legal_docs', maxCount: 10 },
+  ]),
+  createRealEstateValidator,
+  validate,
+
   realEstateController.create
 );
 
@@ -45,6 +59,13 @@ router.post(
 router.put(
   '/:id',
   authorize([STAFF_ROLES.AGENT, STAFF_ROLES.MANAGER, STAFF_ROLES.ADMIN]),
+
+  upload.fields([
+    { name: 'media_files', maxCount: 10 },
+    { name: 'legal_docs', maxCount: 10 },
+  ]),
+  updateRealEstateValidator,
+  validate,
   realEstateController.update
 );
 
@@ -55,7 +76,7 @@ router.put(
  */
 router.put(
   '/:id/legal-check',
-  authorize([STAFF_ROLES.STAFF, STAFF_ROLES.MANAGER, STAFF_ROLES.ADMIN]),
+  authorize([STAFF_ROLES.LEGAL_OFFICER, STAFF_ROLES.MANAGER]),
   realEstateController.legalCheck
 );
 

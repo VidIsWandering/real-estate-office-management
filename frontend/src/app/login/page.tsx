@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { post } from "@/lib/api/client";
+import { useAuth } from "@/lib/context/AuthProvider";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -16,6 +16,7 @@ import {
 
 export default function LoginPage() {
   const router = useRouter();
+  const { login } = useAuth();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -27,12 +28,7 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const response = await post<{
-        data: { tokens: { access_token: string } };
-      }>("auth/login", { username, password });
-
-      // Save token to localStorage
-      localStorage.setItem("auth_token", response.data.tokens.access_token);
+      await login(username, password);
 
       // Redirect to dashboard/settings
       router.push("/settings");

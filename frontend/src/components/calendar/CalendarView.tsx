@@ -17,80 +17,18 @@ export interface CalendarEvent {
 }
 
 interface CalendarViewProps {
-  onDayClick?: (date: string) => void;
+  events: CalendarEvent[];
+  currentDate: Date;
+  onCurrentDateChange: (date: Date) => void;
   onAddEventForDate?: (date: string) => void;
 }
 
-const mockEvents: CalendarEvent[] = [
-  {
-    id: "EVT001",
-    title: "Property Viewing",
-    type: "Viewing",
-    date: "2024-01-08",
-    time: "10:00 AM",
-    property: "123 Oak Street",
-    client: "John Wilson",
-    agent: "Alice Chen",
-    location: "123 Oak Street, Downtown",
-  },
-  {
-    id: "EVT002",
-    title: "Client Meeting",
-    type: "Meeting",
-    date: "2024-01-08",
-    time: "2:30 PM",
-    client: "Sarah Martinez",
-    agent: "Bob Smith",
-    location: "Office",
-  },
-  {
-    id: "EVT003",
-    title: "Home Inspection",
-    type: "Inspection",
-    date: "2024-01-09",
-    time: "9:00 AM",
-    property: "456 Maple Avenue",
-    agent: "Carol Davis",
-    location: "456 Maple Avenue",
-  },
-  {
-    id: "EVT004",
-    title: "Property Showing",
-    type: "Showing",
-    date: "2024-01-09",
-    time: "3:00 PM",
-    property: "789 Pine Road",
-    client: "Michael Chen",
-    agent: "David Lee",
-    location: "789 Pine Road",
-  },
-  {
-    id: "EVT005",
-    title: "Closing Meeting",
-    type: "Closing",
-    date: "2024-01-10",
-    time: "11:00 AM",
-    property: "321 Elm Street",
-    client: "Lisa Anderson",
-    agent: "Emma Wilson",
-    location: "Law Office",
-  },
-  {
-    id: "EVT006",
-    title: "Market Analysis Review",
-    type: "Meeting",
-    date: "2024-01-10",
-    time: "4:00 PM",
-    agent: "Frank Brown",
-    location: "Office Conference Room",
-  },
-];
-
 export function CalendarView({
-  onDayClick,
+  events,
+  currentDate,
+  onCurrentDateChange,
   onAddEventForDate,
 }: CalendarViewProps) {
-  const [currentDate, setCurrentDate] = useState(new Date(2024, 0, 1));
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [isViewEventsModalOpen, setIsViewEventsModalOpen] = useState(false);
   const [isAllEventsPanelOpen, setIsAllEventsPanelOpen] = useState(false);
@@ -110,13 +48,13 @@ export function CalendarView({
   };
 
   const previousMonth = () => {
-    setCurrentDate(
+    onCurrentDateChange(
       new Date(currentDate.getFullYear(), currentDate.getMonth() - 1),
     );
   };
 
   const nextMonth = () => {
-    setCurrentDate(
+    onCurrentDateChange(
       new Date(currentDate.getFullYear(), currentDate.getMonth() + 1),
     );
   };
@@ -141,7 +79,7 @@ export function CalendarView({
     const dateStr = `${currentDate.getFullYear()}-${String(
       currentDate.getMonth() + 1,
     ).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-    return mockEvents.filter((event) => event.date === dateStr);
+    return events.filter((event) => event.date === dateStr);
   };
 
   const getEventColor = (type: string) => {
@@ -210,7 +148,7 @@ export function CalendarView({
 
   const getSelectedDateEvents = () => {
     if (!selectedDate) return [];
-    return mockEvents.filter((event) => event.date === selectedDate);
+    return events.filter((event) => event.date === selectedDate);
   };
 
   return (
@@ -322,7 +260,7 @@ export function CalendarView({
       <AllEventsPanel
         isOpen={isAllEventsPanelOpen}
         onClose={() => setIsAllEventsPanelOpen(false)}
-        events={mockEvents}
+        events={events}
       />
 
       {/* Date Context Menu */}

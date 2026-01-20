@@ -17,10 +17,17 @@ import {
   Compass,
   StickyNote,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { OwnerInfoModal } from "@/components/properties/OwnerInfoModal";
+import { getProfile } from "@/lib/api";
+import {
+  getRealEstateById,
+  legalCheckRealEstate,
+  type RealEstate,
+  type RealEstateStatus,
+} from "@/lib/api/real-estates";
 
 interface Property {
   id: string;
@@ -60,171 +67,59 @@ interface Property {
   ownerAddress: string;
 }
 
-// Mock data - In real app, this would come from API/database
-const propertiesData: Property[] = [
-  {
-    id: "1",
-    image: "🏢",
-    name: "Downtown Luxury Penthouse",
-    type: "Apartment",
-    status: "Listed",
-    price: 950000,
-    agent: "Alice Chen",
-    lastUpdated: "2024-01-15",
-    plotWidth: 20,
-    plotLength: 30,
-    plotArea: 600,
-    buildingWidth: 15,
-    buildingLength: 25,
-    buildingArea: 375,
-    direction: "Southeast",
-    floors: 2,
-    bedrooms: 4,
-    bathrooms: 3,
-    livingRooms: 2,
-    notes: "Premium apartment with a great view and luxury interior.",
-    ownerId: "C001",
-    ownerName: "Nguyen Van A",
-    ownerEmail: "nguyenvana@gmail.com",
-    ownerPhone: "0901234567",
-    ownerAddress: "123 Nguyen Hue St, District 1, Ho Chi Minh City",
-  },
-  {
-    id: "2",
-    image: "🏠",
-    name: "Suburban Family Home",
-    type: "House",
-    status: "New",
-    price: 425000,
-    agent: "Bob Smith",
-    lastUpdated: "2024-01-18",
-    plotWidth: 10,
-    plotLength: 20,
-    plotArea: 200,
-    buildingWidth: 8,
-    buildingLength: 15,
-    buildingArea: 120,
-    direction: "South",
-    floors: 1,
-    bedrooms: 3,
-    bathrooms: 2,
-    livingRooms: 1,
-    notes: "Newly built home in a quiet neighborhood.",
-    ownerId: "C002",
-    ownerName: "Tran Thi B",
-    ownerEmail: "tranthib@gmail.com",
-    ownerPhone: "0912345678",
-    ownerAddress: "456 Le Loi St, District 3, Ho Chi Minh City",
-  },
-  {
-    id: "3",
-    image: "🏢",
-    name: "Commercial Office Space",
-    type: "Commercial",
-    status: "Pending legal review",
-    price: 1200000,
-    agent: "Carol Davis",
-    lastUpdated: "2024-01-20",
-    plotWidth: 25,
-    plotLength: 40,
-    plotArea: 1000,
-    buildingWidth: 20,
-    buildingLength: 35,
-    buildingArea: 700,
-    direction: "East",
-    floors: 3,
-    bedrooms: 0,
-    bathrooms: 4,
-    livingRooms: 0,
-    notes: "Office space in a prime location.",
-    ownerId: "C003",
-    ownerName: "Le Van C",
-    ownerEmail: "levanc@gmail.com",
-    ownerPhone: "0923456789",
-    ownerAddress: "789 Hai Ba Trung St, District 1, Ho Chi Minh City",
-  },
-  {
-    id: "4",
-    image: "🏖️",
-    name: "Beachfront Condo",
-    type: "Apartment",
-    status: "Negotiating",
-    price: 650000,
-    agent: "David Lee",
-    lastUpdated: "2024-01-17",
-    plotWidth: 12,
-    plotLength: 18,
-    plotArea: 216,
-    buildingWidth: 10,
-    buildingLength: 15,
-    buildingArea: 150,
-    direction: "Southeast",
-    floors: 1,
-    bedrooms: 2,
-    bathrooms: 2,
-    livingRooms: 1,
-    notes: "Condo with an amazing ocean view.",
-    ownerId: "C004",
-    ownerName: "Pham Thi D",
-    ownerEmail: "phamthid@gmail.com",
-    ownerPhone: "0934567890",
-    ownerAddress: "321 Tran Hung Dao St, District 5, Ho Chi Minh City",
-  },
-  {
-    id: "5",
-    image: "🌳",
-    name: "Residential Land Plot",
-    type: "Land",
-    status: "Paused",
-    price: 280000,
-    agent: "Emma Wilson",
-    lastUpdated: "2024-01-19",
-    plotWidth: 15,
-    plotLength: 25,
-    plotArea: 375,
-    buildingWidth: 0,
-    buildingLength: 0,
-    buildingArea: 0,
-    direction: "North",
-    floors: 0,
-    bedrooms: 0,
-    bathrooms: 0,
-    livingRooms: 0,
-    notes: "Project land plot with separate ownership certificate.",
-    ownerId: "C005",
-    ownerName: "Hoang Van E",
-    ownerEmail: "hoangvane@gmail.com",
-    ownerPhone: "0945678901",
-    ownerAddress: "654 Cach Mang Thang 8 St, District 10, Ho Chi Minh City",
-  },
-  {
-    id: "6",
-    image: "🏠",
-    name: "Modern Urban Townhouse",
-    type: "House",
-    status: "Closed",
-    price: 580000,
-    agent: "Frank Brown",
-    lastUpdated: "2024-01-10",
-    plotWidth: 8,
-    plotLength: 20,
-    plotArea: 160,
-    buildingWidth: 7,
-    buildingLength: 18,
-    buildingArea: 126,
-    direction: "West",
-    floors: 2,
-    bedrooms: 3,
-    bathrooms: 3,
-    livingRooms: 1,
-    notes: "Modern townhouse with a premium design.",
-    ownerId: "C006",
-    ownerName: "Vu Thi F",
-    ownerEmail: "vuthif@gmail.com",
-    ownerPhone: "0956789012",
-    ownerAddress: "987 Nguyen Thi Minh Khai St, District 3, Ho Chi Minh City",
-  },
-];
+function getPropertyEmoji(type: Property["type"]) {
+  switch (type) {
+    case "Apartment":
+      return "🏢";
+    case "House":
+      return "🏠";
+    case "Land":
+      return "🌳";
+    case "Commercial":
+      return "🏢";
+  }
+}
+
+function toUiPropertyType(type: string): Property["type"] {
+  const normalized = type.trim().toLowerCase();
+  if (normalized.includes("apartment") || normalized.includes("condo")) {
+    return "Apartment";
+  }
+  if (normalized.includes("house") || normalized.includes("townhouse")) {
+    return "House";
+  }
+  if (normalized.includes("land")) {
+    return "Land";
+  }
+  return "Commercial";
+}
+
+function toUiPropertyStatus(status: RealEstateStatus): Property["status"] {
+  switch (status) {
+    case "created":
+      return "New";
+    case "pending_legal_check":
+      return "Pending legal review";
+    case "listed":
+      return "Listed";
+    case "negotiating":
+      return "Negotiating";
+    case "transacted":
+      return "Closed";
+    case "suspended":
+      return "Paused";
+  }
+}
+
+function toUiNumber(value: number | string): number {
+  return typeof value === "number" ? value : Number(value);
+}
+
+function toTitleCaseWord(value: string): string {
+  const v = value.trim();
+  if (!v) return v;
+  return v[0].toUpperCase() + v.slice(1).toLowerCase();
+}
 
 function getStatusColor(status: Property["status"]) {
   const colors = {
@@ -245,7 +140,212 @@ export default function PropertyDetailPage({
 }) {
   const router = useRouter();
   const [isOwnerModalOpen, setIsOwnerModalOpen] = useState(false);
-  const property = propertiesData.find((p) => p.id === params.propertyId);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [realEstate, setRealEstate] = useState<RealEstate | null>(null);
+  const [userPosition, setUserPosition] = useState<string | null>(null);
+  const [owner, setOwner] = useState<{
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
+    address: string;
+  } | null>(null);
+  const [staffName, setStaffName] = useState<string | null>(null);
+  const [legalNote, setLegalNote] = useState("");
+  const [isLegalSubmitting, setIsLegalSubmitting] = useState(false);
+  const [legalError, setLegalError] = useState<string | null>(null);
+  const [legalSuccess, setLegalSuccess] = useState<string | null>(null);
+
+  const canLegalCheck =
+    userPosition === "legal_officer" || userPosition === "manager";
+
+  useEffect(() => {
+    let cancelled = false;
+    const run = async () => {
+      setIsLoading(true);
+      setLoadError(null);
+      try {
+        // Load current user position to decide whether to show legal-check UI.
+        try {
+          const profile = await getProfile();
+          if (!cancelled) {
+            setUserPosition(String(profile.data.position ?? "").toLowerCase());
+          }
+        } catch {
+          // Ignore profile load errors; page can still render.
+          if (!cancelled) setUserPosition(null);
+        }
+
+        const res = await getRealEstateById(params.propertyId);
+        const payload = res.data;
+        if (!payload || !payload.realEstate) {
+          if (!cancelled) {
+            setRealEstate(null);
+            setOwner(null);
+            setStaffName(null);
+          }
+          return;
+        }
+
+        if (cancelled) return;
+
+        setRealEstate(payload.realEstate);
+
+        // Reset legal-check feedback when loading a new record.
+        setLegalError(null);
+        setLegalSuccess(null);
+
+        const rawOwner = payload.owner as
+          | {
+              id?: string | number;
+              full_name?: string;
+              email?: string | null;
+              phone_number?: string | null;
+              address?: string | null;
+            }
+          | undefined;
+
+        if (rawOwner?.full_name) {
+          setOwner({
+            id: String(rawOwner.id ?? ""),
+            name: rawOwner.full_name,
+            email: rawOwner.email ?? "",
+            phone: rawOwner.phone_number ?? "",
+            address: rawOwner.address ?? "",
+          });
+        } else {
+          setOwner(null);
+        }
+
+        const rawStaff = payload.staff as
+          | {
+              full_name?: string;
+              email?: string | null;
+            }
+          | undefined;
+
+        if (rawStaff?.full_name) {
+          setStaffName(
+            rawStaff.email
+              ? `${rawStaff.full_name} (${rawStaff.email})`
+              : rawStaff.full_name,
+          );
+        } else {
+          setStaffName(null);
+        }
+      } catch (e) {
+        if (cancelled) return;
+        setLoadError(
+          e instanceof Error ? e.message : "Failed to load property",
+        );
+        setRealEstate(null);
+        setOwner(null);
+        setStaffName(null);
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    };
+
+    void run();
+    return () => {
+      cancelled = true;
+    };
+  }, [params.propertyId]);
+
+  const handleLegalDecision = async (isApproved: boolean) => {
+    if (!realEstate) return;
+
+    setIsLegalSubmitting(true);
+    setLegalError(null);
+    setLegalSuccess(null);
+
+    try {
+      await legalCheckRealEstate(realEstate.id, {
+        is_approved: isApproved,
+        note: legalNote.trim() ? legalNote.trim() : undefined,
+      });
+
+      const refreshed = await getRealEstateById(realEstate.id);
+      if (refreshed.data?.realEstate) {
+        setRealEstate(refreshed.data.realEstate);
+      }
+
+      setLegalSuccess(
+        isApproved
+          ? "Approved. Status moved to LISTED."
+          : "Rejected. Status kept as PENDING with note.",
+      );
+    } catch (e) {
+      setLegalError(
+        e instanceof Error ? e.message : "Failed to submit legal check",
+      );
+    } finally {
+      setIsLegalSubmitting(false);
+    }
+  };
+
+  const property: Property | null = useMemo(() => {
+    if (!realEstate) return null;
+    const type = toUiPropertyType(realEstate.type);
+    const status = toUiPropertyStatus(realEstate.status);
+
+    return {
+      id: String(realEstate.id),
+      image: getPropertyEmoji(type),
+      name: realEstate.title,
+      type,
+      status,
+      price: toUiNumber(realEstate.price),
+      agent: staffName ?? String(realEstate.staff_id),
+      lastUpdated: new Date().toISOString().split("T")[0] ?? "",
+      plotWidth: 0,
+      plotLength: 0,
+      plotArea: toUiNumber(realEstate.area),
+      buildingWidth: 0,
+      buildingLength: 0,
+      buildingArea: toUiNumber(realEstate.area),
+      direction: realEstate.direction
+        ? toTitleCaseWord(String(realEstate.direction))
+        : "",
+      floors: 0,
+      bedrooms: 0,
+      bathrooms: 0,
+      livingRooms: 0,
+      notes: realEstate.description ? String(realEstate.description) : "",
+      ownerId: owner?.id ?? "",
+      ownerName: owner?.name ?? "Unknown",
+      ownerEmail: owner?.email ?? "—",
+      ownerPhone: owner?.phone ?? "—",
+      ownerAddress: owner?.address ?? "—",
+    };
+  }, [owner, realEstate, staffName]);
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <p className="text-gray-600">Loading property...</p>
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">
+          Failed to load property
+        </h1>
+        <p className="text-gray-600 mb-6">{loadError}</p>
+        <button
+          onClick={() => router.push("/properties")}
+          className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back to Properties
+        </button>
+      </div>
+    );
+  }
 
   if (!property) {
     return (
@@ -471,6 +571,58 @@ export default function PropertyDetailPage({
                 <p className="text-sm text-gray-700">{property.notes}</p>
               </div>
             </div>
+
+            {/* Legal check */}
+            {canLegalCheck && realEstate?.status === "pending_legal_check" && (
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">
+                  Legal check
+                </h2>
+
+                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-3">
+                  <label className="text-sm text-gray-700 font-medium">
+                    Note (optional)
+                  </label>
+                  <textarea
+                    value={legalNote}
+                    onChange={(e) => setLegalNote(e.target.value)}
+                    placeholder="Reason / comments..."
+                    className="w-full min-h-[90px] rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-primary"
+                  />
+
+                  {legalError && (
+                    <div className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-md px-3 py-2">
+                      {legalError}
+                    </div>
+                  )}
+
+                  {legalSuccess && (
+                    <div className="text-sm text-green-700 bg-green-50 border border-green-200 rounded-md px-3 py-2">
+                      {legalSuccess}
+                    </div>
+                  )}
+
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <button
+                      type="button"
+                      disabled={isLegalSubmitting}
+                      onClick={() => void handleLegalDecision(true)}
+                      className="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 disabled:opacity-60 disabled:cursor-not-allowed"
+                    >
+                      {isLegalSubmitting ? "Submitting..." : "Approve"}
+                    </button>
+                    <button
+                      type="button"
+                      disabled={isLegalSubmitting}
+                      onClick={() => void handleLegalDecision(false)}
+                      className="flex-1 px-4 py-2.5 text-sm font-medium text-red-600 border border-red-200 rounded-lg hover:bg-red-50 disabled:opacity-60 disabled:cursor-not-allowed"
+                    >
+                      {isLegalSubmitting ? "Submitting..." : "Reject"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Owner information */}
             <div>

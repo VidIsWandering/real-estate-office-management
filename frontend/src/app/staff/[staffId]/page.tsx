@@ -1,125 +1,20 @@
 "use client";
 
 import { ArrowLeft } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { EditStaffForm } from "@/components/staff/EditStaffForm";
 import { StaffProfileDetail } from "@/components/staff/StaffProfileDetail";
-
-interface Staff {
-  id: string;
-  name: string;
-  username: string;
-  password: string;
-  email: string;
-  phone: string;
-  position: string;
-  assignedArea: string;
-  status: "Active" | "Inactive";
-}
-
-interface StaffFormData {
-  name: string;
-  username: string;
-  password: string;
-  email: string;
-  phone: string;
-  position: string;
-  assignedArea: string;
-  status: "Active" | "Inactive";
-}
-
-// Mock data - In real app, this would come from API/database
-const initialStaffData: Staff[] = [
-  {
-    id: "S001",
-    name: "Alice Chen",
-    username: "alice.chen",
-    password: "Pass123!",
-    email: "alice.chen@realestate.com",
-    phone: "5551234567",
-    position: "Senior Agent",
-    assignedArea: "Downtown District",
-    status: "Active",
-  },
-  {
-    id: "S002",
-    name: "Bob Smith",
-    username: "bob.smith",
-    password: "SecurePass456",
-    email: "bob.smith@realestate.com",
-    phone: "5552345678",
-    position: "Junior Agent",
-    assignedArea: "Riverside District",
-    status: "Active",
-  },
-  {
-    id: "S003",
-    name: "Carol Davis",
-    username: "carol.davis",
-    password: "ManagerPass789",
-    email: "carol.davis@realestate.com",
-    phone: "5553456789",
-    position: "Sales Manager",
-    assignedArea: "North Valley",
-    status: "Active",
-  },
-  {
-    id: "S004",
-    name: "David Lee",
-    username: "david.lee",
-    password: "DavidPass123",
-    email: "david.lee@realestate.com",
-    phone: "5554567890",
-    position: "Senior Agent",
-    assignedArea: "Westside Area",
-    status: "Active",
-  },
-  {
-    id: "S005",
-    name: "Emma Wilson",
-    username: "emma.wilson",
-    password: "EmmaSecure456",
-    email: "emma.wilson@realestate.com",
-    phone: "5555678901",
-    position: "Senior Agent",
-    assignedArea: "Downtown District",
-    status: "Active",
-  },
-  {
-    id: "S006",
-    name: "Frank Brown",
-    username: "frank.brown",
-    password: "FrankPass789",
-    email: "frank.brown@realestate.com",
-    phone: "5556789012",
-    position: "Junior Agent",
-    assignedArea: "Riverside District",
-    status: "Inactive",
-  },
-  {
-    id: "S007",
-    name: "Grace Martinez",
-    username: "grace.martinez",
-    password: "GracePass123",
-    email: "grace.martinez@realestate.com",
-    phone: "5557890123",
-    position: "Property Manager",
-    assignedArea: "North Valley",
-    status: "Active",
-  },
-  {
-    id: "S008",
-    name: "Henry Johnson",
-    username: "henry.johnson",
-    password: "HenryPass456",
-    email: "henry.johnson@realestate.com",
-    phone: "5558901234",
-    position: "Agent",
-    assignedArea: "Eastside Zone",
-    status: "Active",
-  },
-];
+import type { UpdateStaffFormData } from "@/components/staff/types";
+import { useAuth } from "@/lib/context/AuthProvider";
+import {
+  getStaffById,
+  updateStaff,
+  updateStaffPermissions,
+  updateStaffStatus,
+  type Staff,
+  type StaffStatus,
+} from "@/lib/api";
 
 export default function StaffDetailPage({
   params,
@@ -127,48 +22,84 @@ export default function StaffDetailPage({
   params: { staffId: string };
 }) {
   const router = useRouter();
+  const { user } = useAuth();
+  const canManage = user?.role === "admin" || user?.role === "manager";
+  const canSeeAll = canManage;
+
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [staffData, setStaffData] = useState<Staff[]>(initialStaffData);
+  const [staff, setStaff] = useState<Staff | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const staff = staffData.find((s) => s.id === params.staffId);
-
-  const handleStatusChange = (newStatus: "Active" | "Inactive") => {
-    if (staff) {
-      const updatedStaffData = staffData.map((s) =>
-        s.id === staff.id ? { ...s, status: newStatus } : s,
-      );
-      setStaffData(updatedStaffData);
+  const loadStaff = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await getStaffById(params.staffId);
+      setStaff(response.data);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to load staff");
+      setStaff(null);
+    } finally {
+      setIsLoading(false);
     }
+  }, [params.staffId]);
+
+  useEffect(() => {
+    void loadStaff();
+  }, [loadStaff]);
+
+  const handleStatusChange = (newStatus: StaffStatus) => {
+    if (!canManage || !staff) return;
+    void (async () => {
+      await updateStaffStatus(staff.id, newStatus);
+      await loadStaff();
+    })();
   };
 
-  const handleResetPassword = () => {
-    if (staff) {
-      const updatedStaffData = staffData.map((s) =>
-        s.id === staff.id ? { ...s, password: s.phone } : s,
-      );
-      setStaffData(updatedStaffData);
-      alert(`Password has been reset to phone number: ${staff.phone}`);
+  const handleEditStaff = async (data: UpdateStaffFormData) => {
+    if (!canManage || !staff) return;
+
+    const roleChanged = data.role !== staff.position;
+
+    await updateStaff(staff.id, {
+      full_name: data.full_name,
+      status: data.status,
+      email: data.email.trim() ? data.email : undefined,
+      phone_number: data.phone_number.trim() ? data.phone_number : undefined,
+      address: data.address.trim() ? data.address : undefined,
+      assigned_area: data.assigned_area.trim() ? data.assigned_area : undefined,
+    });
+
+    if (roleChanged) {
+      await updateStaffPermissions(staff.id, { role: data.role });
     }
+    setIsEditDialogOpen(false);
+    await loadStaff();
   };
 
-  const handleEditStaff = (data: StaffFormData) => {
-    if (staff) {
-      const updatedStaffData = staffData.map((s) =>
-        s.id === staff.id ? { ...s, ...data } : s,
-      );
-      setStaffData(updatedStaffData);
-      setIsEditDialogOpen(false);
-    }
-  };
+  if (isLoading) {
+    return (
+      <div className="max-w-4xl mx-auto p-4 md:p-6 text-sm text-gray-600">
+        Loading staff…
+      </div>
+    );
+  }
 
-  const handleDeleteStaff = () => {
-    if (
-      staff &&
-      window.confirm(`Are you sure you want to delete ${staff.name}?`)
-    ) {
-      router.push("/staff");
-    }
-  };
+  if (error) {
+    return (
+      <div className="max-w-4xl mx-auto p-4 md:p-6">
+        <div className="text-sm text-red-600 mb-4">{error}</div>
+        <button
+          onClick={() => router.push("/staff")}
+          className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back to Staff List
+        </button>
+      </div>
+    );
+  }
 
   if (!staff) {
     return (
@@ -202,10 +133,10 @@ export default function StaffDetailPage({
       {/* Staff Detail Card */}
       <StaffProfileDetail
         staff={staff}
+        canSeeAll={canSeeAll}
+        canManage={canManage}
         onEdit={() => setIsEditDialogOpen(true)}
-        onDelete={handleDeleteStaff}
         onStatusChange={handleStatusChange}
-        onResetPassword={handleResetPassword}
       />
 
       {/* Edit Staff Dialog */}
