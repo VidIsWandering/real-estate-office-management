@@ -41,8 +41,8 @@ const config = {
   db: {
     host: dbFromUrl?.host || process.env.DB_HOST || 'localhost',
     port: dbFromUrl?.port || parseInt(process.env.DB_PORT, 10) || 5432,
-    user: dbFromUrl?.user || process.env.DB_USER || 'postgres',
-    password: dbFromUrl?.password || process.env.DB_PASSWORD,
+    user: dbFromUrl?.user || process.env.DB_USER || 'devuser',
+    password: dbFromUrl?.password || process.env.DB_PASSWORD || 'devpassword',
     database: dbFromUrl?.database || process.env.DB_NAME || 'real_estate_db',
     min: parseInt(process.env.DB_POOL_MIN, 10) || 2,
     max: parseInt(process.env.DB_POOL_MAX, 10) || 10,

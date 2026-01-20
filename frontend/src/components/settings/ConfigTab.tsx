@@ -34,7 +34,7 @@ const forms: Array<{ key: string; label: string }> = [
   { key: "contracts", label: "Contracts" },
   { key: "payments", label: "Payments" },
   { key: "properties", label: "Properties" },
-  { key: "partners", label: "Partners" },
+  { key: "partners", label: "Clients" },
   { key: "staff", label: "Staff" },
 ];
 

@@ -1,23 +1,23 @@
 import { Badge } from "@/components/ui/badge";
-import { Edit2, Trash2, Mail, Phone } from "lucide-react";
+import { Edit2, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Partner } from "@/app/partners/page";
+import type { ClientItem } from "./types";
 
-interface PartnerTableProps {
-  partners: Partner[];
-  onSelectPartner: (id: string) => void;
-  selectedPartnerId: string | null;
-  onDeletePartner: (id: string) => void;
+interface ClientTableProps {
+  clients: ClientItem[];
+  onSelectClient: (id: string) => void;
+  selectedClientId: string | null;
+  onDeleteClient: (id: string) => void;
   onStaffNameClick?: (staffName: string) => void;
 }
 
-export function PartnerTable({
-  partners,
-  onSelectPartner,
-  selectedPartnerId,
-  onDeletePartner,
+export function ClientTable({
+  clients,
+  onSelectClient,
+  selectedClientId,
+  onDeleteClient,
   onStaffNameClick,
-}: PartnerTableProps) {
+}: ClientTableProps) {
   const getTypeColor = (type: string) => {
     switch (type) {
       case "owner":
@@ -79,50 +79,48 @@ export function PartnerTable({
           </tr>
         </thead>
         <tbody>
-          {partners.map((partner, index) => (
+          {clients.map((client, index) => (
             <tr
-              key={partner.id}
-              onClick={() => onSelectPartner(partner.id)}
+              key={client.id}
+              onClick={() => onSelectClient(client.id)}
               className={cn(
                 "border-b border-gray-200 hover:bg-blue-50 transition-colors cursor-pointer",
-                selectedPartnerId === partner.id && "bg-blue-100",
+                selectedClientId === client.id && "bg-blue-100",
                 index % 2 === 0 ? "bg-white" : "bg-gray-50",
               )}
             >
               <td className="px-4 py-4 text-sm font-medium text-gray-900">
-                {partner.code}
+                {client.code}
               </td>
-              <td className="px-4 py-4 text-sm text-gray-900">
-                {partner.name}
+              <td className="px-4 py-4 text-sm text-gray-900">{client.name}</td>
+              <td className="px-4 py-4 text-sm text-gray-700">
+                {client.email}
               </td>
               <td className="px-4 py-4 text-sm text-gray-700">
-                {partner.email}
+                {client.phone}
               </td>
               <td className="px-4 py-4 text-sm text-gray-700">
-                {partner.phone}
-              </td>
-              <td className="px-4 py-4 text-sm text-gray-700">
-                {partner.address}
+                {client.address}
               </td>
               <td className="px-4 py-4 text-sm">
-                <Badge className={`${getTypeColor(partner.partnerType)}`}>
-                  {getTypeLabel(partner.partnerType)}
+                <Badge className={`${getTypeColor(client.clientType)}`}>
+                  {getTypeLabel(client.clientType)}
                 </Badge>
               </td>
               <td className="px-4 py-4 text-sm text-gray-700">
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    onStaffNameClick?.(partner.assignedStaff);
+                    onStaffNameClick?.(client.assignedStaff);
                   }}
                   className="text-blue-600 hover:text-blue-800 hover:underline transition-colors cursor-pointer font-medium"
                 >
-                  {partner.assignedStaff}
+                  {client.assignedStaff}
                 </button>
               </td>
               <td className="px-4 py-4 text-sm">
-                <Badge className={`${getStatusColor(partner.status)}`}>
-                  {partner.status}
+                <Badge className={`${getStatusColor(client.status)}`}>
+                  {client.status}
                 </Badge>
               </td>
               <td className="px-4 py-4">
@@ -130,10 +128,10 @@ export function PartnerTable({
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      onSelectPartner(partner.id);
+                      onSelectClient(client.id);
                     }}
                     className="p-1.5 text-gray-600 hover:bg-gray-200 rounded transition-colors"
-                    title="Edit partner"
+                    title="Edit client"
                   >
                     <Edit2 className="w-4 h-4" />
                   </button>
@@ -142,14 +140,14 @@ export function PartnerTable({
                       e.stopPropagation();
                       if (
                         window.confirm(
-                          `Are you sure you want to delete ${partner.name}?`,
+                          `Are you sure you want to delete ${client.name}?`,
                         )
                       ) {
-                        onDeletePartner(partner.id);
+                        onDeleteClient(client.id);
                       }
                     }}
                     className="p-1.5 text-red-600 hover:bg-red-100 rounded transition-colors"
-                    title="Delete partner"
+                    title="Delete client"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>

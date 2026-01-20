@@ -9,12 +9,26 @@ class AccountRepository {
   /**
    * Tạo account mới
    */
+  // async create(username, hashedPassword) {
+  //   const sql = `
+  //     INSERT INTO account (username, password)
+  //     VALUES ($1, $2)
+  //     RETURNING *
+  //   `;
+  //   const result = await db.query(sql, [username, hashedPassword]);
+  //   return new Account(result.rows[0]);
+  // }
+
   async create(username, hashedPassword) {
+    console.log('Creating account:');
+    console.log('- Username length:', username.length, 'value:', username);
+    console.log('- Password length:', hashedPassword.length);
+
     const sql = `
-      INSERT INTO account (username, password)
-      VALUES ($1, $2)
-      RETURNING *
-    `;
+    INSERT INTO account (username, password)
+    VALUES ($1, $2)
+    RETURNING *
+  `;
     const result = await db.query(sql, [username, hashedPassword]);
     return new Account(result.rows[0]);
   }

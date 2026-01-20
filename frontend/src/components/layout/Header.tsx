@@ -210,13 +210,13 @@ export function Header() {
                 <p className="text-xs text-gray-500">{userEmail}</p>
               </div>
 
-              <button
+              {/* <button
                 onClick={handleGoProfile}
                 className="w-full px-4 py-2 flex items-center gap-2 text-sm hover:bg-gray-50"
               >
                 <User className="w-4 h-4" />
                 My Profile
-              </button>
+              </button> */}
 
               <button
                 onClick={handleGoSettings}

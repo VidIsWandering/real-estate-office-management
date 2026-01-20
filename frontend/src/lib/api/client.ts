@@ -21,6 +21,10 @@ interface RequestOptions extends RequestInit {
   token?: string;
 }
 
+function isFormData(value: unknown): value is FormData {
+  return typeof FormData !== "undefined" && value instanceof FormData;
+}
+
 /**
  * Generic API request handler with error handling
  */
@@ -31,9 +35,14 @@ async function request<T>(
   const { token, ...fetchOptions } = options;
 
   const headers: Record<string, string> = {
-    "Content-Type": "application/json",
     ...(fetchOptions.headers as Record<string, string>),
   };
+
+  // Default to JSON for non-FormData bodies.
+  // For multipart/form-data, the browser must set the boundary automatically.
+  if (!headers["Content-Type"] && !isFormData(fetchOptions.body)) {
+    headers["Content-Type"] = "application/json";
+  }
 
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
@@ -96,6 +105,36 @@ export async function post<T>(
 }
 
 /**
+ * POST multipart/form-data
+ */
+export async function postFormData<T>(
+  endpoint: string,
+  body: FormData,
+  token?: string,
+): Promise<T> {
+  return request<T>(endpoint, {
+    method: "POST",
+    body,
+    token,
+  });
+}
+
+/**
+ * PUT multipart/form-data
+ */
+export async function putFormData<T>(
+  endpoint: string,
+  body: FormData,
+  token?: string,
+): Promise<T> {
+  return request<T>(endpoint, {
+    method: "PUT",
+    body,
+    token,
+  });
+}
+
+/**
  * PUT request
  */
 export async function put<T>(
@@ -105,6 +144,21 @@ export async function put<T>(
 ): Promise<T> {
   return request<T>(endpoint, {
     method: "PUT",
+    body: JSON.stringify(body),
+    token,
+  });
+}
+
+/**
+ * PATCH request
+ */
+export async function patch<T>(
+  endpoint: string,
+  body?: unknown,
+  token?: string,
+): Promise<T> {
+  return request<T>(endpoint, {
+    method: "PATCH",
     body: JSON.stringify(body),
     token,
   });

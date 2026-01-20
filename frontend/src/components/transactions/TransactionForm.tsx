@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -10,15 +10,117 @@ import {
   SelectItem,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
+import { createTransaction } from "@/lib/api/transactions";
+import { getClientOptions } from "@/lib/api/clients";
+import { getRealEstatesList } from "@/lib/api/real-estates";
 
-export function TransactionForm() {
-  const [, setPropertyId] = useState("");
-  const [, setCustomerId] = useState("");
-  const [, setAgentId] = useState("");
-  const [transactionStatus, setTransactionStatus] =
-    useState<string>("negotiating");
+type Option = { id: number; label: string };
+
+export function TransactionForm({
+  onCancel,
+  onCreated,
+}: {
+  onCancel: () => void;
+  onCreated: () => void;
+}) {
+  const [offerPrice, setOfferPrice] = useState("");
+  const [realEstateId, setRealEstateId] = useState<string>("");
+  const [clientId, setClientId] = useState<string>("");
+  const [initialTerms, setInitialTerms] = useState("");
+
+  const [propertyOptions, setPropertyOptions] = useState<Option[]>([]);
+  const [clientOptions, setClientOptions] = useState<Option[]>([]);
+
+  const [loadingOptions, setLoadingOptions] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoadingOptions(true);
+
+    (async () => {
+      try {
+        const [clientsRes, realEstatesRes] = await Promise.all([
+          getClientOptions({ page: 1, limit: 100 }),
+          getRealEstatesList({ page: 1, limit: 100 }),
+        ]);
+
+        if (cancelled) return;
+
+        setClientOptions(
+          clientsRes.data.map((c) => ({ id: c.id, label: c.full_name })),
+        );
+        setPropertyOptions(
+          realEstatesRes.data.map((re) => ({ id: re.id, label: re.title })),
+        );
+      } catch (err) {
+        console.error("Failed to load transaction form options", err);
+        if (!cancelled) {
+          setClientOptions([]);
+          setPropertyOptions([]);
+        }
+      } finally {
+        if (!cancelled) setLoadingOptions(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const canSubmit = useMemo(() => {
+    const price = Number(offerPrice);
+    return (
+      realEstateId.trim() !== "" &&
+      clientId.trim() !== "" &&
+      offerPrice.trim() !== "" &&
+      Number.isFinite(price) &&
+      price > 0
+    );
+  }, [offerPrice, realEstateId, clientId]);
+
+  const handleSubmit = async () => {
+    setError(null);
+
+    const price = Number(offerPrice);
+    if (!Number.isFinite(price) || price <= 0) {
+      setError("Offer price must be a positive number");
+      return;
+    }
+    if (!realEstateId) {
+      setError("Please select a property");
+      return;
+    }
+    if (!clientId) {
+      setError("Please select a client");
+      return;
+    }
+
+    const terms = initialTerms.trim()
+      ? [{ name: "Initial agreement", content: initialTerms.trim() }]
+      : [];
+
+    try {
+      setSubmitting(true);
+
+      await createTransaction({
+        real_estate_id: Number(realEstateId),
+        client_id: Number(clientId),
+        offer_price: price,
+        terms,
+      });
+
+      onCreated();
+    } catch (err) {
+      console.error("Failed to create transaction", err);
+      setError(err instanceof Error ? err.message : "Failed to create");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <div className="flex flex-col gap-6 p-1 max-h-[80vh] overflow-y-auto custom-scrollbar">
@@ -30,12 +132,23 @@ export function TransactionForm() {
             Transaction details
           </h3>
 
+          {error ? (
+            <div className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-md px-3 py-2">
+              {error}
+            </div>
+          ) : null}
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-muted-foreground">
-                Agreed price
+                Offer price
               </label>
-              <Input placeholder="e.g., 8.5B VND" />
+              <Input
+                placeholder="e.g., 8500000000"
+                inputMode="decimal"
+                value={offerPrice}
+                onChange={(e) => setOfferPrice(e.target.value)}
+              />
             </div>
           </div>
 
@@ -44,17 +157,22 @@ export function TransactionForm() {
               <label className="text-sm font-medium text-muted-foreground">
                 Property (BM3)
               </label>
-              <Select onValueChange={setPropertyId}>
+              <Select value={realEstateId} onValueChange={setRealEstateId}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select a property..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="BDS001">
-                    BDS001 - Townhouse (District 1)
-                  </SelectItem>
-                  <SelectItem value="BDS002">
-                    BDS002 - Apartment (District 7)
-                  </SelectItem>
+                  {loadingOptions ? (
+                    <SelectItem value="loading" disabled>
+                      Loading...
+                    </SelectItem>
+                  ) : (
+                    propertyOptions.map((p) => (
+                      <SelectItem key={p.id} value={String(p.id)}>
+                        {p.label}
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
             </div>
@@ -63,29 +181,25 @@ export function TransactionForm() {
               <label className="text-sm font-medium text-muted-foreground">
                 Customer (BM2)
               </label>
-              <Select onValueChange={setCustomerId}>
+              <Select value={clientId} onValueChange={setClientId}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select a customer..." />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="KH001">KH001 - Nguyễn Văn A</SelectItem>
+                  {loadingOptions ? (
+                    <SelectItem value="loading" disabled>
+                      Loading...
+                    </SelectItem>
+                  ) : (
+                    clientOptions.map((c) => (
+                      <SelectItem key={c.id} value={String(c.id)}>
+                        {c.label}
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
             </div>
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-muted-foreground">
-              Agent
-            </label>
-            <Select onValueChange={setAgentId}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a Agent..." />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="NV001">NV001 - Phạm Văn D</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
 
           <div className="space-y-1.5">
@@ -95,6 +209,8 @@ export function TransactionForm() {
             <Textarea
               placeholder="Enter preliminary terms..."
               className="min-h-[100px] resize-none"
+              value={initialTerms}
+              onChange={(e) => setInitialTerms(e.target.value)}
             />
           </div>
         </section>
@@ -105,54 +221,31 @@ export function TransactionForm() {
             Transaction status
           </h3>
 
-          <div className="flex flex-wrap gap-4 p-4 bg-slate-50 rounded-lg border">
-            {[
-              { id: "negotiating", label: "Negotiating" },
-              { id: "waiting-contract", label: "Awaiting contract signing" },
-              { id: "cancelled", label: "Cancelled" },
-            ].map((status) => (
-              <div
-                key={status.id}
-                className="flex items-center gap-2 min-w-[140px]"
-              >
-                <Checkbox
-                  id={status.id}
-                  checked={transactionStatus === status.id}
-                  onCheckedChange={(checked) =>
-                    checked && setTransactionStatus(status.id)
-                  }
-                />
-                <label
-                  htmlFor={status.id}
-                  className="text-sm font-medium cursor-pointer"
-                >
-                  {status.label}
-                </label>
-              </div>
-            ))}
-          </div>
-
-          {transactionStatus === "cancelled" && (
-            <div className="space-y-1.5 animate-in fade-in slide-in-from-top-1">
-              <label className="text-sm font-medium text-destructive">
-                Cancellation reason
-              </label>
-              <Textarea
-                placeholder="Why was this cancelled?"
-                className="min-h-[80px]"
-              />
+          <div className="p-4 bg-slate-50 rounded-lg border">
+            <div className="text-sm font-medium">Negotiating</div>
+            <div className="text-xs text-muted-foreground mt-1">
+              Status is set by the system on creation.
             </div>
-          )}
+          </div>
         </section>
       </div>
 
       {/* FOOTER: Nút bấm cố định bên dưới */}
       <div className="flex justify-end gap-3 pt-6 mt-4 border-t">
-        <Button variant="outline" className="min-w-[100px]">
+        <Button
+          variant="outline"
+          className="min-w-[100px]"
+          onClick={onCancel}
+          disabled={submitting}
+        >
           Cancel
         </Button>
-        <Button className="min-w-[100px] bg-slate-900 text-white hover:bg-slate-800">
-          Save
+        <Button
+          className="min-w-[100px] bg-slate-900 text-white hover:bg-slate-800"
+          onClick={handleSubmit}
+          disabled={!canSubmit || submitting}
+        >
+          {submitting ? "Saving..." : "Save"}
         </Button>
       </div>
     </div>
