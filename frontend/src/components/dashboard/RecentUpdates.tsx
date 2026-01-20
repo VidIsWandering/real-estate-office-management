@@ -1,111 +1,97 @@
-import { ArrowRight, Home, CheckCircle2, AlertCircle } from "lucide-react";
+"use client";
 
-interface Update {
-  id: string;
-  property: string;
-  status: "updated" | "sold" | "pending";
-  date: string;
-  price: string;
+import { ArrowRight, Home, CheckCircle2, AlertCircle } from "lucide-react";
+import type { DashboardTopProperty } from "@/lib/api/reports";
+
+function formatVnd(value: number): string {
+  return `${Math.round(value).toLocaleString("vi-VN")} VND`;
 }
 
-const updates: Update[] = [
-  {
-    id: "1",
-    property: "Luxury Penthouse - Downtown",
-    status: "sold",
-    date: "2 hours ago",
-    price: "$950,000",
-  },
-  {
-    id: "2",
-    property: "Suburban Family Home",
-    status: "updated",
-    date: "5 hours ago",
-    price: "$425,000",
-  },
-  {
-    id: "3",
-    property: "Commercial Office Space",
-    status: "pending",
-    date: "1 day ago",
-    price: "$1,200,000",
-  },
-  {
-    id: "4",
-    property: "Beachfront Condo",
-    status: "updated",
-    date: "2 days ago",
-    price: "$650,000",
-  },
-];
-
-function getStatusIcon(status: Update["status"]) {
+function getStatusIcon(status: DashboardTopProperty["status"]) {
   switch (status) {
-    case "sold":
+    case "transacted":
       return <CheckCircle2 className="w-5 h-5 text-green-600" />;
-    case "pending":
+    case "pending_legal_check":
+    case "negotiating":
       return <AlertCircle className="w-5 h-5 text-yellow-600" />;
     default:
       return <Home className="w-5 h-5 text-blue-600" />;
   }
 }
 
-function getStatusLabel(status: Update["status"]) {
-  const labels = {
-    sold: "Sold",
-    updated: "Updated",
-    pending: "Pending",
+function getStatusLabel(status: DashboardTopProperty["status"]) {
+  const labels: Record<DashboardTopProperty["status"], string> = {
+    created: "Created",
+    pending_legal_check: "Legal Check",
+    listed: "Listed",
+    negotiating: "Negotiating",
+    transacted: "Transacted",
+    suspended: "Suspended",
   };
-  return labels[status];
+  return labels[status] ?? status;
 }
 
-function getStatusColor(status: Update["status"]) {
-  const colors = {
-    sold: "bg-green-50 text-green-700",
-    updated: "bg-blue-50 text-blue-700",
-    pending: "bg-yellow-50 text-yellow-700",
+function getStatusColor(status: DashboardTopProperty["status"]) {
+  const colors: Partial<Record<DashboardTopProperty["status"], string>> = {
+    transacted: "bg-green-50 text-green-700",
+    listed: "bg-blue-50 text-blue-700",
+    negotiating: "bg-yellow-50 text-yellow-700",
+    pending_legal_check: "bg-yellow-50 text-yellow-700",
+    suspended: "bg-red-50 text-red-700",
+    created: "bg-gray-50 text-gray-700",
   };
-  return colors[status];
+  return colors[status] ?? "bg-gray-50 text-gray-700";
 }
 
-export function RecentUpdates() {
+interface RecentUpdatesProps {
+  items?: DashboardTopProperty[];
+  loading?: boolean;
+}
+
+export function RecentUpdates({ items = [], loading }: RecentUpdatesProps) {
   return (
     <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
       <div className="p-6 border-b border-gray-200">
-        <h3 className="text-lg font-semibold text-gray-900">
-          Recent Property Updates
-        </h3>
+        <h3 className="text-lg font-semibold text-gray-900">Top Properties</h3>
       </div>
       <div className="divide-y divide-gray-200">
-        {updates.map((update) => (
-          <div
-            key={update.id}
-            className="p-4 hover:bg-gray-50 transition-colors duration-200"
-          >
-            <div className="flex items-start justify-between">
-              <div className="flex items-start gap-3 flex-1">
-                {getStatusIcon(update.status)}
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-gray-900 truncate">
-                    {update.property}
-                  </p>
-                  <p className="text-xs text-gray-600 mt-1">{update.date}</p>
+        {loading ? (
+          <div className="p-4 text-sm text-gray-500">Loading…</div>
+        ) : items.length === 0 ? (
+          <div className="p-4 text-sm text-gray-500">No data.</div>
+        ) : (
+          items.map((item) => (
+            <div
+              key={item.id}
+              className="p-4 hover:bg-gray-50 transition-colors duration-200"
+            >
+              <div className="flex items-start justify-between">
+                <div className="flex items-start gap-3 flex-1">
+                  {getStatusIcon(item.status)}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-gray-900 truncate">
+                      {item.title}
+                    </p>
+                    <p className="text-xs text-gray-600 mt-1">
+                      {item.location ?? "—"}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 ml-2">
+                  <span
+                    className={`text-xs font-medium px-2 py-1 rounded ${getStatusColor(item.status)}`}
+                  >
+                    {getStatusLabel(item.status)}
+                  </span>
+                  <ArrowRight className="w-4 h-4 text-gray-400 flex-shrink-0" />
                 </div>
               </div>
-              <div className="flex items-center gap-2 ml-2">
-                <span
-                  className={`text-xs font-medium px-2 py-1 rounded ${getStatusColor(update.status)}`}
-                >
-                  {getStatusLabel(update.status)}
-                </span>
-                <ArrowRight className="w-4 h-4 text-gray-400 flex-shrink-0" />
-              </div>
+              <p className="text-sm font-semibold text-gray-900 mt-2">
+                {formatVnd(item.price)}
+              </p>
             </div>
-            <p className="text-sm font-semibold text-gray-900 mt-2">
-              {update.price}
-            </p>
-          </div>
-        ))}
+          ))
+        )}
       </div>
       <div className="p-4 bg-gray-50 text-center">
         <button className="text-sm font-medium text-primary hover:text-blue-600 transition-colors">
