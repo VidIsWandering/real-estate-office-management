@@ -10,12 +10,19 @@ interface AllEventsPanelProps {
   isOpen: boolean;
   onClose: () => void;
   events: CalendarEvent[];
+  onEditEvent?: (event: CalendarEvent) => void;
+  onUpdateStatus?: (
+    event: CalendarEvent,
+    status: "created" | "confirmed" | "completed" | "cancelled",
+  ) => void;
 }
 
 export function AllEventsPanel({
   isOpen,
   onClose,
   events,
+  onEditEvent,
+  onUpdateStatus,
 }: AllEventsPanelProps) {
   const getEventColor = (type: string) => {
     switch (type) {
@@ -64,6 +71,36 @@ export function AllEventsPanel({
     }
   };
 
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "created":
+        return "bg-gray-100 text-gray-700";
+      case "confirmed":
+        return "bg-blue-100 text-blue-700";
+      case "completed":
+        return "bg-green-100 text-green-700";
+      case "cancelled":
+        return "bg-red-100 text-red-700";
+      default:
+        return "bg-gray-100 text-gray-700";
+    }
+  };
+
+  const formatStatusLabel = (status: string) => {
+    switch (status) {
+      case "created":
+        return "CREATED";
+      case "confirmed":
+        return "CONFIRMED";
+      case "completed":
+        return "COMPLETED";
+      case "cancelled":
+        return "CANCELLED";
+      default:
+        return status;
+    }
+  };
+
   const sortedEvents = [...events].sort((a, b) => {
     const dateA = new Date(a.date);
     const dateB = new Date(b.date);
@@ -102,6 +139,15 @@ export function AllEventsPanel({
                       >
                         {event.type}
                       </span>
+                      {event.appointment?.status ? (
+                        <span
+                          className={`text-xs px-2 py-1 rounded-full font-medium ${getStatusBadge(
+                            event.appointment.status,
+                          )}`}
+                        >
+                          {formatStatusLabel(event.appointment.status)}
+                        </span>
+                      ) : null}
                       <span className="text-sm font-semibold text-gray-900">
                         {event.time}
                       </span>
@@ -145,6 +191,53 @@ export function AllEventsPanel({
                         </div>
                       )}
                     </div>
+                  </div>
+
+                  <div className="shrink-0 flex items-center gap-3">
+                    {onUpdateStatus && event.appointment?.status ? (
+                      <>
+                        {event.appointment.status === "created" ? (
+                          <button
+                            type="button"
+                            onClick={() => onUpdateStatus(event, "confirmed")}
+                            className="text-sm font-medium text-blue-600 hover:text-blue-700"
+                          >
+                            Confirm
+                          </button>
+                        ) : null}
+
+                        {event.appointment.status === "confirmed" ? (
+                          <button
+                            type="button"
+                            onClick={() => onUpdateStatus(event, "completed")}
+                            className="text-sm font-medium text-green-600 hover:text-green-700"
+                          >
+                            Complete
+                          </button>
+                        ) : null}
+
+                        {event.appointment.status === "created" ||
+                        event.appointment.status === "confirmed" ? (
+                          <button
+                            type="button"
+                            onClick={() => onUpdateStatus(event, "cancelled")}
+                            className="text-sm font-medium text-red-600 hover:text-red-700"
+                          >
+                            Cancel
+                          </button>
+                        ) : null}
+                      </>
+                    ) : null}
+
+                    {onEditEvent && event.appointment?.id ? (
+                      <button
+                        type="button"
+                        onClick={() => onEditEvent(event)}
+                        className="text-sm font-medium text-blue-600 hover:text-blue-700"
+                      >
+                        Edit
+                      </button>
+                    ) : null}
                   </div>
                 </div>
               </div>
