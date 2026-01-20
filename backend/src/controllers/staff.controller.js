@@ -4,7 +4,8 @@
 
 const staffService = require('../services/staff.service');
 const { successResponse } = require('../utils/response.util');
-const { HTTP_STATUS } = require('../config/constants');
+const { AppError } = require('../utils/error.util');
+const { HTTP_STATUS, STAFF_ROLES } = require('../config/constants');
 const { asyncHandler } = require('../middlewares/error.middleware');
 
 class StaffController {
@@ -34,6 +35,18 @@ class StaffController {
    * Create new staff member
    */
   async create(req, res) {
+    // Frontend may send `role` while backend uses `position`
+    const requestedPosition = req.body?.position ?? req.body?.role;
+    if (
+      requestedPosition === STAFF_ROLES.ADMIN &&
+      req.user?.position !== STAFF_ROLES.ADMIN
+    ) {
+      throw new AppError(
+        'Only admin can create admin staff',
+        HTTP_STATUS.FORBIDDEN
+      );
+    }
+
     const staff = await staffService.create(req.body);
 
     return successResponse(
@@ -74,9 +87,7 @@ class StaffController {
    */
   async updatePermissions(req, res) {
     const { id } = req.params;
-    const { position } = req.body;
-
-    const staff = await staffService.updatePermissions(id, position);
+    const staff = await staffService.updatePermissions(id, req.body);
 
     return successResponse(
       res,

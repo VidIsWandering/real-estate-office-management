@@ -51,6 +51,8 @@ const toClientItem = (
   assignedStaff: staffName ?? client.staff_name ?? "",
   status: toUiClientStatus(client),
   joinDate: (client.created_at ?? new Date().toISOString()).split("T")[0] ?? "",
+  referralSource: client.referral_src ?? "",
+  requirement: client.requirement ?? "",
 });
 
 export default function ClientsPage() {
@@ -65,20 +67,9 @@ export default function ClientsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const staffMembers = useMemo(
-    () => staffData.map((s) => s.full_name),
-    [staffData],
-  );
-
   const staffByName = useMemo(() => {
     const map = new Map<string, Staff>();
     for (const staff of staffData) map.set(staff.full_name, staff);
-    return map;
-  }, [staffData]);
-
-  const staffIdByName = useMemo(() => {
-    const map = new Map<string, number>();
-    for (const staff of staffData) map.set(staff.full_name, staff.id);
     return map;
   }, [staffData]);
 
@@ -126,18 +117,14 @@ export default function ClientsPage() {
   );
 
   const handleAddClient = async (data: ClientFormData) => {
-    const staff_id = data.assignedStaff
-      ? staffIdByName.get(data.assignedStaff)
-      : undefined;
-
     await createClient({
       full_name: data.name.trim(),
-      email: data.email.trim() ? data.email : undefined,
-      phone_number: data.phone.trim() ? data.phone : undefined,
-      address: data.address.trim() ? data.address : undefined,
+      email: data.email.trim(),
+      phone_number: data.phone.trim(),
+      address: data.address.trim(),
       type: toApiClientType(data.clientType),
-      staff_id,
-      status: data.status,
+      referral_src: data.referralSource.trim(),
+      requirement: data.requirement.trim(),
     });
 
     setIsAddClientDialogOpen(false);
@@ -147,18 +134,16 @@ export default function ClientsPage() {
   const handleEditClient = async (data: ClientFormData) => {
     if (!selectedClient) return;
 
-    const staff_id = data.assignedStaff
-      ? staffIdByName.get(data.assignedStaff)
-      : undefined;
-
     await updateClient(selectedClient.id, {
       full_name: data.name.trim(),
       email: data.email.trim() ? data.email : undefined,
       phone_number: data.phone.trim() ? data.phone : undefined,
       address: data.address.trim() ? data.address : undefined,
       type: toApiClientType(data.clientType),
-      staff_id,
-      status: data.status,
+      referral_src: data.referralSource.trim()
+        ? data.referralSource
+        : undefined,
+      requirement: data.requirement.trim() ? data.requirement : undefined,
     });
 
     setIsEditClientDialogOpen(false);
@@ -254,7 +239,6 @@ export default function ClientsPage() {
         isOpen={isAddClientDialogOpen}
         onClose={() => setIsAddClientDialogOpen(false)}
         onSubmit={handleAddClient}
-        staffMembers={staffMembers}
       />
 
       {selectedClient && (
@@ -263,7 +247,6 @@ export default function ClientsPage() {
           onClose={() => setIsEditClientDialogOpen(false)}
           onSubmit={handleEditClient}
           initialData={selectedClient}
-          staffMembers={staffMembers}
         />
       )}
 

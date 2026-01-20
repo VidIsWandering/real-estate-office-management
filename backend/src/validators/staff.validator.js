@@ -6,6 +6,14 @@ const { body, param, query, validationResult } = require('express-validator');
 const { AppError } = require('../utils/error.util');
 const { HTTP_STATUS } = require('../config/constants');
 
+const STAFF_POSITIONS = [
+  'admin',
+  'agent',
+  'legal_officer',
+  'accountant',
+  'manager',
+];
+
 /**
  * Handle validation errors
  */
@@ -74,9 +82,16 @@ const validateStaffCreate = [
 
   body('position')
     .optional()
-    .isIn(['agent', 'legal_officer', 'accountant', 'manager'])
+    .isIn(STAFF_POSITIONS)
     .withMessage(
-      'Position must be one of: agent, legal_officer, accountant, manager'
+      'Position must be one of: admin, agent, legal_officer, accountant, manager'
+    ),
+
+  body('role')
+    .optional()
+    .isIn(STAFF_POSITIONS)
+    .withMessage(
+      'Role must be one of: admin, agent, legal_officer, accountant, manager'
     ),
 
   body('status')
@@ -131,9 +146,16 @@ const validateStaffUpdate = [
 
   body('position')
     .optional()
-    .isIn(['agent', 'legal_officer', 'accountant', 'manager'])
+    .isIn(STAFF_POSITIONS)
     .withMessage(
-      'Position must be one of: agent, legal_officer, accountant, manager'
+      'Position must be one of: admin, agent, legal_officer, accountant, manager'
+    ),
+
+  body('role')
+    .optional()
+    .isIn(STAFF_POSITIONS)
+    .withMessage(
+      'Role must be one of: admin, agent, legal_officer, accountant, manager'
     ),
 
   body('status')
@@ -165,13 +187,18 @@ const validateStaffStatusUpdate = [
 const validateStaffPermissionsUpdate = [
   param('id').isInt({ min: 1 }).withMessage('Invalid staff ID'),
 
-  body('position')
-    .notEmpty()
-    .withMessage('Position is required')
-    .isIn(['agent', 'legal_officer', 'accountant', 'manager'])
-    .withMessage(
-      'Position must be one of: agent, legal_officer, accountant, manager'
-    ),
+  body().custom((_, { req }) => {
+    const position = req.body?.position ?? req.body?.role;
+    if (!position) {
+      throw new Error('Position is required');
+    }
+    if (!STAFF_POSITIONS.includes(position)) {
+      throw new Error(
+        'Position must be one of: admin, agent, legal_officer, accountant, manager'
+      );
+    }
+    return true;
+  }),
 
   handleValidationErrors,
 ];
@@ -201,8 +228,13 @@ const validateStaffQuery = [
 
   query('position')
     .optional()
-    .isIn(['agent', 'legal_officer', 'accountant', 'manager'])
+    .isIn(STAFF_POSITIONS)
     .withMessage('Invalid position filter'),
+
+  query('role')
+    .optional()
+    .isIn(STAFF_POSITIONS)
+    .withMessage('Invalid role filter'),
 
   query('status')
     .optional()

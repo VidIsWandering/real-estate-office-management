@@ -13,6 +13,8 @@ export interface ClientItem {
   assignedStaff: string;
   status: ClientStatus;
   joinDate: string;
+  referralSource?: string;
+  requirement?: string;
 }
 
 export interface ClientFormData {
@@ -21,6 +23,6 @@ export interface ClientFormData {
   phone: string;
   address: string;
   clientType: ClientCategory;
-  assignedStaff: string;
-  status: ClientStatus;
+  referralSource: string;
+  requirement: string;
 }

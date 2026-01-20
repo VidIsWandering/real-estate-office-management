@@ -7,9 +7,18 @@ const router = express.Router();
 
 const clientController = require('../controllers/client.controller');
 const { authenticate } = require('../middlewares/auth.middleware');
-const { createValidator } = require('../validators/client.validator');
+const {
+  createValidator,
+  updateValidator,
+  idParamValidator,
+} = require('../validators/client.validator');
+const {
+  addClientNoteValidator,
+} = require('../validators/client-note.validator');
+const {
+  clientOptionsValidator,
+} = require('../validators/client-options.validator');
 const { validate } = require('../middlewares/validate.middleware');
-const { asyncHandler } = require('../middlewares/error.middleware');
 
 // All routes require authentication
 router.use(authenticate);
@@ -19,14 +28,26 @@ router.use(authenticate);
  * @desc    Get all clients
  * @access  Private
  */
-router.get('/', asyncHandler(clientController.getAll));
+router.get('/', clientController.getAll);
+
+/**
+ * @route   GET /api/v1/clients/options
+ * @desc    Lightweight client options for dropdowns
+ * @access  Private
+ */
+router.get(
+  '/options',
+  clientOptionsValidator,
+  validate,
+  clientController.getOptions
+);
 
 /**
  * @route   GET /api/v1/clients/:id
  * @desc    Get client by ID
  * @access  Private
  */
-router.get('/:id', asyncHandler(clientController.getById));
+router.get('/:id', clientController.getById);
 
 /**
  * @route   POST /api/v1/clients
@@ -40,7 +61,7 @@ router.post('/', createValidator, validate, clientController.create);
  * @desc    Update client
  * @access  Private
  */
-router.put('/:id', clientController.update);
+router.put('/:id', updateValidator, validate, clientController.update);
 
 /**
  * @route   DELETE /api/v1/clients/:id
@@ -54,13 +75,12 @@ router.delete('/:id', clientController.delete);
  * @desc    Get client contact notes
  * @access  Private
  */
-router.get('/:id/notes', clientController.getNotes);
-
-/**
- * @route   POST /api/v1/clients/:id/notes
- * @desc    Add client contact note
- * @access  Private
- */
-router.post('/:id/notes', clientController.addNote);
+router.get('/:id/notes', idParamValidator, validate, clientController.getNotes);
+router.post(
+  '/:id/notes',
+  addClientNoteValidator,
+  validate,
+  clientController.addNote
+);
 
 module.exports = router;

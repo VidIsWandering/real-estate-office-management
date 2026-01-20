@@ -36,6 +36,20 @@ export interface StaffPagination {
   totalPages: number;
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function isStaffPagination(value: unknown): value is StaffPagination {
+  if (!isRecord(value)) return false;
+  return (
+    typeof value.page === "number" &&
+    typeof value.limit === "number" &&
+    typeof value.total === "number" &&
+    typeof value.totalPages === "number"
+  );
+}
+
 export async function getStaffList(params?: {
   page?: number;
   limit?: number;
@@ -53,7 +67,67 @@ export async function getStaffList(params?: {
   if (params?.search) query.set("search", params.search);
 
   const qs = query.toString();
-  return get(`/staff${qs ? `?${qs}` : ""}`, token);
+
+  // Backend currently wraps pagination inside `data`:
+  // { success, message, data: { items: Staff[], pagination: {...} } }
+  // but some callers expect { data: Staff[], pagination: {...} }.
+  const raw = await get<unknown>(`/staff${qs ? `?${qs}` : ""}`, token);
+
+  const rawObj = isRecord(raw) ? raw : {};
+  const rawData = rawObj.data;
+  const rawPagination = isStaffPagination(rawObj.pagination)
+    ? rawObj.pagination
+    : undefined;
+  const success = rawObj.success === true;
+
+  if (Array.isArray(rawData)) {
+    return {
+      success,
+      data: rawData,
+      pagination:
+        rawPagination ??
+        ({
+          page: params?.page ?? 1,
+          limit: params?.limit ?? rawData.length,
+          total: rawData.length,
+          totalPages: 1,
+        } satisfies StaffPagination),
+    };
+  }
+
+  if (isRecord(rawData) && Array.isArray(rawData.items)) {
+    const items: Staff[] = rawData.items as Staff[];
+    const embeddedPagination = isStaffPagination(rawData.pagination)
+      ? rawData.pagination
+      : undefined;
+    const pagination: StaffPagination =
+      embeddedPagination ??
+      rawPagination ??
+      ({
+        page: params?.page ?? 1,
+        limit: params?.limit ?? items.length,
+        total: items.length,
+        totalPages: 1,
+      } satisfies StaffPagination);
+
+    return {
+      success,
+      data: items,
+      pagination,
+    };
+  }
+
+  // Defensive fallback: avoid crashing UI if API shape changes.
+  return {
+    success,
+    data: [],
+    pagination: {
+      page: params?.page ?? 1,
+      limit: params?.limit ?? 10,
+      total: 0,
+      totalPages: 0,
+    },
+  };
 }
 
 export async function getStaffById(

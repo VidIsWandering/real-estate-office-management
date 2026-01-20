@@ -9,6 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -16,20 +17,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { ClientCategory, ClientFormData, ClientStatus } from "./types";
+import type { ClientCategory, ClientFormData } from "./types";
 
 interface AddClientFormProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (data: ClientFormData) => Promise<void>;
-  staffMembers: string[];
 }
 
 export function AddClientForm({
   isOpen,
   onClose,
   onSubmit,
-  staffMembers,
 }: AddClientFormProps) {
   const [formData, setFormData] = useState<ClientFormData>({
     name: "",
@@ -37,8 +36,8 @@ export function AddClientForm({
     phone: "",
     address: "",
     clientType: "customer",
-    assignedStaff: "",
-    status: "Active",
+    referralSource: "",
+    requirement: "",
   });
 
   const [errors, setErrors] = useState<Partial<ClientFormData>>({});
@@ -74,11 +73,41 @@ export function AddClientForm({
       newErrors.name = "Client name is required";
     }
 
-    if (
-      formData.email.trim() &&
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)
-    ) {
+    if (!formData.email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
       newErrors.email = "Invalid email format";
+    }
+
+    if (!formData.phone.trim()) {
+      newErrors.phone = "Phone number is required";
+    } else {
+      // Loose VN mobile validation (backend uses isMobilePhone('vi-VN'))
+      const normalized = formData.phone.trim().replace(/[\s()\-+]/g, "");
+      if (!/^0\d{9}$/.test(normalized) && !/^84\d{9}$/.test(normalized)) {
+        newErrors.phone = "Invalid Vietnamese phone number";
+      }
+    }
+
+    if (!formData.address.trim()) {
+      newErrors.address = "Address is required";
+    } else if (formData.address.trim().length < 5) {
+      newErrors.address = "Address is too short";
+    }
+
+    if (!formData.referralSource.trim()) {
+      newErrors.referralSource = "Referral source is required";
+    } else if (formData.referralSource.trim().length > 50) {
+      newErrors.referralSource = "Referral source is too long";
+    }
+
+    if (!formData.requirement.trim()) {
+      newErrors.requirement = "Requirement is required";
+    } else if (
+      formData.requirement.trim().length < 5 ||
+      formData.requirement.trim().length > 500
+    ) {
+      newErrors.requirement = "Requirement must be 5–500 characters";
     }
 
     setErrors(newErrors);
@@ -102,8 +131,8 @@ export function AddClientForm({
         phone: "",
         address: "",
         clientType: "customer",
-        assignedStaff: "",
-        status: "Active",
+        referralSource: "",
+        requirement: "",
       });
       setErrors({});
       onClose();
@@ -211,43 +240,36 @@ export function AddClientForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="assignedStaff">Assigned Staff</Label>
-            <Select
-              value={formData.assignedStaff}
-              onValueChange={(value) =>
-                handleSelectChange("assignedStaff", value)
-              }
-              disabled={staffMembers.length === 0}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select staff member" />
-              </SelectTrigger>
-              <SelectContent>
-                {staffMembers.map((staff) => (
-                  <SelectItem key={staff} value={staff}>
-                    {staff}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Label htmlFor="referralSource">Referral Source</Label>
+            <Input
+              id="referralSource"
+              name="referralSource"
+              value={formData.referralSource}
+              onChange={handleChange}
+              placeholder="e.g., Facebook, Friend, Zalo"
+              className={errors.referralSource ? "border-red-500" : ""}
+            />
+            {errors.referralSource && (
+              <p className="text-red-500 text-xs">{errors.referralSource}</p>
+            )}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="status">Status</Label>
-            <Select
-              value={formData.status}
-              onValueChange={(value) =>
-                handleSelectChange("status", value as ClientStatus)
+            <Label htmlFor="requirement">Requirement</Label>
+            <Textarea
+              id="requirement"
+              name="requirement"
+              value={formData.requirement}
+              onChange={(e) =>
+                handleSelectChange("requirement", e.currentTarget.value)
               }
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Active">Active</SelectItem>
-                <SelectItem value="Inactive">Inactive</SelectItem>
-              </SelectContent>
-            </Select>
+              rows={3}
+              placeholder="Notes about needs (budget, location, type...)"
+              className={errors.requirement ? "border-red-500" : ""}
+            />
+            {errors.requirement && (
+              <p className="text-red-500 text-xs">{errors.requirement}</p>
+            )}
           </div>
 
           <DialogFooter className="gap-2">
