@@ -171,7 +171,9 @@ export function DebtReport({ onExport }: DebtReportProps) {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-right font-semibold">
                     <span
                       className={
-                        record.remainingAmount > 0 ? "text-red-600" : "text-gray-900"
+                        record.remainingAmount > 0
+                          ? "text-red-600"
+                          : "text-gray-900"
                       }
                     >
                       ${record.remainingAmount.toLocaleString()}

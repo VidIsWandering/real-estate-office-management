@@ -100,7 +100,8 @@ export function AgentPerformanceReport({
     agent: "All",
   });
 
-  const [performances, setPerformances] = useState<AgentPerformance[]>(mockPerformance);
+  const [performances, setPerformances] =
+    useState<AgentPerformance[]>(mockPerformance);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
