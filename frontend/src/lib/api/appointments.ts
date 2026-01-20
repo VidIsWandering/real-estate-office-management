@@ -48,14 +48,14 @@ export async function getAppointmentsList(params?: {
   status?: AppointmentStatus;
   from_time?: string;
   to_time?: string;
-}): Promise<{ success: boolean; data: Appointment[]; pagination: Pagination }>
-{
+}): Promise<{ success: boolean; data: Appointment[]; pagination: Pagination }> {
   const token = getAuthToken();
   const query = new URLSearchParams();
 
   if (params?.page) query.set("page", String(params.page));
   if (params?.limit) query.set("limit", String(params.limit));
-  if (params?.real_estate_id) query.set("real_estate_id", String(params.real_estate_id));
+  if (params?.real_estate_id)
+    query.set("real_estate_id", String(params.real_estate_id));
   if (params?.client_id) query.set("client_id", String(params.client_id));
   if (params?.staff_id) query.set("staff_id", String(params.staff_id));
   if (params?.status) query.set("status", params.status);
@@ -70,7 +70,9 @@ export async function getAppointmentsList(params?: {
 
   // Backend usually returns: { success, data: Appointment[], pagination }
   const rawData = rawObj.data;
-  const rawPagination = isPagination(rawObj.pagination) ? rawObj.pagination : undefined;
+  const rawPagination = isPagination(rawObj.pagination)
+    ? rawObj.pagination
+    : undefined;
 
   if (Array.isArray(rawData)) {
     const items = rawData as Appointment[];

@@ -73,9 +73,9 @@ function toUiNumber(value: number | string): number {
   return typeof value === "number" ? value : Number(value);
 }
 
-function toApiTransactionType(value: PropertyFormData["transactionType"]):
-  | "sale"
-  | "rent" {
+function toApiTransactionType(
+  value: PropertyFormData["transactionType"],
+): "sale" | "rent" {
   return value === "Rent" ? "rent" : "sale";
 }
 
@@ -220,7 +220,9 @@ export default function Properties() {
 
       setProperties(mapped);
     } catch (e) {
-      setLoadError(e instanceof Error ? e.message : "Failed to load properties");
+      setLoadError(
+        e instanceof Error ? e.message : "Failed to load properties",
+      );
     } finally {
       setIsLoading(false);
     }
@@ -270,7 +272,9 @@ export default function Properties() {
       setIsAddPropertyDialogOpen(false);
       await reloadProperties();
     } catch (e) {
-      setLoadError(e instanceof Error ? e.message : "Failed to create property");
+      setLoadError(
+        e instanceof Error ? e.message : "Failed to create property",
+      );
     }
   };
 
@@ -327,7 +331,8 @@ export default function Properties() {
         owner_id: ownerId,
         description: data.description || undefined,
         media_files: data.mediaFiles.length > 0 ? data.mediaFiles : undefined,
-        legal_docs: data.legalDocFiles.length > 0 ? data.legalDocFiles : undefined,
+        legal_docs:
+          data.legalDocFiles.length > 0 ? data.legalDocFiles : undefined,
       });
 
       if (currentStatusUi && desiredStatus !== currentStatusUi) {
@@ -342,7 +347,9 @@ export default function Properties() {
       setEditingRealEstate(null);
       await reloadProperties();
     } catch (e) {
-      setLoadError(e instanceof Error ? e.message : "Failed to update property");
+      setLoadError(
+        e instanceof Error ? e.message : "Failed to update property",
+      );
     }
   };
 
@@ -499,13 +506,13 @@ export default function Properties() {
             bedrooms: String(editingProperty.bedrooms),
             bathrooms: String(editingProperty.bathrooms),
             area: String(editingRealEstate?.area ?? editingProperty.area),
-            direction: (editingRealEstate?.direction ?? "") as PropertyFormData["direction"],
+            direction: (editingRealEstate?.direction ??
+              "") as PropertyFormData["direction"],
             ownerId: String(editingRealEstate?.owner_id ?? ""),
             description: String(editingRealEstate?.description ?? ""),
           }}
         />
       )}
     </>
-
   );
 }

@@ -73,7 +73,6 @@ export default function ClientsPage() {
     return map;
   }, [staffData]);
 
-
   const loadData = async () => {
     setIsLoading(true);
     setError(null);
@@ -141,7 +140,9 @@ export default function ClientsPage() {
       phone_number: data.phone.trim() ? data.phone : undefined,
       address: data.address.trim() ? data.address : undefined,
       type: toApiClientType(data.clientType),
-      referral_src: data.referralSource.trim() ? data.referralSource : undefined,
+      referral_src: data.referralSource.trim()
+        ? data.referralSource
+        : undefined,
       requirement: data.requirement.trim() ? data.requirement : undefined,
     });
 

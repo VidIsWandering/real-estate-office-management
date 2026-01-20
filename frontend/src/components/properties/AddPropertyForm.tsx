@@ -404,7 +404,9 @@ export function AddPropertyForm({
                   handleSelectChange("direction", value)
                 }
               >
-                <SelectTrigger className={errors.direction ? "border-red-500" : ""}>
+                <SelectTrigger
+                  className={errors.direction ? "border-red-500" : ""}
+                >
                   <SelectValue placeholder="Select direction" />
                 </SelectTrigger>
                 <SelectContent>
@@ -467,9 +469,7 @@ export function AddPropertyForm({
               )}
               <Select
                 value={formData.ownerId}
-                onValueChange={(value) =>
-                  handleSelectChange("ownerId", value)
-                }
+                onValueChange={(value) => handleSelectChange("ownerId", value)}
               >
                 <SelectTrigger
                   className={errors.ownerId ? "border-red-500" : ""}

@@ -6,6 +6,7 @@ import {
   NewEventForm,
   EventFormData,
 } from "@/components/calendar/NewEventForm";
+import type { UpcomingEvent } from "@/components/calendar/UpcomingEvents";
 import { getAppointmentsList, Appointment } from "@/lib/api/appointments";
 import { Plus } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
@@ -162,7 +163,7 @@ export default function Calendar() {
       .filter((e): e is NonNullable<typeof e> => e !== null);
   }, [appointmentsForMonth]);
 
-  const upcomingEvents = useMemo(() => {
+  const upcomingEvents = useMemo<UpcomingEvent[]>(() => {
     const now = new Date();
     const items = appointmentsUpcoming
       .map((a) => {
@@ -171,7 +172,9 @@ export default function Calendar() {
         if (start.getTime() < now.getTime()) return null;
 
         const location = a.location ?? undefined;
-        const inferredType = location?.toLowerCase().includes("office")
+        const inferredType: UpcomingEvent["type"] = location
+          ?.toLowerCase()
+          .includes("office")
           ? "Meeting"
           : "Viewing";
 

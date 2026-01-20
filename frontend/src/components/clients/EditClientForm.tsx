@@ -17,11 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type {
-  ClientCategory,
-  ClientFormData,
-  ClientItem,
-} from "./types";
+import type { ClientCategory, ClientFormData, ClientItem } from "./types";
 
 interface EditClientFormProps {
   isOpen: boolean;

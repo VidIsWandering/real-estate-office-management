@@ -1,4 +1,11 @@
-import { get, getAuthToken, patch, postFormData, put, putFormData } from "./client";
+import {
+  get,
+  getAuthToken,
+  patch,
+  postFormData,
+  put,
+  putFormData,
+} from "./client";
 
 export type RealEstateStatus =
   | "created"
@@ -72,17 +79,20 @@ export async function getRealEstatesList(params?: {
   if (params?.limit) query.set("limit", String(params.limit));
   if (params?.title) query.set("title", params.title);
   if (params?.type) query.set("type", params.type);
-  if (params?.transaction_type) query.set("transaction_type", params.transaction_type);
+  if (params?.transaction_type)
+    query.set("transaction_type", params.transaction_type);
   if (params?.location) query.set("location", params.location);
   if (params?.status) query.set("status", params.status);
 
   const qs = query.toString();
-  const raw = await get<unknown>(`/real-estates${qs ? `?${qs}` : ""}` , token);
+  const raw = await get<unknown>(`/real-estates${qs ? `?${qs}` : ""}`, token);
 
   const rawObj = isRecord(raw) ? raw : {};
   const success = rawObj.success === true;
   const rawData = rawObj.data;
-  const rawPagination = isPagination(rawObj.pagination) ? rawObj.pagination : undefined;
+  const rawPagination = isPagination(rawObj.pagination)
+    ? rawObj.pagination
+    : undefined;
 
   if (Array.isArray(rawData)) {
     const items = rawData as RealEstate[];
@@ -242,8 +252,10 @@ export async function updateRealEstateById(
   if (typeof data.price === "number") form.set("price", String(data.price));
   if (typeof data.area === "number") form.set("area", String(data.area));
   if (typeof data.direction === "string") form.set("direction", data.direction);
-  if (typeof data.owner_id === "number") form.set("owner_id", String(data.owner_id));
-  if (typeof data.description === "string") form.set("description", data.description);
+  if (typeof data.owner_id === "number")
+    form.set("owner_id", String(data.owner_id));
+  if (typeof data.description === "string")
+    form.set("description", data.description);
 
   for (const file of data.media_files ?? []) {
     form.append("media_files", file);
@@ -252,7 +264,11 @@ export async function updateRealEstateById(
     form.append("legal_docs", file);
   }
 
-  const raw = await putFormData<unknown>(`/real-estates/${realEstateId}`, form, token);
+  const raw = await putFormData<unknown>(
+    `/real-estates/${realEstateId}`,
+    form,
+    token,
+  );
   const rawObj = isRecord(raw) ? raw : {};
   const success = rawObj.success === true;
   const rawData = rawObj.data;
@@ -273,7 +289,11 @@ export async function updateRealEstateStatus(
   reason?: string,
 ): Promise<{ success: boolean; data: unknown }> {
   const token = getAuthToken();
-  return patch(`/real-estates/${realEstateId}/status`, { status, reason }, token);
+  return patch(
+    `/real-estates/${realEstateId}/status`,
+    { status, reason },
+    token,
+  );
 }
 
 /**
@@ -284,8 +304,10 @@ export async function updateRealEstateStatus(
 export async function legalCheckRealEstate(
   realEstateId: number | string,
   data: { is_approved: boolean; note?: string },
-): Promise<{ success: boolean; data: { id: number; status: RealEstateStatus; note?: string } }>
-{
+): Promise<{
+  success: boolean;
+  data: { id: number; status: RealEstateStatus; note?: string };
+}> {
   const token = getAuthToken();
   return put(`/real-estates/${realEstateId}/legal-check`, data, token);
 }

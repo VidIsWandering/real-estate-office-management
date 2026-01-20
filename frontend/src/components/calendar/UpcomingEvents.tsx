@@ -63,48 +63,48 @@ export function UpcomingEvents({ events }: UpcomingEventsProps) {
           </div>
         ) : (
           events.map((event) => (
-          <div
-            key={event.id}
-            className={`p-4 rounded-lg transition-colors cursor-pointer hover:shadow-md ${getEventColor(
-              event.type,
-            )}`}
-          >
-            <div className="flex items-start justify-between mb-2">
-              <h4 className="font-semibold text-gray-900 text-sm">
-                {event.title}
-              </h4>
-              <span
-                className={`px-2.5 py-0.5 rounded text-xs font-medium whitespace-nowrap ${getEventBadgeColor(
-                  event.type,
-                )}`}
-              >
-                {event.type}
-              </span>
-            </div>
-
-            <div className="space-y-2 text-sm text-gray-600">
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 flex-shrink-0 text-gray-400" />
-                <span>
-                  {event.date} at {event.time}
+            <div
+              key={event.id}
+              className={`p-4 rounded-lg transition-colors cursor-pointer hover:shadow-md ${getEventColor(
+                event.type,
+              )}`}
+            >
+              <div className="flex items-start justify-between mb-2">
+                <h4 className="font-semibold text-gray-900 text-sm">
+                  {event.title}
+                </h4>
+                <span
+                  className={`px-2.5 py-0.5 rounded text-xs font-medium whitespace-nowrap ${getEventBadgeColor(
+                    event.type,
+                  )}`}
+                >
+                  {event.type}
                 </span>
               </div>
 
-              {event.location && (
+              <div className="space-y-2 text-sm text-gray-600">
                 <div className="flex items-center gap-2">
-                  <MapPin className="w-4 h-4 flex-shrink-0 text-gray-400" />
-                  <span className="truncate">{event.location}</span>
+                  <Clock className="w-4 h-4 flex-shrink-0 text-gray-400" />
+                  <span>
+                    {event.date} at {event.time}
+                  </span>
                 </div>
-              )}
 
-              {event.client && (
-                <div className="flex items-center gap-2">
-                  <Users className="w-4 h-4 flex-shrink-0 text-gray-400" />
-                  <span className="truncate">{event.client}</span>
-                </div>
-              )}
+                {event.location && (
+                  <div className="flex items-center gap-2">
+                    <MapPin className="w-4 h-4 flex-shrink-0 text-gray-400" />
+                    <span className="truncate">{event.location}</span>
+                  </div>
+                )}
+
+                {event.client && (
+                  <div className="flex items-center gap-2">
+                    <Users className="w-4 h-4 flex-shrink-0 text-gray-400" />
+                    <span className="truncate">{event.client}</span>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
           ))
         )}
       </div>

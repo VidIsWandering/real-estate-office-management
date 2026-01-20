@@ -150,12 +150,15 @@ export async function getClientOptions(params?: {
 }> {
   const token = getAuthToken();
   const query = new URLSearchParams();
-  if (params?.page) query.set('page', String(params.page));
-  if (params?.limit) query.set('limit', String(params.limit));
-  if (params?.search) query.set('search', params.search);
+  if (params?.page) query.set("page", String(params.page));
+  if (params?.limit) query.set("limit", String(params.limit));
+  if (params?.search) query.set("search", params.search);
   const qs = query.toString();
 
-  const raw = await get<unknown>(`/clients/options${qs ? `?${qs}` : ''}`, token);
+  const raw = await get<unknown>(
+    `/clients/options${qs ? `?${qs}` : ""}`,
+    token,
+  );
   const rawObj = isRecord(raw) ? raw : {};
   const rawData = rawObj.data;
   const rawPagination = isClientsPagination(rawObj.pagination)
@@ -178,8 +181,13 @@ export async function getClientOptions(params?: {
         return { id, full_name, phone_number };
       })
       .filter(
-        (v): v is { id: number; full_name: string; phone_number: string | null } =>
-          v !== null
+        (
+          v,
+        ): v is {
+          id: number;
+          full_name: string;
+          phone_number: string | null;
+        } => v !== null,
       );
 
     return {

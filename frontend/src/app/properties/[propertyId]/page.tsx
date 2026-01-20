@@ -144,16 +144,13 @@ export default function PropertyDetailPage({
   const [loadError, setLoadError] = useState<string | null>(null);
   const [realEstate, setRealEstate] = useState<RealEstate | null>(null);
   const [userPosition, setUserPosition] = useState<string | null>(null);
-  const [owner, setOwner] = useState<
-    | {
-        id: string;
-        name: string;
-        email: string;
-        phone: string;
-        address: string;
-      }
-    | null
-  >(null);
+  const [owner, setOwner] = useState<{
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
+    address: string;
+  } | null>(null);
   const [staffName, setStaffName] = useState<string | null>(null);
   const [legalNote, setLegalNote] = useState("");
   const [isLegalSubmitting, setIsLegalSubmitting] = useState(false);
@@ -195,9 +192,9 @@ export default function PropertyDetailPage({
 
         setRealEstate(payload.realEstate);
 
-  // Reset legal-check feedback when loading a new record.
-  setLegalError(null);
-  setLegalSuccess(null);
+        // Reset legal-check feedback when loading a new record.
+        setLegalError(null);
+        setLegalSuccess(null);
 
         const rawOwner = payload.owner as
           | {
@@ -230,14 +227,18 @@ export default function PropertyDetailPage({
 
         if (rawStaff?.full_name) {
           setStaffName(
-            rawStaff.email ? `${rawStaff.full_name} (${rawStaff.email})` : rawStaff.full_name,
+            rawStaff.email
+              ? `${rawStaff.full_name} (${rawStaff.email})`
+              : rawStaff.full_name,
           );
         } else {
           setStaffName(null);
         }
       } catch (e) {
         if (cancelled) return;
-        setLoadError(e instanceof Error ? e.message : "Failed to load property");
+        setLoadError(
+          e instanceof Error ? e.message : "Failed to load property",
+        );
         setRealEstate(null);
         setOwner(null);
         setStaffName(null);
