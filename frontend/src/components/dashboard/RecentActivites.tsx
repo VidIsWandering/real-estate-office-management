@@ -1,105 +1,106 @@
-import { User, MessageSquare, FileText, Eye, Calendar } from "lucide-react";
+"use client";
 
-interface Activity {
-  id: string;
-  type: "client" | "message" | "document" | "viewing" | "meeting";
-  description: string;
-  user: string;
-  time: string;
+import { User, FileText, Eye, Calendar } from "lucide-react";
+import type { DashboardRecentTransaction } from "@/lib/api/reports";
+
+type ActivityType = "sale" | "rent" | "contract" | "other";
+
+function toActivityType(type: string | null): ActivityType {
+  const t = (type ?? "").toLowerCase();
+  if (t.includes("rent")) return "rent";
+  if (t.includes("sale") || t.includes("sell")) return "sale";
+  if (t.includes("contract")) return "contract";
+  return "other";
 }
 
-const activities: Activity[] = [
-  {
-    id: "1",
-    type: "client",
-    description: "New client registered",
-    user: "Sarah Johnson",
-    time: "1 hour ago",
-  },
-  {
-    id: "2",
-    type: "viewing",
-    description: "Property viewing scheduled",
-    user: "Michael Brown",
-    time: "3 hours ago",
-  },
-  {
-    id: "3",
-    type: "message",
-    description: "New message from client",
-    user: "Jennifer Davis",
-    time: "5 hours ago",
-  },
-  {
-    id: "4",
-    type: "document",
-    description: "Contract signed",
-    user: "Robert Wilson",
-    time: "1 day ago",
-  },
-  {
-    id: "5",
-    type: "meeting",
-    description: "Team meeting completed",
-    user: "Team Meeting",
-    time: "2 days ago",
-  },
-];
-
-function getActivityIcon(type: Activity["type"]) {
-  const icons = {
-    client: <User className="w-4 h-4" />,
-    message: <MessageSquare className="w-4 h-4" />,
-    document: <FileText className="w-4 h-4" />,
-    viewing: <Eye className="w-4 h-4" />,
-    meeting: <Calendar className="w-4 h-4" />,
-  };
-  return icons[type];
+function getActivityIcon(type: ActivityType) {
+  switch (type) {
+    case "sale":
+      return <FileText className="w-4 h-4" />;
+    case "rent":
+      return <Eye className="w-4 h-4" />;
+    case "contract":
+      return <Calendar className="w-4 h-4" />;
+    default:
+      return <User className="w-4 h-4" />;
+  }
 }
 
-function getActivityColor(type: Activity["type"]) {
-  const colors = {
-    client: "bg-green-50 text-green-600",
-    message: "bg-blue-50 text-blue-600",
-    document: "bg-purple-50 text-purple-600",
-    viewing: "bg-orange-50 text-orange-600",
-    meeting: "bg-pink-50 text-pink-600",
-  };
-  return colors[type];
+function getActivityColor(type: ActivityType) {
+  switch (type) {
+    case "sale":
+      return "bg-blue-50 text-blue-600";
+    case "rent":
+      return "bg-orange-50 text-orange-600";
+    case "contract":
+      return "bg-purple-50 text-purple-600";
+    default:
+      return "bg-green-50 text-green-600";
+  }
 }
 
-export function RecentActivities() {
+function formatVnd(value: number): string {
+  return `${Math.round(value).toLocaleString("vi-VN")} VND`;
+}
+
+function formatDate(value: string | null): string {
+  if (!value) return "—";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return value;
+  return d.toLocaleDateString("vi-VN");
+}
+
+interface RecentActivitiesProps {
+  items?: DashboardRecentTransaction[];
+  loading?: boolean;
+}
+
+export function RecentActivities({
+  items = [],
+  loading,
+}: RecentActivitiesProps) {
   return (
     <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
       <div className="p-6 border-b border-gray-200">
         <h3 className="text-lg font-semibold text-gray-900">
-          Recent Client Activities
+          Recent Transactions
         </h3>
       </div>
       <div className="divide-y divide-gray-200">
-        {activities.map((activity) => (
-          <div
-            key={activity.id}
-            className="p-4 hover:bg-gray-50 transition-colors duration-200"
-          >
-            <div className="flex items-start gap-3">
+        {loading ? (
+          <div className="p-4 text-sm text-gray-500">Loading…</div>
+        ) : items.length === 0 ? (
+          <div className="p-4 text-sm text-gray-500">No data.</div>
+        ) : (
+          items.map((item) => {
+            const activityType = toActivityType(item.type);
+            return (
               <div
-                className={`p-2 rounded-lg flex-shrink-0 ${getActivityColor(activity.type)}`}
+                key={item.id}
+                className="p-4 hover:bg-gray-50 transition-colors duration-200"
               >
-                {getActivityIcon(activity.type)}
+                <div className="flex items-start gap-3">
+                  <div
+                    className={`p-2 rounded-lg flex-shrink-0 ${getActivityColor(activityType)}`}
+                  >
+                    {getActivityIcon(activityType)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-gray-900">
+                      {item.property.title}
+                    </p>
+                    <p className="text-xs text-gray-600 mt-1">
+                      {item.agent.fullName} • {formatVnd(item.amount)}
+                    </p>
+                  </div>
+                  <span className="text-xs text-gray-600 flex-shrink-0 whitespace-nowrap ml-2">
+                    {formatDate(item.date)}
+                  </span>
+                </div>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-gray-900">
-                  {activity.description}
-                </p>
-                <p className="text-xs text-gray-600 mt-1">{activity.user}</p>
-              </div>
-              <span className="text-xs text-gray-600 flex-shrink-0 whitespace-nowrap ml-2">
-                {activity.time}
-              </span>
-            </div>
-          </div>
-        ))}
+            );
+          })
+        )}
       </div>
       <div className="p-4 bg-gray-50 text-center">
         <button className="text-sm font-medium text-primary hover:text-blue-600 transition-colors">
