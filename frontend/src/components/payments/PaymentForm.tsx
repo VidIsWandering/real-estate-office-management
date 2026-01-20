@@ -41,19 +41,21 @@ function fromISODate(date: string): string {
   return `${day}/${month}/${year}`;
 }
 
+interface PaymentFormProps {
+  voucherId?: string;
+  initialData?: Partial<PaymentDraft>;
+  onSubmit?: (data: PaymentDraft) => void;
+  onCancel?: () => void;
+  submitLabel?: string;
+}
+
 export function PaymentForm({
   voucherId,
   initialData,
   onSubmit,
   onCancel,
   submitLabel = "Save",
-}: {
-  voucherId?: string;
-  initialData?: Partial<PaymentDraft>;
-  onSubmit?: (data: PaymentDraft) => void;
-  onCancel?: () => void;
-  submitLabel?: string;
-}) {
+}: PaymentFormProps) {
   const [contractId, setContractId] = useState(initialData?.contractId ?? "");
   const [voucherType, setVoucherType] = useState<VoucherType | "">(
     initialData?.voucherType ?? "",

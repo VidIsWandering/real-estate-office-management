@@ -17,15 +17,17 @@ export interface PaymentsFilterValues {
   status: string;
 }
 
+interface PaymentsFilterProps {
+  onCreate?: () => void;
+  filters?: PaymentsFilterValues;
+  onFilterChange?: (filters: PaymentsFilterValues) => void;
+}
+
 export function PaymentsFilter({
   onCreate,
   filters,
   onFilterChange,
-}: {
-  onCreate: () => void;
-  filters?: PaymentsFilterValues;
-  onFilterChange?: (filters: PaymentsFilterValues) => void;
-}) {
+}: PaymentsFilterProps) {
   const currentFilters = filters || {
     search: "",
     voucherType: "all",

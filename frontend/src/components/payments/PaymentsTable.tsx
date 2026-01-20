@@ -27,15 +27,17 @@ import {
 } from "@/components/ui/dialog";
 import { Payment, statusColor } from "@/components/payments/payment.types";
 
+interface PaymentsTableProps {
+  payments: Payment[];
+  onEdit?: (payment: Payment) => void;
+  onDelete?: (payment: Payment) => void;
+}
+
 export function PaymentsTable({
   payments,
   onEdit,
   onDelete,
-}: {
-  payments: Payment[];
-  onEdit: (payment: Payment) => void;
-  onDelete: (payment: Payment) => void;
-}) {
+}: PaymentsTableProps) {
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<Payment | null>(null);
 
@@ -126,7 +128,7 @@ export function PaymentsTable({
                     className="h-8 w-8 p-0"
                     onClick={(e) => {
                       e.stopPropagation();
-                      onEdit(payment);
+                      onEdit?.(payment);
                     }}
                     aria-label="Edit"
                     title="Edit"
@@ -139,7 +141,7 @@ export function PaymentsTable({
                     className="h-8 w-8 p-0 text-red-500 hover:text-red-600"
                     onClick={(e) => {
                       e.stopPropagation();
-                      onDelete(payment);
+                      onDelete?.(payment);
                     }}
                     aria-label="Delete"
                     title="Delete"

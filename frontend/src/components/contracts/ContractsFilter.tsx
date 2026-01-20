@@ -16,15 +16,17 @@ export interface ContractsFilterValues {
   status: string;
 }
 
+interface ContractsFilterProps {
+  onCreate?: () => void;
+  filters?: ContractsFilterValues;
+  onFilterChange?: (filters: ContractsFilterValues) => void;
+}
+
 export function ContractsFilter({
   onCreate,
   filters,
   onFilterChange,
-}: {
-  onCreate: () => void;
-  filters?: ContractsFilterValues;
-  onFilterChange?: (filters: ContractsFilterValues) => void;
-}) {
+}: ContractsFilterProps) {
   const currentFilters = filters || {
     search: "",
     type: "all",
