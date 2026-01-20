@@ -99,10 +99,20 @@ class RealEstateController {
     try {
       const { id } = req.params;
 
-      const media_files = formatUploadedFiles(req.files?.media_files);
-      const legal_docs = formatUploadedFiles(req.files?.legal_docs);
+      const media_files =
+        Array.isArray(req.files?.media_files) && req.files.media_files.length > 0
+          ? formatUploadedFiles(req.files.media_files)
+          : undefined;
+      const legal_docs =
+        Array.isArray(req.files?.legal_docs) && req.files.legal_docs.length > 0
+          ? formatUploadedFiles(req.files.legal_docs)
+          : undefined;
 
-      const data = { ...req.body, media_files, legal_docs };
+      const data = {
+        ...req.body,
+        ...(media_files !== undefined ? { media_files } : {}),
+        ...(legal_docs !== undefined ? { legal_docs } : {}),
+      };
 
       const result = await realEstateService.updateRealEstateById(
         id,
@@ -138,7 +148,7 @@ class RealEstateController {
         : await realEstateService.updateStatus(
             Number(id),
             'pending_legal_check',
-            req.user.id,
+            req.user,
             note
           );
 

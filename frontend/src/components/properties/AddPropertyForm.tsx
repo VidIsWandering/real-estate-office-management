@@ -19,28 +19,36 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
-const mockOwners = [
-  { id: "C001", name: "Nguyen Van A" },
-  { id: "C002", name: "Tran Thi B" },
-  { id: "C003", name: "Le Van C" },
-  { id: "C004", name: "Pham Thi D" },
-];
-
-const mockStaff = [
-  { id: "S001", name: "Alice Chen" },
-  { id: "S002", name: "Bob Smith" },
-  { id: "S003", name: "Carol Davis" },
-  { id: "S004", name: "David Lee" },
-];
+export interface PropertyOwnerOption {
+  id: number;
+  full_name: string;
+  phone_number?: string | null;
+}
 
 interface AddPropertyFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: PropertyFormData) => void;
+  onSubmit: (data: PropertyFormData) => void | Promise<void>;
+  owners?: PropertyOwnerOption[];
+  ownersLoading?: boolean;
+  ownersError?: string | null;
+  staffMembers?: string[];
+  staffLoading?: boolean;
+  staffError?: string | null;
   title?: string;
   submitLabel?: string;
   initialData?: Partial<PropertyFormData>;
 }
+
+type DirectionValue =
+  | "north"
+  | "south"
+  | "east"
+  | "west"
+  | "northeast"
+  | "northwest"
+  | "southeast"
+  | "southwest";
 
 export interface PropertyFormData {
   // Property code (may be hidden)
@@ -56,14 +64,16 @@ export interface PropertyFormData {
   // Details
   area: string;
   description: string;
-  direction: string;
+  direction: DirectionValue | "";
   media: string;
+  mediaFiles: File[];
 
   // Management & legal
-  ownerName: string;
+  ownerId: string;
   legalDocuments: string;
+  legalDocFiles: File[];
   status: string;
-  agent: string; // Responsible staff
+  agent: string; // Optional (backend derives staff from auth token)
   legalNotes: string;
 
   // Legacy fields kept for compatibility with existing local mock data.
@@ -82,8 +92,10 @@ const defaultFormData: PropertyFormData = {
   description: "",
   direction: "",
   media: "",
-  ownerName: "",
+  mediaFiles: [],
+  ownerId: "",
   legalDocuments: "",
+  legalDocFiles: [],
   status: "New",
   agent: "",
   legalNotes: "",
@@ -95,6 +107,12 @@ export function AddPropertyForm({
   isOpen,
   onClose,
   onSubmit,
+  owners,
+  ownersLoading,
+  ownersError,
+  staffMembers,
+  staffLoading,
+  staffError,
   title,
   submitLabel,
   initialData,
@@ -108,9 +126,12 @@ export function AddPropertyForm({
     Partial<Record<keyof PropertyFormData, string>>
   >({});
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   useEffect(() => {
     if (!isOpen) return;
     setErrors({});
+    setIsSubmitting(false);
     setFormData({
       ...defaultFormData,
       ...(initialData ?? {}),
@@ -148,6 +169,24 @@ export function AddPropertyForm({
     }
   };
 
+  const handleFilesChange = (
+    name: "mediaFiles" | "legalDocFiles",
+    fileList: FileList | null,
+  ) => {
+    const files = fileList ? Array.from(fileList) : [];
+    setFormData((prev) => ({
+      ...prev,
+      [name]: files,
+    }));
+
+    if (errors[name]) {
+      setErrors((prev) => ({
+        ...prev,
+        [name]: "",
+      }));
+    }
+  };
+
   const validateForm = (): boolean => {
     const newErrors: Partial<Record<keyof PropertyFormData, string>> = {};
 
@@ -165,26 +204,31 @@ export function AddPropertyForm({
     if (formData.area.trim() && isNaN(Number(formData.area)))
       newErrors.area = "Area must be a number";
 
-    if (!formData.ownerName.trim())
-      newErrors.ownerName = "Please select an owner";
+    if (!formData.direction.trim())
+      newErrors.direction = "Please select a direction";
+
+    if (!formData.ownerId.trim()) newErrors.ownerId = "Please select an owner";
 
     if (!formData.status.trim())
       newErrors.status = "Please select a property status";
 
-    if (!formData.agent.trim())
-      newErrors.agent = "Please select a responsible staff member";
+    // agent is optional for API-backed create.
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!validateForm()) return;
 
-    onSubmit(formData);
-    onClose();
+    try {
+      setIsSubmitting(true);
+      await onSubmit(formData);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -353,27 +397,30 @@ export function AddPropertyForm({
             </div>
 
             <div className="space-y-2">
-              <Label>Direction</Label>
+              <Label>Direction *</Label>
               <Select
                 value={formData.direction}
                 onValueChange={(value) =>
                   handleSelectChange("direction", value)
                 }
               >
-                <SelectTrigger>
+                <SelectTrigger className={errors.direction ? "border-red-500" : ""}>
                   <SelectValue placeholder="Select direction" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="North">North</SelectItem>
-                  <SelectItem value="South">South</SelectItem>
-                  <SelectItem value="East">East</SelectItem>
-                  <SelectItem value="West">West</SelectItem>
-                  <SelectItem value="Northeast">Northeast</SelectItem>
-                  <SelectItem value="Southeast">Southeast</SelectItem>
-                  <SelectItem value="Northwest">Northwest</SelectItem>
-                  <SelectItem value="Southwest">Southwest</SelectItem>
+                  <SelectItem value="north">North</SelectItem>
+                  <SelectItem value="south">South</SelectItem>
+                  <SelectItem value="east">East</SelectItem>
+                  <SelectItem value="west">West</SelectItem>
+                  <SelectItem value="northeast">Northeast</SelectItem>
+                  <SelectItem value="southeast">Southeast</SelectItem>
+                  <SelectItem value="northwest">Northwest</SelectItem>
+                  <SelectItem value="southwest">Southwest</SelectItem>
                 </SelectContent>
               </Select>
+              {errors.direction && (
+                <p className="text-red-500 text-xs">{errors.direction}</p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -386,6 +433,25 @@ export function AddPropertyForm({
                 placeholder="Paste image/video links (one per line)"
               />
             </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="mediaFiles">Upload media files</Label>
+              <Input
+                id="mediaFiles"
+                name="mediaFiles"
+                type="file"
+                multiple
+                accept="image/*,video/*"
+                onChange={(e) =>
+                  handleFilesChange("mediaFiles", e.currentTarget.files)
+                }
+              />
+              {formData.mediaFiles.length > 0 && (
+                <p className="text-xs text-gray-600">
+                  {formData.mediaFiles.length} file(s) selected
+                </p>
+              )}
+            </div>
           </div>
 
           {/* Management & legal */}
@@ -395,28 +461,46 @@ export function AddPropertyForm({
             </h3>
 
             <div className="space-y-2">
-              <Label htmlFor="ownerName">Owner *</Label>
+              <Label htmlFor="ownerId">Owner *</Label>
+              {ownersError && ownersLoading !== true && (
+                <p className="text-xs text-red-600">{ownersError}</p>
+              )}
               <Select
-                value={formData.ownerName}
+                value={formData.ownerId}
                 onValueChange={(value) =>
-                  handleSelectChange("ownerName", value)
+                  handleSelectChange("ownerId", value)
                 }
               >
                 <SelectTrigger
-                  className={errors.ownerName ? "border-red-500" : ""}
+                  className={errors.ownerId ? "border-red-500" : ""}
                 >
                   <SelectValue placeholder="Select owner" />
                 </SelectTrigger>
                 <SelectContent>
-                  {mockOwners.map((owner) => (
-                    <SelectItem key={owner.id} value={owner.name}>
-                      {owner.id} - {owner.name}
+                  {ownersLoading === true ? (
+                    <SelectItem value="__loading" disabled>
+                      Loading clients...
                     </SelectItem>
-                  ))}
+                  ) : ownersError ? (
+                    <SelectItem value="__error" disabled>
+                      {ownersError}
+                    </SelectItem>
+                  ) : (owners ?? []).length === 0 ? (
+                    <SelectItem value="__empty" disabled>
+                      No clients found
+                    </SelectItem>
+                  ) : (
+                    (owners ?? []).map((owner) => (
+                      <SelectItem key={owner.id} value={String(owner.id)}>
+                        {owner.full_name}
+                        {owner.phone_number ? ` - ${owner.phone_number}` : ""}
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
-              {errors.ownerName && (
-                <p className="text-red-500 text-xs">{errors.ownerName}</p>
+              {errors.ownerId && (
+                <p className="text-red-500 text-xs">{errors.ownerId}</p>
               )}
             </div>
 
@@ -429,6 +513,24 @@ export function AddPropertyForm({
                 onChange={handleChange}
                 placeholder="Document notes / reference numbers / current state..."
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="legalDocFiles">Upload legal documents</Label>
+              <Input
+                id="legalDocFiles"
+                name="legalDocFiles"
+                type="file"
+                multiple
+                onChange={(e) =>
+                  handleFilesChange("legalDocFiles", e.currentTarget.files)
+                }
+              />
+              {formData.legalDocFiles.length > 0 && (
+                <p className="text-xs text-gray-600">
+                  {formData.legalDocFiles.length} file(s) selected
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -459,25 +561,39 @@ export function AddPropertyForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="agent">Responsible staff *</Label>
+              <Label htmlFor="agent">Responsible staff</Label>
+              {staffError && staffLoading !== true && (
+                <p className="text-xs text-red-600">{staffError}</p>
+              )}
               <Select
                 value={formData.agent}
                 onValueChange={(value) => handleSelectChange("agent", value)}
               >
-                <SelectTrigger className={errors.agent ? "border-red-500" : ""}>
+                <SelectTrigger>
                   <SelectValue placeholder="Select staff" />
                 </SelectTrigger>
                 <SelectContent>
-                  {mockStaff.map((staff) => (
-                    <SelectItem key={staff.id} value={staff.name}>
-                      {staff.id} - {staff.name}
+                  {staffLoading === true ? (
+                    <SelectItem value="__loading" disabled>
+                      Loading staff...
                     </SelectItem>
-                  ))}
+                  ) : staffError ? (
+                    <SelectItem value="__error" disabled>
+                      {staffError}
+                    </SelectItem>
+                  ) : (staffMembers ?? []).length === 0 ? (
+                    <SelectItem value="__empty" disabled>
+                      No staff found
+                    </SelectItem>
+                  ) : (
+                    (staffMembers ?? []).map((staffName) => (
+                      <SelectItem key={staffName} value={staffName}>
+                        {staffName}
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
-              {errors.agent && (
-                <p className="text-red-500 text-xs">{errors.agent}</p>
-              )}
             </div>
 
             <div className="space-y-2">
@@ -497,7 +613,7 @@ export function AddPropertyForm({
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
-          <Button type="submit" onClick={handleSubmit}>
+          <Button type="submit" onClick={handleSubmit} disabled={isSubmitting}>
             {submitLabel ?? "Save"}
           </Button>
         </DialogFooter>

@@ -25,6 +25,31 @@ export interface ClientsPagination {
   totalPages: number;
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
+
+function isClientsPagination(value: unknown): value is ClientsPagination {
+  if (!isRecord(value)) return false;
+  return (
+    typeof value.page === "number" &&
+    typeof value.limit === "number" &&
+    typeof value.total === "number" &&
+    typeof value.totalPages === "number"
+  );
+}
+
+function toFiniteNumber(value: unknown): number | undefined {
+  if (typeof value === "number") {
+    return Number.isFinite(value) ? value : undefined;
+  }
+  if (typeof value === "string") {
+    const n = Number(value);
+    return Number.isFinite(n) ? n : undefined;
+  }
+  return undefined;
+}
+
 export interface ClientNote {
   id: number;
   content: string;
@@ -57,7 +82,130 @@ export async function getClientsList(params?: {
     query.set("is_active", String(params.is_active));
 
   const qs = query.toString();
-  return get(`/clients${qs ? `?${qs}` : ""}`, token);
+
+  const raw = await get<unknown>(`/clients${qs ? `?${qs}` : ""}`, token);
+  const rawObj = isRecord(raw) ? raw : {};
+  const rawData = rawObj.data;
+  const rawPagination = isClientsPagination(rawObj.pagination)
+    ? rawObj.pagination
+    : undefined;
+  const success = rawObj.success === true;
+
+  if (Array.isArray(rawData)) {
+    return {
+      success,
+      data: rawData as Client[],
+      pagination:
+        rawPagination ??
+        ({
+          page: params?.page ?? 1,
+          limit: params?.limit ?? (rawData as unknown[]).length,
+          total: (rawData as unknown[]).length,
+          totalPages: 1,
+        } satisfies ClientsPagination),
+    };
+  }
+
+  if (isRecord(rawData) && Array.isArray(rawData.items)) {
+    const items = rawData.items as Client[];
+    const embeddedPagination = isClientsPagination(rawData.pagination)
+      ? rawData.pagination
+      : undefined;
+
+    return {
+      success,
+      data: items,
+      pagination:
+        embeddedPagination ??
+        rawPagination ??
+        ({
+          page: params?.page ?? 1,
+          limit: params?.limit ?? items.length,
+          total: items.length,
+          totalPages: 1,
+        } satisfies ClientsPagination),
+    };
+  }
+
+  return {
+    success,
+    data: [],
+    pagination: {
+      page: params?.page ?? 1,
+      limit: params?.limit ?? 10,
+      total: 0,
+      totalPages: 0,
+    },
+  };
+}
+
+export async function getClientOptions(params?: {
+  page?: number;
+  limit?: number;
+  search?: string;
+}): Promise<{
+  success: boolean;
+  data: Array<{ id: number; full_name: string; phone_number?: string | null }>;
+  pagination: ClientsPagination;
+}> {
+  const token = getAuthToken();
+  const query = new URLSearchParams();
+  if (params?.page) query.set('page', String(params.page));
+  if (params?.limit) query.set('limit', String(params.limit));
+  if (params?.search) query.set('search', params.search);
+  const qs = query.toString();
+
+  const raw = await get<unknown>(`/clients/options${qs ? `?${qs}` : ''}`, token);
+  const rawObj = isRecord(raw) ? raw : {};
+  const rawData = rawObj.data;
+  const rawPagination = isClientsPagination(rawObj.pagination)
+    ? rawObj.pagination
+    : undefined;
+  const success = rawObj.success === true;
+
+  if (Array.isArray(rawData)) {
+    const items = (rawData as unknown[])
+      .map((item) => {
+        if (!isRecord(item)) return null;
+
+        const id = toFiniteNumber(item.id);
+        const full_name =
+          typeof item.full_name === "string" ? item.full_name : undefined;
+        const phone_number =
+          typeof item.phone_number === "string" ? item.phone_number : null;
+
+        if (!id || !full_name) return null;
+        return { id, full_name, phone_number };
+      })
+      .filter(
+        (v): v is { id: number; full_name: string; phone_number: string | null } =>
+          v !== null
+      );
+
+    return {
+      success,
+      data: items,
+      pagination:
+        rawPagination ??
+        ({
+          page: params?.page ?? 1,
+          limit: params?.limit ?? items.length,
+          total: items.length,
+          totalPages: 1,
+        } satisfies ClientsPagination),
+    };
+  }
+
+  return {
+    success,
+    data: [],
+    pagination: {
+      page: params?.page ?? 1,
+      limit: params?.limit ?? 10,
+      total: 0,
+      totalPages: 0,
+    },
+  };
 }
 
 export async function getClientById(

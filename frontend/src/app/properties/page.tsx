@@ -7,95 +7,19 @@ import {
   AddPropertyForm,
   type PropertyFormData,
 } from "@/components/properties/AddPropertyForm";
+import {
+  createRealEstate,
+  getClientOptions,
+  getRealEstateById,
+  getRealEstatesList,
+  getStaffList,
+  updateRealEstateById,
+  updateRealEstateStatus,
+  type RealEstate,
+  type RealEstateStatus,
+} from "@/lib/api";
 import { Search, Plus } from "lucide-react";
-import { useState } from "react";
-
-const initialProperties: Property[] = [
-  {
-    id: "1",
-    image: "🏢",
-    name: "Downtown Luxury Penthouse",
-    type: "Apartment",
-    status: "Listed",
-    price: 950000,
-    agent: "Alice Chen",
-    address: "123 Main St, Downtown",
-    bedrooms: 4,
-    bathrooms: 3,
-    area: 2400,
-    lastUpdated: "2024-01-15",
-  },
-  {
-    id: "2",
-    image: "🏠",
-    name: "Suburban Family Home",
-    type: "House",
-    status: "New",
-    price: 425000,
-    agent: "Bob Smith",
-    address: "456 Maple Ave, Suburb",
-    bedrooms: 3,
-    bathrooms: 2,
-    area: 1800,
-    lastUpdated: "2024-01-18",
-  },
-  {
-    id: "3",
-    image: "🏢",
-    name: "Commercial Office Space",
-    type: "Commercial",
-    status: "Pending legal review",
-    price: 1200000,
-    agent: "Carol Davis",
-    address: "789 Business Rd, City Center",
-    bedrooms: 0,
-    bathrooms: 4,
-    area: 6000,
-    lastUpdated: "2024-01-20",
-  },
-  {
-    id: "4",
-    image: "🏖️",
-    name: "Beachfront Condo",
-    type: "Apartment",
-    status: "Negotiating",
-    price: 650000,
-    agent: "David Lee",
-    address: "321 Ocean Dr, Beach District",
-    bedrooms: 2,
-    bathrooms: 2,
-    area: 1200,
-    lastUpdated: "2024-01-17",
-  },
-  {
-    id: "5",
-    image: "🌳",
-    name: "Residential Land Plot",
-    type: "Land",
-    status: "Paused",
-    price: 280000,
-    agent: "Emma Wilson",
-    address: "654 Cedar Ln, Outskirts",
-    bedrooms: 0,
-    bathrooms: 0,
-    area: 12000,
-    lastUpdated: "2024-01-19",
-  },
-  {
-    id: "6",
-    image: "🏠",
-    name: "Modern Urban Townhouse",
-    type: "House",
-    status: "Closed",
-    price: 580000,
-    agent: "Frank Brown",
-    address: "987 Birch Blvd, Urban",
-    bedrooms: 3,
-    bathrooms: 3,
-    area: 2000,
-    lastUpdated: "2024-01-10",
-  },
-];
+import { useEffect, useState } from "react";
 
 function todayIsoDate() {
   return new Date().toISOString().split("T")[0];
@@ -114,77 +38,312 @@ function getPropertyEmoji(type: Property["type"]) {
   }
 }
 
+function toUiPropertyType(type: string): Property["type"] {
+  const normalized = type.trim().toLowerCase();
+  if (normalized.includes("apartment") || normalized.includes("condo")) {
+    return "Apartment";
+  }
+  if (normalized.includes("house") || normalized.includes("townhouse")) {
+    return "House";
+  }
+  if (normalized.includes("land")) {
+    return "Land";
+  }
+  return "Commercial";
+}
+
+function toUiPropertyStatus(status: RealEstate["status"]): Property["status"] {
+  switch (status) {
+    case "created":
+      return "New";
+    case "pending_legal_check":
+      return "Pending legal review";
+    case "listed":
+      return "Listed";
+    case "negotiating":
+      return "Negotiating";
+    case "transacted":
+      return "Closed";
+    case "suspended":
+      return "Paused";
+  }
+}
+
+function toUiNumber(value: number | string): number {
+  return typeof value === "number" ? value : Number(value);
+}
+
+function toApiTransactionType(value: PropertyFormData["transactionType"]):
+  | "sale"
+  | "rent" {
+  return value === "Rent" ? "rent" : "sale";
+}
+
+function toApiStatus(value: Property["status"]): RealEstateStatus {
+  switch (value) {
+    case "New":
+      return "created";
+    case "Pending legal review":
+      return "pending_legal_check";
+    case "Listed":
+      return "listed";
+    case "Negotiating":
+      return "negotiating";
+    case "Closed":
+      return "transacted";
+    case "Paused":
+      return "suspended";
+  }
+}
+
 export default function Properties() {
-  const [properties, setProperties] = useState<Property[]>(initialProperties);
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [owners, setOwners] = useState<
+    Array<{ id: number; full_name: string; phone_number?: string | null }>
+  >([]);
+  const [isOwnersLoading, setIsOwnersLoading] = useState(false);
+  const [ownersLoadError, setOwnersLoadError] = useState<string | null>(null);
+  const [staffMembers, setStaffMembers] = useState<string[]>([]);
+  const [isStaffLoading, setIsStaffLoading] = useState(false);
+  const [staffLoadError, setStaffLoadError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const [isAddPropertyDialogOpen, setIsAddPropertyDialogOpen] = useState(false);
   const [isEditPropertyDialogOpen, setIsEditPropertyDialogOpen] =
     useState(false);
   const [editingPropertyId, setEditingPropertyId] = useState<string | null>(
     null,
   );
+  const [editingRealEstate, setEditingRealEstate] = useState<RealEstate | null>(
+    null,
+  );
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterType, setFilterType] = useState("all");
 
+  const reloadOwners = async () => {
+    setIsOwnersLoading(true);
+    setOwnersLoadError(null);
+    try {
+      const clientsRes = await getClientOptions({ page: 1, limit: 100 });
+      if (clientsRes.success !== true) {
+        setOwners([]);
+        setOwnersLoadError("Failed to load owners");
+        return;
+      }
+
+      setOwners(
+        clientsRes.data
+          .filter((c) => typeof c.id === "number")
+          .map((c) => ({
+            id: c.id,
+            full_name: c.full_name,
+            phone_number: c.phone_number,
+          })),
+      );
+    } catch (e) {
+      setOwners([]);
+      setOwnersLoadError(
+        e instanceof Error ? e.message : "Failed to load owners",
+      );
+    } finally {
+      setIsOwnersLoading(false);
+    }
+  };
+
+  const reloadStaffMembers = async () => {
+    setIsStaffLoading(true);
+    setStaffLoadError(null);
+    try {
+      // Backend validator caps limit at 100
+      const staffRes = await getStaffList({ page: 1, limit: 100 });
+      if (staffRes.success !== true) {
+        setStaffMembers([]);
+        setStaffLoadError("Failed to load staff");
+        return;
+      }
+
+      setStaffMembers(
+        staffRes.data
+          .map((s) => (typeof s.full_name === "string" ? s.full_name : null))
+          .filter((name): name is string => Boolean(name)),
+      );
+    } catch (e) {
+      setStaffMembers([]);
+      setStaffLoadError(
+        e instanceof Error ? e.message : "Failed to load staff",
+      );
+    } finally {
+      setIsStaffLoading(false);
+    }
+  };
+
+  const reloadProperties = async () => {
+    setIsLoading(true);
+    setLoadError(null);
+    try {
+      const [realEstatesRes, staffRes] = await Promise.all([
+        getRealEstatesList({ page: 1, limit: 100 }),
+        getStaffList({ page: 1, limit: 100 }),
+      ]);
+
+      const staffNameById = new Map(
+        staffRes.data
+          .filter((s) => typeof s.id === "number")
+          .map((s) => [String(s.id), s.full_name] as const),
+      );
+
+      const mapped: Property[] = realEstatesRes.data.map((re) => {
+        const type = toUiPropertyType(re.type);
+        const status = toUiPropertyStatus(re.status);
+        const staffName = staffNameById.get(String(re.staff_id));
+
+        return {
+          id: String(re.id),
+          image: getPropertyEmoji(type),
+          name: re.title,
+          type,
+          status,
+          price: toUiNumber(re.price),
+          agent: staffName ?? `Staff #${re.staff_id}`,
+          address: re.location,
+          bedrooms: 0,
+          bathrooms: 0,
+          area: toUiNumber(re.area),
+          lastUpdated: todayIsoDate(),
+        };
+      });
+
+      if (realEstatesRes.success !== true) {
+        setLoadError("Failed to load properties");
+      }
+
+      setProperties(mapped);
+    } catch (e) {
+      setLoadError(e instanceof Error ? e.message : "Failed to load properties");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    void reloadProperties();
+    void reloadOwners();
+    void reloadStaffMembers();
+  }, []);
+
   const editingProperty = properties.find((p) => p.id === editingPropertyId);
 
-  const handleAddProperty = (data: PropertyFormData) => {
-    const type = data.type as Property["type"];
-    const status = data.status as Property["status"];
+  const handleAddProperty = async (data: PropertyFormData) => {
+    setLoadError(null);
+    try {
+      const transaction_type =
+        data.transactionType === "Sale"
+          ? "sale"
+          : data.transactionType === "Rent"
+            ? "rent"
+            : "sale";
 
-    const newProperty: Property = {
-      id: String(Date.now()),
-      image: getPropertyEmoji(type),
-      name: data.name,
-      type,
-      status,
-      price: Number(data.price),
-      agent: data.agent,
-      address: data.address,
-      bedrooms: data.bedrooms ? Number(data.bedrooms) : 0,
-      bathrooms: data.bathrooms ? Number(data.bathrooms) : 0,
-      area: data.area ? Number(data.area) : 0,
-      lastUpdated: todayIsoDate(),
-    };
+      const ownerId = Number(data.ownerId);
+      if (!Number.isFinite(ownerId)) {
+        throw new Error("Please select a valid owner");
+      }
 
-    setProperties((prev) => [newProperty, ...prev]);
-    setIsAddPropertyDialogOpen(false);
+      if (!data.direction) {
+        throw new Error("Please select a direction");
+      }
+
+      await createRealEstate({
+        title: data.name,
+        type: data.type,
+        transaction_type,
+        location: data.address,
+        price: Number(data.price),
+        area: Number(data.area),
+        direction: data.direction,
+        owner_id: ownerId,
+        description: data.description || undefined,
+        media_files: data.mediaFiles,
+        legal_docs: data.legalDocFiles,
+      });
+
+      setIsAddPropertyDialogOpen(false);
+      await reloadProperties();
+    } catch (e) {
+      setLoadError(e instanceof Error ? e.message : "Failed to create property");
+    }
   };
 
   const handleStartEditProperty = (property: Property) => {
-    setEditingPropertyId(property.id);
-    setIsEditPropertyDialogOpen(true);
+    void (async () => {
+      setLoadError(null);
+      setEditingPropertyId(property.id);
+      setEditingRealEstate(null);
+
+      try {
+        const res = await getRealEstateById(property.id);
+        if (!res.data?.realEstate) {
+          throw new Error("Failed to load property details");
+        }
+        setEditingRealEstate(res.data.realEstate);
+        setIsEditPropertyDialogOpen(true);
+      } catch (e) {
+        setLoadError(
+          e instanceof Error ? e.message : "Failed to load property details",
+        );
+        setEditingPropertyId(null);
+        setEditingRealEstate(null);
+        setIsEditPropertyDialogOpen(false);
+      } finally {
+      }
+    })();
   };
 
-  const handleEditProperty = (data: PropertyFormData) => {
-    if (!editingProperty) return;
+  const handleEditProperty = async (data: PropertyFormData) => {
+    if (!editingPropertyId || !editingRealEstate) return;
 
-    const type = data.type as Property["type"];
-    const status = data.status as Property["status"];
+    setLoadError(null);
+    try {
+      const ownerId = Number(data.ownerId);
+      if (!Number.isFinite(ownerId)) {
+        throw new Error("Please select a valid owner");
+      }
 
-    setProperties((prev) =>
-      prev.map((p) =>
-        p.id === editingProperty.id
-          ? {
-              ...p,
-              image: getPropertyEmoji(type),
-              name: data.name,
-              type,
-              status,
-              price: Number(data.price),
-              agent: data.agent,
-              address: data.address,
-              bedrooms: data.bedrooms ? Number(data.bedrooms) : 0,
-              bathrooms: data.bathrooms ? Number(data.bathrooms) : 0,
-              area: data.area ? Number(data.area) : 0,
-              lastUpdated: todayIsoDate(),
-            }
-          : p,
-      ),
-    );
+      if (!data.direction) {
+        throw new Error("Please select a direction");
+      }
 
-    setIsEditPropertyDialogOpen(false);
-    setEditingPropertyId(null);
+      const desiredStatus = data.status as Property["status"];
+      const currentStatusUi = editingProperty?.status;
+
+      await updateRealEstateById(editingPropertyId, {
+        title: data.name,
+        type: data.type,
+        transaction_type: toApiTransactionType(data.transactionType),
+        location: data.address,
+        price: Number(data.price),
+        area: Number(data.area),
+        direction: data.direction,
+        owner_id: ownerId,
+        description: data.description || undefined,
+        media_files: data.mediaFiles.length > 0 ? data.mediaFiles : undefined,
+        legal_docs: data.legalDocFiles.length > 0 ? data.legalDocFiles : undefined,
+      });
+
+      if (currentStatusUi && desiredStatus !== currentStatusUi) {
+        await updateRealEstateStatus(
+          editingPropertyId,
+          toApiStatus(desiredStatus),
+        );
+      }
+
+      setIsEditPropertyDialogOpen(false);
+      setEditingPropertyId(null);
+      setEditingRealEstate(null);
+      await reloadProperties();
+    } catch (e) {
+      setLoadError(e instanceof Error ? e.message : "Failed to update property");
+    }
   };
 
   const handleDeleteProperty = (propertyId: string) => {
@@ -192,6 +351,7 @@ export default function Properties() {
     if (editingPropertyId === propertyId) {
       setIsEditPropertyDialogOpen(false);
       setEditingPropertyId(null);
+      setEditingRealEstate(null);
     }
   };
 
@@ -254,7 +414,11 @@ export default function Properties() {
         {/* Add Property Button */}
         <button
           type="button"
-          onClick={() => setIsAddPropertyDialogOpen(true)}
+          onClick={() => {
+            void reloadOwners();
+            void reloadStaffMembers();
+            setIsAddPropertyDialogOpen(true);
+          }}
           className="px-6 py-2.5 bg-primary text-white rounded-lg font-medium hover:bg-blue-600 transition-colors flex items-center gap-2 whitespace-nowrap shadow-sm"
         >
           <Plus className="w-5 h-5" />
@@ -266,14 +430,26 @@ export default function Properties() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Table - Left side */}
         <div className="lg:col-span-2">
-          <PropertyTable
-            properties={properties}
-            searchTerm={searchTerm}
-            filterStatus={filterStatus}
-            filterType={filterType}
-            onEditProperty={handleStartEditProperty}
-            onDeleteProperty={handleDeleteProperty}
-          />
+          {loadError && (
+            <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {loadError}
+            </div>
+          )}
+
+          {isLoading ? (
+            <div className="rounded-lg border border-gray-200 bg-white px-6 py-10 text-center text-sm text-gray-600">
+              Loading properties...
+            </div>
+          ) : (
+            <PropertyTable
+              properties={properties}
+              searchTerm={searchTerm}
+              filterStatus={filterStatus}
+              filterType={filterType}
+              onEditProperty={handleStartEditProperty}
+              onDeleteProperty={handleDeleteProperty}
+            />
+          )}
         </div>
 
         {/* Summary - Right side */}
@@ -286,6 +462,12 @@ export default function Properties() {
         isOpen={isAddPropertyDialogOpen}
         onClose={() => setIsAddPropertyDialogOpen(false)}
         onSubmit={handleAddProperty}
+        owners={owners}
+        ownersLoading={isOwnersLoading}
+        ownersError={ownersLoadError}
+        staffMembers={staffMembers}
+        staffLoading={isStaffLoading}
+        staffError={staffLoadError}
       />
 
       {editingProperty && (
@@ -294,23 +476,36 @@ export default function Properties() {
           onClose={() => {
             setIsEditPropertyDialogOpen(false);
             setEditingPropertyId(null);
+            setEditingRealEstate(null);
           }}
           onSubmit={handleEditProperty}
+          owners={owners}
+          ownersLoading={isOwnersLoading}
+          ownersError={ownersLoadError}
+          staffMembers={staffMembers}
+          staffLoading={isStaffLoading}
+          staffError={staffLoadError}
           title="Edit property"
           submitLabel="Save changes"
           initialData={{
-            name: editingProperty.name,
-            type: editingProperty.type,
+            name: editingRealEstate?.title ?? editingProperty.name,
+            type: editingRealEstate?.type ?? editingProperty.type,
+            transactionType:
+              editingRealEstate?.transaction_type === "rent" ? "Rent" : "Sale",
             status: editingProperty.status,
-            price: String(editingProperty.price),
+            price: String(editingRealEstate?.price ?? editingProperty.price),
             agent: editingProperty.agent,
-            address: editingProperty.address,
+            address: editingRealEstate?.location ?? editingProperty.address,
             bedrooms: String(editingProperty.bedrooms),
             bathrooms: String(editingProperty.bathrooms),
-            area: String(editingProperty.area),
+            area: String(editingRealEstate?.area ?? editingProperty.area),
+            direction: (editingRealEstate?.direction ?? "") as PropertyFormData["direction"],
+            ownerId: String(editingRealEstate?.owner_id ?? ""),
+            description: String(editingRealEstate?.description ?? ""),
           }}
         />
       )}
     </>
+
   );
 }

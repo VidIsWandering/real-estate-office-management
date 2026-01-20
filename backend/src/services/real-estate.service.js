@@ -10,10 +10,11 @@ class RealEstateService {
     const existingOwner = await clientRepository.findById(data.owner_id);
     if (!existingOwner) throw new Error('Owner does not exist');
 
-    if (
-      existingOwner.staff_id != user.staff_id &&
-      user.position != STAFF_ROLES.MANAGER
-    ) {
+    const position = String(user?.position ?? '').toLowerCase();
+    const canManageAll =
+      position === STAFF_ROLES.MANAGER || position === STAFF_ROLES.ADMIN;
+
+    if (!canManageAll && existingOwner.staff_id != user.staff_id) {
       throw new Error('You do not have permission to manage this customer');
     }
 
@@ -23,7 +24,6 @@ class RealEstateService {
     const mediaFileIds = media_files.items.map((item) => item.id);
     const legalDocIds = legal_docs.items.map((item) => item.id);
 
-    console.log(mediaFileIds);
     const res = await realEstateRepository.create({
       ...data,
       media_files: mediaFileIds,
@@ -35,10 +35,23 @@ class RealEstateService {
   }
 
   async getRealEstates(query, user) {
-    if (user.position != STAFF_ROLES.MANAGER) {
-      query.staff_id = user.staff_id;
+    const position = String(user?.position ?? '').toLowerCase();
+    const canSeeAll =
+      position === STAFF_ROLES.MANAGER || position === STAFF_ROLES.ADMIN;
+
+    // Avoid mutating req.query directly.
+    const normalizedQuery = { ...query };
+
+    // Default behavior: agent only sees their own listings.
+    if (!canSeeAll) {
+      normalizedQuery.staff_id = user.staff_id;
+    } else {
+      // Admin/Manager default: show all listings.
+      // If a caller accidentally passes staff_id, ignore it.
+      delete normalizedQuery.staff_id;
     }
-    const res = await realEstateRepository.findAll(query);
+
+    const res = await realEstateRepository.findAll(normalizedQuery);
     return res;
   }
 
@@ -46,9 +59,12 @@ class RealEstateService {
     const realEstate = await realEstateRepository.findById(realEstateId);
     if (!realEstate) throw new Error('Real estate not found');
 
+    const canManageAll =
+      user.position === STAFF_ROLES.MANAGER || user.position === STAFF_ROLES.ADMIN;
+
     if (
       realEstate.staff_id != user.staff_id &&
-      user.position != STAFF_ROLES.MANAGER
+      !canManageAll
     ) {
       throw new Error('You do not have permission to manage this real estate');
     }
@@ -76,10 +92,10 @@ class RealEstateService {
       await realEstateRepository.findById(realEstateId);
     if (!existingRealEstate) throw new Error('Real estate not found');
 
-    if (
-      existingRealEstate.staff_id != user.staff_id &&
-      user.position != STAFF_ROLES.MANAGER
-    ) {
+    const canManageAll =
+      user.position === STAFF_ROLES.MANAGER || user.position === STAFF_ROLES.ADMIN;
+
+    if (existingRealEstate.staff_id != user.staff_id && !canManageAll) {
       throw new Error('You do not have permission to manage this real estate');
     }
     // 2️⃣ Kiểm tra location để tránh trùng
@@ -97,26 +113,38 @@ class RealEstateService {
       }
     }
 
-    // 3️⃣ Upload media files và legal docs
-    const media_files = updateData.media_files
-      ? (await fileService.createManyFiles(updateData.media_files)).items.map(
-          (item) => item.id
-        )
-      : null;
+    // 3️⃣ Upload media files và legal docs (only when provided)
+    let mediaFileIds;
+    if (Array.isArray(updateData.media_files)) {
+      mediaFileIds = (await fileService.createManyFiles(updateData.media_files)).items.map(
+        (item) => item.id
+      );
+    }
 
-    const legal_docs = updateData.legal_docs
-      ? (await fileService.createManyFiles(updateData.legal_docs)).items.map(
-          (item) => item.id
-        )
-      : null;
+    let legalDocIds;
+    if (Array.isArray(updateData.legal_docs)) {
+      legalDocIds = (await fileService.createManyFiles(updateData.legal_docs)).items.map(
+        (item) => item.id
+      );
+    }
+
+    const updateFields = { ...updateData };
+    delete updateFields.media_files;
+    delete updateFields.legal_docs;
+
+    // Backend derives staff_id from token
+    updateFields.staff_id = user.staff_id;
+
+    // Only overwrite media/legal docs when explicitly provided.
+    if (mediaFileIds !== undefined) {
+      updateFields.media_files = mediaFileIds.length > 0 ? mediaFileIds : null;
+    }
+    if (legalDocIds !== undefined) {
+      updateFields.legal_docs = legalDocIds.length > 0 ? legalDocIds : null;
+    }
 
     // 4️⃣ Cập nhật bản ghi
-    await realEstateRepository.update(realEstateId, {
-      ...updateData,
-      staff_id: user.staff_id,
-      media_files: media_files?.length > 0 ? media_files : null,
-      legal_docs: legal_docs?.length > 0 ? legal_docs : null,
-    });
+    await realEstateRepository.update(realEstateId, updateFields);
 
     // 5️⃣ Nếu price thay đổi, lưu lịch sử giá
     if (updateData.price && updateData.price !== existingRealEstate.price) {
@@ -163,10 +191,10 @@ class RealEstateService {
     const realEstate = await realEstateRepository.findById(realEstateId);
     if (!realEstate) throw new Error('Real estate not found');
 
-    if (
-      realEstate.staff_id != user.staff_id &&
-      user.position == STAFF_ROLES.AGENT
-    ) {
+    const canManageAll =
+      user.position === STAFF_ROLES.MANAGER || user.position === STAFF_ROLES.ADMIN;
+
+    if (realEstate.staff_id != user.staff_id && !canManageAll) {
       throw new Error('You do not have permission to manage this real estate');
     }
 

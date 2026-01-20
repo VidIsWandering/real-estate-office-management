@@ -4,6 +4,21 @@ const clientRepository = require('../repositories/client.repository');
 const staffRepository = require('../repositories/staff.repository');
 
 class ClientService {
+  async getOptions(query) {
+    const res = await clientRepository.findAll(query);
+    return {
+      items: res.items.map((c) => {
+        const json = c.toJSON();
+        return {
+          id: json.id,
+          full_name: json.full_name,
+          phone_number: json.phone_number ?? null,
+        };
+      }),
+      pagination: res.pagination,
+    };
+  }
+
   async create(data) {
     const existingEmail = await clientRepository.findByEmail(data.email);
     if (existingEmail) throw new Error('Email already exists');
@@ -20,7 +35,10 @@ class ClientService {
   }
 
   async getAll(query, user) {
-    if (user.position != STAFF_ROLES.MANAGER) {
+    const canSeeAll =
+      user.position === STAFF_ROLES.MANAGER || user.position === STAFF_ROLES.ADMIN;
+
+    if (!canSeeAll) {
       query.staff_id = user.staff_id;
     }
     return await clientRepository.findAll(query);
@@ -28,12 +46,14 @@ class ClientService {
 
   async getById(clientId, user) {
     const client = await clientRepository.findById(clientId);
-    const staff = await clientRepository.findById(client.staff_id);
+    const staff = client?.staff_id
+      ? await staffRepository.findById(client.staff_id)
+      : null;
 
-    if (
-      client.staff_id != user.staff_id &&
-      user.position != STAFF_ROLES.MANAGER
-    ) {
+    const canManageAll =
+      user.position === STAFF_ROLES.MANAGER || user.position === STAFF_ROLES.ADMIN;
+
+    if (!canManageAll && client.staff_id != user.staff_id) {
       throw new Error('You do not have permission to manage this customer');
     }
     return {
@@ -44,10 +64,15 @@ class ClientService {
 
   async update(clientId, updateData, user) {
     const client = await clientRepository.findById(clientId);
-    const staff = await clientRepository.findById(client.staff_id);
+    const staff = client?.staff_id
+      ? await staffRepository.findById(client.staff_id)
+      : null;
+
+    const canManageAll =
+      user.position === STAFF_ROLES.MANAGER || user.position === STAFF_ROLES.ADMIN;
     if (
-      client.staff_id != user.staff_id &&
-      user.position != STAFF_ROLES.MANAGER
+      !canManageAll &&
+      client.staff_id != user.staff_id
     ) {
       throw new Error('You do not have permission to manage this customer');
     }
@@ -64,10 +89,10 @@ class ClientService {
   async delete(clientId, user) {
     const client = await clientRepository.findById(clientId);
 
-    if (
-      client.staff_id != user.staff_id &&
-      user.position != STAFF_ROLES.MANAGER
-    ) {
+    const canManageAll =
+      user.position === STAFF_ROLES.MANAGER || user.position === STAFF_ROLES.ADMIN;
+
+    if (!canManageAll && client.staff_id != user.staff_id) {
       throw new Error('You do not have permission to manage this customer');
     }
     const res = await clientRepository.delete(clientId);
@@ -79,10 +104,10 @@ class ClientService {
     const client = await clientRepository.findById(data.client_id);
     const staff = await staffRepository.findById(data.staff_id);
 
-    if (
-      client.staff_id != user.staff_id &&
-      user.position != STAFF_ROLES.MANAGER
-    ) {
+    const canManageAll =
+      user.position === STAFF_ROLES.MANAGER || user.position === STAFF_ROLES.ADMIN;
+
+    if (!canManageAll && client.staff_id != user.staff_id) {
       throw new Error('You do not have permission to manage this customer');
     }
     const res = await clientNoteRepository.create(data);
@@ -95,10 +120,11 @@ class ClientService {
 
   async getNotes(query, user) {
     const client = await clientRepository.findById(query.client_id);
-    if (
-      client.staff_id != user.staff_id &&
-      user.position != STAFF_ROLES.MANAGER
-    ) {
+
+    const canManageAll =
+      user.position === STAFF_ROLES.MANAGER || user.position === STAFF_ROLES.ADMIN;
+
+    if (!canManageAll && client.staff_id != user.staff_id) {
       throw new Error('You do not have permission to manage this customer');
     }
     const res = await clientNoteRepository.findAll(query);

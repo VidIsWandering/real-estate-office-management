@@ -39,7 +39,7 @@ router.get('/:id', realEstateController.getById);
  */
 router.post(
   '/',
-  authorize([STAFF_ROLES.AGENT, STAFF_ROLES.MANAGER]),
+  authorize([STAFF_ROLES.AGENT, STAFF_ROLES.MANAGER, STAFF_ROLES.ADMIN]),
 
   upload.fields([
     { name: 'media_files', maxCount: 10 },
@@ -58,7 +58,7 @@ router.post(
  */
 router.put(
   '/:id',
-  authorize([STAFF_ROLES.AGENT, STAFF_ROLES.MANAGER]),
+  authorize([STAFF_ROLES.AGENT, STAFF_ROLES.MANAGER, STAFF_ROLES.ADMIN]),
 
   upload.fields([
     { name: 'media_files', maxCount: 10 },

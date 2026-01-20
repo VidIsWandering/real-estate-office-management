@@ -9,6 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -20,7 +21,6 @@ import type {
   ClientCategory,
   ClientFormData,
   ClientItem,
-  ClientStatus,
 } from "./types";
 
 interface EditClientFormProps {
@@ -28,7 +28,6 @@ interface EditClientFormProps {
   onClose: () => void;
   onSubmit: (data: ClientFormData) => Promise<void>;
   initialData: ClientItem;
-  staffMembers: string[];
 }
 
 export function EditClientForm({
@@ -36,7 +35,6 @@ export function EditClientForm({
   onClose,
   onSubmit,
   initialData,
-  staffMembers,
 }: EditClientFormProps) {
   const [formData, setFormData] = useState<ClientFormData>({
     name: initialData.name,
@@ -44,8 +42,8 @@ export function EditClientForm({
     phone: initialData.phone,
     address: initialData.address,
     clientType: initialData.clientType,
-    assignedStaff: initialData.assignedStaff,
-    status: initialData.status,
+    referralSource: initialData.referralSource ?? "",
+    requirement: initialData.requirement ?? "",
   });
 
   const [errors, setErrors] = useState<Partial<ClientFormData>>({});
@@ -208,43 +206,36 @@ export function EditClientForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="assignedStaff">Assigned Staff</Label>
-            <Select
-              value={formData.assignedStaff}
-              onValueChange={(value) =>
-                handleSelectChange("assignedStaff", value)
-              }
-              disabled={staffMembers.length === 0}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select staff member" />
-              </SelectTrigger>
-              <SelectContent>
-                {staffMembers.map((staff) => (
-                  <SelectItem key={staff} value={staff}>
-                    {staff}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Label htmlFor="referralSource">Referral Source</Label>
+            <Input
+              id="referralSource"
+              name="referralSource"
+              value={formData.referralSource}
+              onChange={handleChange}
+              placeholder="e.g., Facebook, Friend, Zalo"
+              className={errors.referralSource ? "border-red-500" : ""}
+            />
+            {errors.referralSource && (
+              <p className="text-red-500 text-xs">{errors.referralSource}</p>
+            )}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="status">Status</Label>
-            <Select
-              value={formData.status}
-              onValueChange={(value) =>
-                handleSelectChange("status", value as ClientStatus)
+            <Label htmlFor="requirement">Requirement</Label>
+            <Textarea
+              id="requirement"
+              name="requirement"
+              value={formData.requirement}
+              onChange={(e) =>
+                handleSelectChange("requirement", e.currentTarget.value)
               }
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="Active">Active</SelectItem>
-                <SelectItem value="Inactive">Inactive</SelectItem>
-              </SelectContent>
-            </Select>
+              rows={3}
+              placeholder="Notes about needs (budget, location, type...)"
+              className={errors.requirement ? "border-red-500" : ""}
+            />
+            {errors.requirement && (
+              <p className="text-red-500 text-xs">{errors.requirement}</p>
+            )}
           </div>
 
           <DialogFooter className="gap-2">

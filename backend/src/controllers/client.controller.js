@@ -10,8 +10,37 @@ const {
 const { HTTP_STATUS } = require('../config/constants');
 const { asyncHandler } = require('../middlewares/error.middleware');
 const clientService = require('../services/client.service');
+const staffRepository = require('../repositories/staff.repository');
 
 class ClientController {
+  /**
+   * GET /clients/options
+   * Lightweight lookup for dropdowns (owners, etc.)
+   */
+  async getOptions(req, res) {
+    try {
+      const page = req.query.page ? Number(req.query.page) : 1;
+      const limit = req.query.limit ? Number(req.query.limit) : 50;
+      const search = typeof req.query.search === 'string' ? req.query.search : '';
+
+      const query = {
+        page,
+        limit,
+        full_name: search || undefined,
+      };
+
+      const result = await clientService.getOptions(query);
+      return successResponseWithPagination(
+        res,
+        result.items,
+        result.pagination,
+        'Client options retrieved successfully'
+      );
+    } catch (error) {
+      return errorResponse(res, error.message);
+    }
+  }
+
   /**
    * GET /clients
    */
@@ -76,7 +105,8 @@ class ClientController {
       const { id } = req.params;
       const updateData = req.body;
       const result = await clientService.update(id, updateData, req.user);
-      return successResponse(res, { ...result }, 'Client updated successfully');
+      const updatedClient = result?.updated_client ?? result?.client ?? result;
+      return successResponse(res, updatedClient, 'Client updated successfully');
     } catch (error) {
       return errorResponse(res, error.message);
     }
@@ -105,16 +135,50 @@ class ClientController {
    */
   async getNotes(req, res) {
     try {
-      // TODO: Implement
       const { id } = req.params;
-      const { from, to } = req.query;
-      const query = { client_id: id, from, to };
+      const { from, to, page, limit } = req.query;
+      const query = {
+        client_id: id,
+        from,
+        to,
+        page: page ? Number(page) : undefined,
+        limit: limit ? Number(limit) : undefined,
+      };
       const result = await clientService.getNotes(query, req.user);
+
+      const staffIds = Array.from(
+        new Set(
+          result.items
+            .map((note) => note.staff_id)
+            .filter((staffId) => staffId !== null && staffId !== undefined)
+        )
+      );
+
+      const staffNameById = new Map();
+      await Promise.all(
+        staffIds.map(async (staffId) => {
+          const staff = await staffRepository.findById(staffId);
+          if (staff) {
+            staffNameById.set(String(staffId), staff.full_name);
+          }
+        })
+      );
+
+      const notes = result.items.map((note) => ({
+        id: note.id !== undefined && note.id !== null ? Number(note.id) : undefined,
+        content: note.content,
+        created_at: note.created_at,
+        created_by:
+          note.staff_id !== undefined && note.staff_id !== null
+            ? Number(note.staff_id)
+            : undefined,
+        created_by_name: staffNameById.get(String(note.staff_id)) ?? null,
+      }));
+
       return successResponseWithPagination(
         res,
-        { client_id: id, notes: result.items },
+        notes,
         result.pagination,
-
         'Notes retrieved successfully'
       );
     } catch (error) {
@@ -127,14 +191,26 @@ class ClientController {
    */
   async addNote(req, res) {
     try {
-      // TODO: Implement
       const { id } = req.params;
       const { content } = req.body;
       const data = { client_id: id, staff_id: req.user.staff_id, content };
       const result = await clientService.addNote(data, req.user);
+
+      const note = result?.client_note;
+      const staff = result?.staff;
+
       return successResponse(
         res,
-        { ...result },
+        {
+          id: note?.id !== undefined && note?.id !== null ? Number(note.id) : undefined,
+          content: note?.content,
+          created_at: note?.created_at,
+          created_by:
+            note?.staff_id !== undefined && note?.staff_id !== null
+              ? Number(note.staff_id)
+              : undefined,
+          created_by_name: staff?.full_name ?? null,
+        },
         'Note added successfully',
         HTTP_STATUS.CREATED
       );
@@ -147,6 +223,7 @@ class ClientController {
 const controller = new ClientController();
 
 module.exports = {
+  getOptions: asyncHandler((req, res) => controller.getOptions(req, res)),
   getAll: asyncHandler((req, res) => controller.getAll(req, res)),
   getById: asyncHandler((req, res) => controller.getById(req, res)),
   create: asyncHandler((req, res) => controller.create(req, res)),

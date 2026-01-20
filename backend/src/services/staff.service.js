@@ -65,9 +65,12 @@ class StaffService {
       phone_number,
       address,
       assigned_area,
-      position = 'staff',
+      position,
+      role,
       status = 'working',
     } = staffData;
+
+    const normalizedPosition = position ?? role ?? 'agent';
 
     // Validate required fields
     if (!username || !password || !full_name) {
@@ -78,8 +81,14 @@ class StaffService {
     }
 
     // Validate position
-    const validPositions = ['agent', 'legal_officer', 'accountant', 'manager'];
-    if (!validPositions.includes(position)) {
+    const validPositions = [
+      'admin',
+      'agent',
+      'legal_officer',
+      'accountant',
+      'manager',
+    ];
+    if (!validPositions.includes(normalizedPosition)) {
       throw new AppError('Invalid position', HTTP_STATUS.BAD_REQUEST);
     }
 
@@ -118,7 +127,7 @@ class StaffService {
         phone_number,
         address,
         assigned_area,
-        position,
+        position: normalizedPosition,
         status,
       });
 
@@ -151,18 +160,22 @@ class StaffService {
       address,
       assigned_area,
       position,
+      role,
       status,
     } = updateData;
 
+    const normalizedPosition = position ?? role;
+
     // Validate position if provided
-    if (position) {
+    if (normalizedPosition) {
       const validPositions = [
+        'admin',
         'agent',
         'legal_officer',
         'accountant',
         'manager',
       ];
-      if (!validPositions.includes(position)) {
+      if (!validPositions.includes(normalizedPosition)) {
         throw new AppError('Invalid position', HTTP_STATUS.BAD_REQUEST);
       }
     }
@@ -190,7 +203,7 @@ class StaffService {
       phone_number,
       address,
       assigned_area,
-      position,
+      position: normalizedPosition,
       status,
     });
 
@@ -235,14 +248,23 @@ class StaffService {
    * Update staff permissions (position)
    */
   async updatePermissions(id, permissionsData) {
-    const { position } = permissionsData;
+    const position =
+      typeof permissionsData === 'string'
+        ? permissionsData
+        : permissionsData?.position ?? permissionsData?.role;
 
     if (!position) {
       throw new AppError('Position is required', HTTP_STATUS.BAD_REQUEST);
     }
 
     // Validate position
-    const validPositions = ['agent', 'legal_officer', 'accountant', 'manager'];
+    const validPositions = [
+      'admin',
+      'agent',
+      'legal_officer',
+      'accountant',
+      'manager',
+    ];
     if (!validPositions.includes(position)) {
       throw new AppError('Invalid position', HTTP_STATUS.BAD_REQUEST);
     }

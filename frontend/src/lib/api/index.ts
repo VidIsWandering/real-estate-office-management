@@ -9,3 +9,4 @@ export * from "./system";
 export * from "./auth";
 export * from "./staff";
 export * from "./clients";
+export * from "./real-estates";

@@ -11,56 +11,9 @@ export interface UpcomingEvent {
   location?: string;
 }
 
-const upcomingEvents: UpcomingEvent[] = [
-  {
-    id: "EVT001",
-    title: "Property Viewing - 123 Oak Street",
-    type: "Viewing",
-    date: "Today",
-    time: "10:00 AM",
-    property: "123 Oak Street",
-    client: "John Wilson",
-    location: "123 Oak Street, Downtown",
-  },
-  {
-    id: "EVT002",
-    title: "Client Meeting - Strategy Review",
-    type: "Meeting",
-    date: "Today",
-    time: "2:30 PM",
-    client: "Sarah Martinez",
-    location: "Office",
-  },
-  {
-    id: "EVT003",
-    title: "Home Inspection - 456 Maple Avenue",
-    type: "Inspection",
-    date: "Tomorrow",
-    time: "9:00 AM",
-    property: "456 Maple Avenue",
-    location: "456 Maple Avenue",
-  },
-  {
-    id: "EVT004",
-    title: "Property Showing - 789 Pine Road",
-    type: "Showing",
-    date: "Tomorrow",
-    time: "3:00 PM",
-    property: "789 Pine Road",
-    client: "Michael Chen",
-    location: "789 Pine Road",
-  },
-  {
-    id: "EVT005",
-    title: "Closing Meeting",
-    type: "Closing",
-    date: "Jan 10",
-    time: "11:00 AM",
-    property: "321 Elm Street",
-    client: "Lisa Anderson",
-    location: "Law Office",
-  },
-];
+interface UpcomingEventsProps {
+  events: UpcomingEvent[];
+}
 
 function getEventColor(type: string) {
   switch (type) {
@@ -96,7 +49,7 @@ function getEventBadgeColor(type: string) {
   }
 }
 
-export function UpcomingEvents() {
+export function UpcomingEvents({ events }: UpcomingEventsProps) {
   return (
     <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
       <h3 className="text-lg font-semibold text-gray-900 mb-4">
@@ -104,7 +57,12 @@ export function UpcomingEvents() {
       </h3>
 
       <div className="space-y-3">
-        {upcomingEvents.map((event) => (
+        {events.length === 0 ? (
+          <div className="text-center py-8">
+            <p className="text-gray-500">No upcoming events</p>
+          </div>
+        ) : (
+          events.map((event) => (
           <div
             key={event.id}
             className={`p-4 rounded-lg transition-colors cursor-pointer hover:shadow-md ${getEventColor(
@@ -147,7 +105,8 @@ export function UpcomingEvents() {
               )}
             </div>
           </div>
-        ))}
+          ))
+        )}
       </div>
 
       {/* <button className="w-full mt-6 px-4 py-2 border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
