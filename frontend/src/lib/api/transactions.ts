@@ -1,21 +1,52 @@
-import { get, getAuthToken, patch, post, put } from "./client";
+import { get, getAuthToken, post, put } from "./client";
 
-export type AppointmentStatus =
-  | "created"
-  | "confirmed"
-  | "completed"
+export type TransactionStatus =
+  | "negotiating"
+  | "pending_contract"
   | "cancelled";
 
-export interface Appointment {
+export interface Transaction {
   id: number;
   real_estate_id: number;
   client_id: number;
   staff_id: number;
-  start_time: string;
-  end_time: string;
-  location: string | null;
-  status: AppointmentStatus;
-  note: string | null;
+  offer_price: number | string;
+  terms: Array<string | number>;
+  status: TransactionStatus;
+  cancellation_reason: string | null;
+}
+
+export interface Term {
+  id: number;
+  name: string;
+  content: string | null;
+}
+
+export type TransactionWithTerms = Omit<Transaction, "terms"> & {
+  terms: Term[];
+};
+
+export interface TermInput {
+  name: string;
+  content?: string | null;
+}
+
+export interface CreateTransactionInput {
+  real_estate_id: number;
+  client_id: number;
+  offer_price: number;
+  terms: TermInput[];
+}
+
+export interface UpdateTermInput {
+  id: number;
+  name?: string;
+  content?: string | null;
+}
+
+export interface UpdateTransactionInput {
+  offer_price?: number;
+  terms?: UpdateTermInput[];
 }
 
 export interface Pagination {
@@ -39,16 +70,16 @@ function isPagination(value: unknown): value is Pagination {
   );
 }
 
-export async function getAppointmentsList(params?: {
+export async function getTransactionsList(params?: {
   page?: number;
   limit?: number;
   real_estate_id?: number;
   client_id?: number;
   staff_id?: number;
-  status?: AppointmentStatus;
-  from_time?: string;
-  to_time?: string;
-}): Promise<{ success: boolean; data: Appointment[]; pagination: Pagination }> {
+  status?: TransactionStatus;
+  min_price?: number;
+  max_price?: number;
+}): Promise<{ success: boolean; data: Transaction[]; pagination: Pagination }> {
   const token = getAuthToken();
   const query = new URLSearchParams();
 
@@ -59,23 +90,24 @@ export async function getAppointmentsList(params?: {
   if (params?.client_id) query.set("client_id", String(params.client_id));
   if (params?.staff_id) query.set("staff_id", String(params.staff_id));
   if (params?.status) query.set("status", params.status);
-  if (params?.from_time) query.set("from_time", params.from_time);
-  if (params?.to_time) query.set("to_time", params.to_time);
+  if (params?.min_price !== undefined)
+    query.set("min_price", String(params.min_price));
+  if (params?.max_price !== undefined)
+    query.set("max_price", String(params.max_price));
 
   const qs = query.toString();
-  const raw = await get<unknown>(`/appointments${qs ? `?${qs}` : ""}`, token);
+  const raw = await get<unknown>(`/transactions${qs ? `?${qs}` : ""}`, token);
 
   const rawObj = isRecord(raw) ? raw : {};
   const success = rawObj.success === true;
 
-  // Backend usually returns: { success, data: Appointment[], pagination }
   const rawData = rawObj.data;
   const rawPagination = isPagination(rawObj.pagination)
     ? rawObj.pagination
     : undefined;
 
   if (Array.isArray(rawData)) {
-    const items = rawData as Appointment[];
+    const items = rawData as Transaction[];
     return {
       success,
       data: items,
@@ -92,7 +124,7 @@ export async function getAppointmentsList(params?: {
 
   // Fallback: sometimes list endpoints embed pagination under data
   if (isRecord(rawData) && Array.isArray(rawData.items)) {
-    const items = rawData.items as Appointment[];
+    const items = rawData.items as Transaction[];
     const embeddedPagination = isPagination(rawData.pagination)
       ? (rawData.pagination as Pagination)
       : undefined;
@@ -124,41 +156,49 @@ export async function getAppointmentsList(params?: {
   };
 }
 
-export async function createAppointment(data: {
-  real_estate_id: number;
-  client_id: number;
-  start_time: string;
-  end_time: string;
-  location?: string;
-  note?: string;
-}): Promise<{ success: boolean; data: Appointment }> {
-  const token = getAuthToken();
-  return post(`/appointments`, data, token);
-}
-
-export async function updateAppointment(
-  id: number,
-  data: Partial<{
-    real_estate_id: number;
-    client_id: number;
-    start_time: string;
-    end_time: string;
-    location: string;
-    note: string;
-    status: AppointmentStatus;
-  }>,
-): Promise<{ success: boolean; data: Appointment }> {
-  const token = getAuthToken();
-  return put(`/appointments/${id}`, data, token);
-}
-
-export async function updateAppointmentStatus(
-  id: number,
+export async function createTransaction(data: CreateTransactionInput): Promise<{
+  success: boolean;
   data: {
-    status: AppointmentStatus;
-    result_note?: string;
-  },
-): Promise<{ success: boolean; data: Appointment }> {
+    transaction: TransactionWithTerms;
+    real_estate: unknown;
+    client: unknown;
+  };
+}> {
   const token = getAuthToken();
-  return patch(`/appointments/${id}/status`, data, token);
+  return post(`/transactions`, data, token);
+}
+
+export async function getTransactionById(id: number): Promise<{
+  success: boolean;
+  data: {
+    transaction: TransactionWithTerms;
+    client: unknown;
+    real_estate: unknown;
+  };
+}> {
+  const token = getAuthToken();
+  return get(`/transactions/${id}`, token);
+}
+
+export async function updateTransaction(
+  id: number,
+  data: UpdateTransactionInput,
+): Promise<{ success: boolean; data: Transaction | TransactionWithTerms }> {
+  const token = getAuthToken();
+  return put(`/transactions/${id}`, data, token);
+}
+
+export async function finalizeTransaction(
+  id: number,
+): Promise<{ success: boolean; data: Transaction }> {
+  const token = getAuthToken();
+  return put(`/transactions/${id}/finalize`, undefined, token);
+}
+
+export async function cancelTransaction(
+  id: number,
+  reason?: string,
+): Promise<{ success: boolean; data: Transaction }> {
+  const token = getAuthToken();
+  return put(`/transactions/${id}/cancel`, { reason: reason || null }, token);
 }

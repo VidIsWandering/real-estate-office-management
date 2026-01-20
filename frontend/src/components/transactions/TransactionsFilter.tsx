@@ -9,8 +9,21 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
+import type { TransactionStatus } from "@/lib/api/transactions";
 
-export function TransactionsFilter({ onCreate }: { onCreate: () => void }) {
+export function TransactionsFilter({
+  onCreate,
+  search,
+  onSearchChange,
+  status,
+  onStatusChange,
+}: {
+  onCreate: () => void;
+  search: string;
+  onSearchChange: (value: string) => void;
+  status: TransactionStatus | "all";
+  onStatusChange: (value: TransactionStatus | "all") => void;
+}) {
   return (
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-2">
@@ -19,17 +32,22 @@ export function TransactionsFilter({ onCreate }: { onCreate: () => void }) {
           <Input
             placeholder="Search by transaction ID, customer, or property..."
             className="pl-9"
+            value={search}
+            onChange={(e) => onSearchChange(e.target.value)}
           />
         </div>
 
-        <Select>
+        <Select
+          value={status}
+          onValueChange={(v) => onStatusChange(v as TransactionStatus | "all")}
+        >
           <SelectTrigger className="w-40">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All</SelectItem>
             <SelectItem value="negotiating">Negotiating</SelectItem>
-            <SelectItem value="waiting-contract">
+            <SelectItem value="pending_contract">
               Awaiting Contract Signing
             </SelectItem>
             <SelectItem value="cancelled">Cancelled</SelectItem>

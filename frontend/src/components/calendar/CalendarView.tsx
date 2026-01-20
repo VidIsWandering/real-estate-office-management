@@ -14,6 +14,16 @@ export interface CalendarEvent {
   client?: string;
   agent?: string;
   location?: string;
+  appointment?: {
+    id: number;
+    real_estate_id: number;
+    client_id: number;
+    start_time: string;
+    end_time: string;
+    location?: string | null;
+    note?: string | null;
+    status?: "created" | "confirmed" | "completed" | "cancelled";
+  };
 }
 
 interface CalendarViewProps {
@@ -21,6 +31,11 @@ interface CalendarViewProps {
   currentDate: Date;
   onCurrentDateChange: (date: Date) => void;
   onAddEventForDate?: (date: string) => void;
+  onEditEvent?: (event: CalendarEvent) => void;
+  onUpdateStatus?: (
+    event: CalendarEvent,
+    status: "created" | "confirmed" | "completed" | "cancelled",
+  ) => void;
 }
 
 export function CalendarView({
@@ -28,6 +43,8 @@ export function CalendarView({
   currentDate,
   onCurrentDateChange,
   onAddEventForDate,
+  onEditEvent,
+  onUpdateStatus,
 }: CalendarViewProps) {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [isViewEventsModalOpen, setIsViewEventsModalOpen] = useState(false);
@@ -253,6 +270,14 @@ export function CalendarView({
           onClose={() => setIsViewEventsModalOpen(false)}
           events={getSelectedDateEvents()}
           selectedDate={selectedDate}
+          onEditEvent={(event) => {
+            setIsViewEventsModalOpen(false);
+            onEditEvent?.(event);
+          }}
+          onUpdateStatus={(event, status) => {
+            setIsViewEventsModalOpen(false);
+            onUpdateStatus?.(event, status);
+          }}
         />
       )}
 
@@ -261,6 +286,14 @@ export function CalendarView({
         isOpen={isAllEventsPanelOpen}
         onClose={() => setIsAllEventsPanelOpen(false)}
         events={events}
+        onEditEvent={(event) => {
+          setIsAllEventsPanelOpen(false);
+          onEditEvent?.(event);
+        }}
+        onUpdateStatus={(event, status) => {
+          setIsAllEventsPanelOpen(false);
+          onUpdateStatus?.(event, status);
+        }}
       />
 
       {/* Date Context Menu */}

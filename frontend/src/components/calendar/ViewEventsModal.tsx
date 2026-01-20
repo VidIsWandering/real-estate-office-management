@@ -5,13 +5,17 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { CalendarEvent } from "./CalendarView";
-import { X } from "lucide-react";
 
 interface ViewEventsModalProps {
   isOpen: boolean;
   onClose: () => void;
   events: CalendarEvent[];
   selectedDate: string;
+  onEditEvent?: (event: CalendarEvent) => void;
+  onUpdateStatus?: (
+    event: CalendarEvent,
+    status: "created" | "confirmed" | "completed" | "cancelled",
+  ) => void;
 }
 
 export function ViewEventsModal({
@@ -19,6 +23,8 @@ export function ViewEventsModal({
   onClose,
   events,
   selectedDate,
+  onEditEvent,
+  onUpdateStatus,
 }: ViewEventsModalProps) {
   const getEventColor = (type: string) => {
     switch (type) {
@@ -68,6 +74,36 @@ export function ViewEventsModal({
     }
   };
 
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "created":
+        return "bg-gray-100 text-gray-700";
+      case "confirmed":
+        return "bg-blue-100 text-blue-700";
+      case "completed":
+        return "bg-green-100 text-green-700";
+      case "cancelled":
+        return "bg-red-100 text-red-700";
+      default:
+        return "bg-gray-100 text-gray-700";
+    }
+  };
+
+  const formatStatusLabel = (status: string) => {
+    switch (status) {
+      case "created":
+        return "CREATED";
+      case "confirmed":
+        return "CONFIRMED";
+      case "completed":
+        return "COMPLETED";
+      case "cancelled":
+        return "CANCELLED";
+      default:
+        return status;
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[600px]">
@@ -96,6 +132,15 @@ export function ViewEventsModal({
                       >
                         {event.type}
                       </span>
+                      {event.appointment?.status ? (
+                        <span
+                          className={`text-xs px-2 py-1 rounded-full font-medium ${getStatusBadge(
+                            event.appointment.status,
+                          )}`}
+                        >
+                          {formatStatusLabel(event.appointment.status)}
+                        </span>
+                      ) : null}
                       <span className="text-sm font-semibold text-gray-900">
                         {event.time}
                       </span>
@@ -131,6 +176,53 @@ export function ViewEventsModal({
                         </div>
                       )}
                     </div>
+                  </div>
+
+                  <div className="shrink-0 flex items-center gap-3">
+                    {onUpdateStatus && event.appointment?.status ? (
+                      <>
+                        {event.appointment.status === "created" ? (
+                          <button
+                            type="button"
+                            onClick={() => onUpdateStatus(event, "confirmed")}
+                            className="text-sm font-medium text-blue-600 hover:text-blue-700"
+                          >
+                            Confirm
+                          </button>
+                        ) : null}
+
+                        {event.appointment.status === "confirmed" ? (
+                          <button
+                            type="button"
+                            onClick={() => onUpdateStatus(event, "completed")}
+                            className="text-sm font-medium text-green-600 hover:text-green-700"
+                          >
+                            Complete
+                          </button>
+                        ) : null}
+
+                        {event.appointment.status === "created" ||
+                        event.appointment.status === "confirmed" ? (
+                          <button
+                            type="button"
+                            onClick={() => onUpdateStatus(event, "cancelled")}
+                            className="text-sm font-medium text-red-600 hover:text-red-700"
+                          >
+                            Cancel
+                          </button>
+                        ) : null}
+                      </>
+                    ) : null}
+
+                    {onEditEvent && event.appointment?.id ? (
+                      <button
+                        type="button"
+                        onClick={() => onEditEvent(event)}
+                        className="text-sm font-medium text-blue-600 hover:text-blue-700"
+                      >
+                        Edit
+                      </button>
+                    ) : null}
                   </div>
                 </div>
               </div>
