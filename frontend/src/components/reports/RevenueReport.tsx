@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { getRevenueReport } from "@/lib/api/report";
 import {
   Select,
   SelectContent,
@@ -101,7 +102,47 @@ export function RevenueReport({ onExport }: RevenueReportProps) {
     area: "All",
   });
 
-  const [contracts] = useState<Contract[]>(mockContracts);
+  const [contracts, setContracts] = useState<Contract[]>(mockContracts);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    loadReport();
+  }, []);
+
+  const loadReport = async () => {
+    setLoading(true);
+    try {
+      const res = await getRevenueReport({
+        fromDate: filters.fromDate || undefined,
+        toDate: filters.toDate || undefined,
+        staffId: filters.agent !== "All" ? parseInt(filters.agent) : undefined,
+        location: filters.area !== "All" ? filters.area : undefined,
+        page: 1,
+        limit: 50,
+      });
+
+      if (res.success && res.data.items) {
+        const mapped = res.data.items.map((item) => ({
+          id: String(item.id),
+          contractNo: item.contractNo,
+          property: item.property.title,
+          agent: item.agent.fullName,
+          value: item.totalValue,
+          signDate: item.signedDate,
+          status: item.status as "Signed" | "Pending" | "Finished",
+        }));
+        setContracts(mapped);
+      }
+    } catch (err) {
+      console.error("Load revenue report failed", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSearch = () => {
+    loadReport();
+  };
 
   const totalRevenue = contracts.reduce(
     (sum, contract) => sum + contract.value,
@@ -215,7 +256,7 @@ export function RevenueReport({ onExport }: RevenueReportProps) {
           </div>
         </div>
         <div className="mt-4 flex justify-end">
-          <Button className="gap-2">
+          <Button className="gap-2" onClick={handleSearch} disabled={loading}>
             <Search className="w-4 h-4" />
             Search
           </Button>

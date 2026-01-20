@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { getAgentPerformanceReport } from "@/lib/api/report";
 import {
   Select,
   SelectContent,
@@ -99,7 +100,45 @@ export function AgentPerformanceReport({
     agent: "All",
   });
 
-  const [performances] = useState<AgentPerformance[]>(mockPerformance);
+  const [performances, setPerformances] = useState<AgentPerformance[]>(mockPerformance);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    loadReport();
+  }, []);
+
+  const loadReport = async () => {
+    setLoading(true);
+    try {
+      const res = await getAgentPerformanceReport({
+        fromDate: filters.fromDate || undefined,
+        toDate: filters.toDate || undefined,
+        staffId: filters.agent !== "All" ? parseInt(filters.agent) : undefined,
+      });
+
+      if (res.success && res.data.items) {
+        const mapped = res.data.items.map((item) => ({
+          id: String(item.id),
+          agentName: item.agentName,
+          properties: item.properties,
+          completedAppointments: item.completedAppointments,
+          initiatedDeals: item.initiatedDeals,
+          successfulContracts: item.successfulContracts,
+          conversionRate: item.conversionRate,
+          revenue: item.revenue,
+        }));
+        setPerformances(mapped);
+      }
+    } catch (err) {
+      console.error("Load agent performance report failed", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSearch = () => {
+    loadReport();
+  };
 
   const totalRevenue = performances.reduce(
     (sum, perf) => sum + perf.revenue,
@@ -189,7 +228,7 @@ export function AgentPerformanceReport({
           </div>
         </div>
         <div className="mt-4 flex justify-end">
-          <Button className="gap-2">
+          <Button className="gap-2" onClick={handleSearch} disabled={loading}>
             <Search className="w-4 h-4" />
             Search
           </Button>
